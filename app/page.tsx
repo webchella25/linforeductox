@@ -1,6 +1,7 @@
 import Hero from "@/components/Hero";
 import ServiceCard from "@/components/ServiceCard";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 
 export default function Home() {
@@ -68,6 +69,56 @@ export default function Home() {
                 delay={index * 0.2}
               />
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Conoce a Alin */}
+      <section className="section-padding bg-cream">
+        <div className="container-custom">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Imagen */}
+            <Link href="/nosotros" className="group">
+              <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl group-hover:shadow-3xl transition-all duration-300">
+                <Image
+                  src="/alin-vidal.jpg"
+                  alt="Alin Vidal - Fundadora de LINFOREDUCTOX"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-8">
+                  <p className="text-white text-lg font-medium">Conoce mi historia →</p>
+                </div>
+              </div>
+            </Link>
+
+            {/* Contenido */}
+            <div>
+              <p className="text-secondary font-medium mb-2">Creadora del Método</p>
+              <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-6">
+                Alin Vidal
+              </h2>
+              <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+                Terapeuta especializada en medicina ancestral oriental con más de 10 años
+                de experiencia fusionando técnicas milenarias con tecnología natural avanzada.
+              </p>
+              <p className="text-gray-700 mb-6 leading-relaxed">
+                Mi pasión es ayudar a las mujeres a reconectar con su cuerpo, liberar
+                bloqueos energéticos y descubrir su belleza más auténtica a través del
+                poder sanador del toque consciente.
+              </p>
+              <p className="text-gray-700 mb-8 leading-relaxed italic">
+                "Cuando el sistema linfático fluye con libertad, la belleza y la salud
+                emergen naturalmente. Ese es el corazón del método LINFOREDUCTOX."
+              </p>
+              <Link
+                href="/nosotros"
+                className="inline-flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-full font-medium hover:bg-primary-dark transition-all"
+              >
+                Conoce mi historia
+                <ArrowRight size={20} />
+              </Link>
+            </div>
           </div>
         </div>
       </section>

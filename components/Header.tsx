@@ -3,12 +3,13 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isServicesOpen, setIsServicesOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -20,9 +21,15 @@ const Header = () => {
 
   const navLinks = [
     { href: "/", label: "Inicio" },
-    { href: "/servicios", label: "Servicios" },
-    { href: "/nosotros", label: "Nosotros" },
+    { href: "/alin-vidal", label: "Alin Vidal" },
     { href: "/contacto", label: "Contacto" },
+  ];
+
+  const serviciosLinks = [
+    { href: "/servicios", label: "Todos los Servicios" },
+    { href: "/servicios/corporal", label: "Tratamientos Corporales" },
+    { href: "/servicios/facial", label: "Tratamientos Faciales" },
+    { href: "/servicios/acupuntura", label: "Acupuntura" },
   ];
 
   return (
@@ -68,6 +75,51 @@ const Header = () => {
               </Link>
             </li>
           ))}
+
+          {/* Dropdown Servicios */}
+          <li
+            className="relative"
+            onMouseEnter={() => setIsServicesOpen(true)}
+            onMouseLeave={() => setIsServicesOpen(false)}
+          >
+            <button
+              className={`font-medium hover:text-secondary transition-colors flex items-center gap-1 ${
+                isScrolled ? "text-gray-800" : "text-white"
+              }`}
+            >
+              Servicios
+              <ChevronDown
+                size={16}
+                className={`transition-transform ${
+                  isServicesOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {/* Dropdown Menu */}
+            <AnimatePresence>
+              {isServicesOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[250px] border border-gray-100"
+                >
+                  {serviciosLinks.map((servicio) => (
+                    <Link
+                      key={servicio.href}
+                      href={servicio.href}
+                      className="block px-6 py-3 text-gray-800 hover:bg-cream hover:text-primary transition-colors"
+                    >
+                      {servicio.label}
+                    </Link>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </li>
+
           <li>
             <Link
               href="/contacto"
@@ -114,6 +166,37 @@ const Header = () => {
                   </Link>
                 </li>
               ))}
+
+              {/* Servicios Mobile */}
+              <li>
+                <button
+                  onClick={() => setIsServicesOpen(!isServicesOpen)}
+                  className="w-full text-left px-6 py-3 text-gray-800 hover:bg-cream hover:text-primary transition-colors flex items-center justify-between"
+                >
+                  Servicios
+                  <ChevronDown
+                    size={16}
+                    className={`transition-transform ${
+                      isServicesOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                {isServicesOpen && (
+                  <div className="bg-cream/50">
+                    {serviciosLinks.map((servicio) => (
+                      <Link
+                        key={servicio.href}
+                        href={servicio.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block px-12 py-2 text-gray-700 hover:text-primary transition-colors"
+                      >
+                        {servicio.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </li>
+
               <li className="px-6 pt-2">
                 <Link
                   href="/contacto"
