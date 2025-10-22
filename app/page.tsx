@@ -140,7 +140,7 @@ export default function Home() {
                 magnetismo.
               </p>
               <Link
-                href="/nosotros"
+                href="/alin-vidal"
                 className="inline-flex items-center gap-2 bg-secondary text-white px-8 py-4 rounded-full font-medium hover:bg-secondary-light transition-all"
               >
                 Conoce Nuestra Filosofía

@@ -56,51 +56,78 @@ export default function AlinVidalPage() {
         </div>
       </section>
 
-      {/* Presentación con foto profesional */}
-      <section className="section-padding bg-white">
-        <div className="container-custom">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Foto profesional */}
-            <div className="relative h-[600px] rounded-2xl overflow-hidden shadow-2xl">
-              <Image
-                src="/alin-vidal-profesional.jpg"
-                alt="Alin Vidal - Fundadora LINFOREDUCTOX"
-                fill
-                className="object-cover"
-              />
-            </div>
+{/* Presentación con foto profesional */}
+<section className="section-padding bg-white">
+  <div className="container-custom">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      {/* Foto profesional */}
+      <div className="relative h-[600px] rounded-2xl overflow-hidden shadow-2xl bg-cream">
+        <Image
+          src="/alin-vidal-profesional.jpg"
+          alt="Alin Vidal - Fundadora LINFOREDUCTOX"
+          fill
+          className="object-contain"
+          priority
+        />
+      </div>
 
-            {/* Contenido */}
-            <div>
-              <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-6">
-                Mi historia
-              </h2>
-              <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-                Desde muy joven sentí una profunda conexión con las terapias
-                naturales y la medicina ancestral. Mi camino comenzó hace más de
-                10 años, cuando descubrí el poder transformador del toque consciente
-                y las técnicas orientales milenarias.
-              </p>
-              <p className="text-gray-700 mb-6 leading-relaxed">
-                Formada en Medicina Tradicional China, drenaje linfático, acupuntura
-                y técnicas faciales japonesas como el Kobido, he dedicado mi vida a
-                fusionar la sabiduría ancestral con la ciencia moderna para crear
-                experiencias únicas de sanación y belleza.
-              </p>
-              <p className="text-gray-700 mb-6 leading-relaxed">
-                En cada sesión, mi objetivo no es solo transformar el cuerpo físico,
-                sino reconectar a mis clientas con su esencia, liberar bloqueos
-                energéticos y despertar su belleza natural desde el interior.
-              </p>
-              <p className="text-lg text-primary font-medium italic">
-                "Cuando el sistema linfático fluye con libertad, la belleza y la
-                salud emergen naturalmente. Ese es el corazón del método que he
-                creado."
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Contenido */}
+      <div>
+        <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-6">
+          Mi historia
+        </h2>
+        <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+          Coach corporal y facialista, diplomada en Acupuntura Estética, 
+          Osteopatía y Sistema Linfático.
+        </p>
+        <p className="text-lg font-semibold text-primary mb-6">
+          Creadora del método LINFOREDUCTOX.
+        </p>
+        <p className="text-gray-700 mb-6 leading-relaxed">
+          Más de 15 años dedicada a practicar métodos relacionados con el 
+          bienestar y la estética corporal y facial.
+        </p>
+        
+        <h3 className="font-heading text-2xl font-semibold text-primary mb-4">
+          Formación y Experiencia Técnica:
+        </h3>
+        <ul className="space-y-2 mb-6">
+          <li className="flex items-start gap-3">
+            <span className="text-secondary mt-1">✦</span>
+            <span className="text-gray-700">Medicina Tradicional China y Japonesa</span>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="text-secondary mt-1">✦</span>
+            <span className="text-gray-700">Osteopatía y Sistema Linfático</span>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="text-secondary mt-1">✦</span>
+            <span className="text-gray-700">Masajes reductores y modeladores</span>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="text-secondary mt-1">✦</span>
+            <span className="text-gray-700">Acupuntura Estética (con y sin agujas)</span>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="text-secondary mt-1">✦</span>
+            <span className="text-gray-700">Aromaterapia y Cosmética Natural y Biológica</span>
+          </li>
+        </ul>
+
+        <p className="text-gray-700 mb-6 leading-relaxed">
+          Con todo ello ha nacido <span className="font-semibold text-primary">LINFOREDUCTOX</span>, 
+          un método que no solo embellece el cuerpo, sino que libera bloqueos, 
+          armoniza los sistemas internos y conecta con el poder de la belleza 
+          del Sagrado Femenino.
+        </p>
+        
+        <p className="text-2xl text-center font-heading text-secondary italic">
+          «Un Arte hecho Masaje»
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* Foto trabajando */}
       <section className="section-padding bg-cream">
