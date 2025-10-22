@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -28,15 +29,24 @@ const Header = () => {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? "bg-white/95 backdrop-blur-md shadow-md py-4"
-          : "bg-transparent py-6"
+          ? "bg-white/95 backdrop-blur-md shadow-md py-3"
+          : "bg-transparent py-4"
       }`}
     >
       <nav className="container-custom flex items-center justify-between px-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center">
+        <Link href="/" className="flex items-center gap-3">
+          <div className="relative w-12 h-12 md:w-14 md:h-14">
+            <Image
+              src="/logo.png"
+              alt="LINFOREDUCTOX Logo"
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
           <h1
-            className={`font-heading text-2xl md:text-3xl font-bold transition-colors ${
+            className={`font-heading text-xl md:text-2xl font-bold transition-colors ${
               isScrolled ? "text-primary" : "text-white"
             }`}
           >
