@@ -21,7 +21,8 @@ const Header = () => {
 
   const navLinks = [
     { href: "/", label: "Inicio" },
-    { href: "/alin-vidal", label: "Alin Vidal" },
+    { href: "/aline-vidal", label: "Alin Vidal" },
+    { href: "/testimonios", label: "Testimonios" },
     { href: "/contacto", label: "Contacto" },
   ];
 
@@ -63,18 +64,17 @@ const Header = () => {
 
         {/* Desktop Navigation */}
         <ul className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                className={`font-medium hover:text-secondary transition-colors ${
-                  isScrolled ? "text-gray-800" : "text-white"
-                }`}
-              >
-                {link.label}
-              </Link>
-            </li>
-          ))}
+          {/* Inicio */}
+          <li>
+            <Link
+              href="/"
+              className={`font-medium hover:text-secondary transition-colors ${
+                isScrolled ? "text-gray-800" : "text-white"
+              }`}
+            >
+              Inicio
+            </Link>
+          </li>
 
           {/* Dropdown Servicios */}
           <li
@@ -120,6 +120,43 @@ const Header = () => {
             </AnimatePresence>
           </li>
 
+          {/* Alin Vidal */}
+          <li>
+            <Link
+              href="/aline-vidal"
+              className={`font-medium hover:text-secondary transition-colors ${
+                isScrolled ? "text-gray-800" : "text-white"
+              }`}
+            >
+              Alin Vidal
+            </Link>
+          </li>
+
+          {/* Testimonios */}
+          <li>
+            <Link
+              href="/testimonios"
+              className={`font-medium hover:text-secondary transition-colors ${
+                isScrolled ? "text-gray-800" : "text-white"
+              }`}
+            >
+              Testimonios
+            </Link>
+          </li>
+
+          {/* Contacto */}
+          <li>
+            <Link
+              href="/contacto"
+              className={`font-medium hover:text-secondary transition-colors ${
+                isScrolled ? "text-gray-800" : "text-white"
+              }`}
+            >
+              Contacto
+            </Link>
+          </li>
+
+          {/* Botón Reservar */}
           <li>
             <Link
               href="/contacto"
@@ -155,17 +192,16 @@ const Header = () => {
             className="md:hidden bg-white border-t"
           >
             <ul className="flex flex-col py-4">
-              {navLinks.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="block px-6 py-3 text-gray-800 hover:bg-cream hover:text-primary transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+              {/* Inicio */}
+              <li>
+                <Link
+                  href="/"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block px-6 py-3 text-gray-800 hover:bg-cream hover:text-primary transition-colors"
+                >
+                  Inicio
+                </Link>
+              </li>
 
               {/* Servicios Mobile */}
               <li>
@@ -195,6 +231,39 @@ const Header = () => {
                     ))}
                   </div>
                 )}
+              </li>
+
+              {/* Alin Vidal */}
+              <li>
+                <Link
+                  href="/aline-vidal"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block px-6 py-3 text-gray-800 hover:bg-cream hover:text-primary transition-colors"
+                >
+                  Alin Vidal
+                </Link>
+              </li>
+
+              {/* Testimonios */}
+              <li>
+                <Link
+                  href="/testimonios"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block px-6 py-3 text-gray-800 hover:bg-cream hover:text-primary transition-colors"
+                >
+                  Testimonios
+                </Link>
+              </li>
+
+              {/* Contacto */}
+              <li>
+                <Link
+                  href="/contacto"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block px-6 py-3 text-gray-800 hover:bg-cream hover:text-primary transition-colors"
+                >
+                  Contacto
+                </Link>
               </li>
 
               <li className="px-6 pt-2">

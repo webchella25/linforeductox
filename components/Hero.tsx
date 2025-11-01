@@ -16,26 +16,27 @@ const Hero = () => {
 
       <div className="relative z-10 text-center text-white px-6 max-w-5xl">
         <h1 className="font-heading text-5xl md:text-7xl font-bold mb-6">
-          Bienvenida a
+          Bienvenid@
           <span className="block text-secondary mt-2">LINFOREDUCTOX</span>
         </h1>
         <p className="text-xl md:text-2xl mb-8 text-white/90 max-w-3xl mx-auto">
-          Fusionamos Medicina Ancestral y Tecnología Natural avanzada para
-          depurar tu cuerpo, activar tu metabolismo y esculpir tu belleza.
+          Regenera y depura tu sistema	linfático.
+		  Activa tu metabolismo.
+		  Esculpe tu belleza facial y corpotal
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Link
+			<Link
+            href="/servicios"
+            className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-full font-medium hover:bg-white hover:text-primary transition-all"
+          >
+            Ver Servicios
+          </Link>
+		  <Link
             href="/contacto"
             className="bg-secondary text-white px-8 py-4 rounded-full font-medium hover:bg-secondary-light transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
           >
             Reserva tu Experiencia
             <ArrowRight size={20} />
-          </Link>
-          <Link
-            href="/servicios"
-            className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-full font-medium hover:bg-white hover:text-primary transition-all"
-          >
-            Ver Servicios
           </Link>
         </div>
       </div>

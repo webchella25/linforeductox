@@ -48,7 +48,7 @@ export default function AlinVidalPage() {
             Fundadora de LINFOREDUCTOX
           </p>
           <h1 className="font-heading text-5xl md:text-6xl font-bold mb-4">
-            Alin Vidal
+            Aline Vidal
           </h1>
           <p className="text-xl md:text-2xl text-white/90">
             Terapeuta especializada en medicina ancestral oriental
@@ -64,7 +64,7 @@ export default function AlinVidalPage() {
       <div className="relative h-[600px] rounded-2xl overflow-hidden shadow-2xl bg-cream">
         <Image
           src="/alin-vidal-profesional.jpg"
-          alt="Alin Vidal - Fundadora LINFOREDUCTOX"
+          alt="Aline Vidal - Fundadora LINFOREDUCTOX"
           fill
           className="object-contain"
           priority
@@ -92,10 +92,6 @@ export default function AlinVidalPage() {
           Formación y Experiencia Técnica:
         </h3>
         <ul className="space-y-2 mb-6">
-          <li className="flex items-start gap-3">
-            <span className="text-secondary mt-1">✦</span>
-            <span className="text-gray-700">Medicina Tradicional China y Japonesa</span>
-          </li>
           <li className="flex items-start gap-3">
             <span className="text-secondary mt-1">✦</span>
             <span className="text-gray-700">Osteopatía y Sistema Linfático</span>
