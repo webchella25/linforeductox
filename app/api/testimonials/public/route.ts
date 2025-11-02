@@ -1,7 +1,7 @@
 // app/api/testimonials/public/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
+import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
 const testimonialSchema = z.object({
