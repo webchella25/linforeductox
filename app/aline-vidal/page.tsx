@@ -1,8 +1,28 @@
+// app/aline-vidal/page.tsx
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Award, Heart, Sparkles } from "lucide-react";
+import { prisma } from '@/lib/prisma';
 
-export default function AlinVidalPage() {
+export const revalidate = 60;
+
+async function getAlineContent() {
+  try {
+    const [bio, philosophy] = await Promise.all([
+      prisma.content.findUnique({ where: { section: 'aline_bio' } }),
+      prisma.content.findUnique({ where: { section: 'aline_philosophy' } }),
+    ]);
+
+    return { bio, philosophy };
+  } catch (error) {
+    console.error('Error fetching Aline content:', error);
+    return { bio: null, philosophy: null };
+  }
+}
+
+export default async function AlineVidalPage() {
+  const { bio, philosophy } = await getAlineContent();
+
   const formacion = [
     "Terapeuta en Medicina Tradicional China",
     "Especialista en Drenaje Linfático Manual",
@@ -12,23 +32,9 @@ export default function AlinVidalPage() {
     "Especialización en Gua Sha y Moxibustión",
   ];
 
-  const experiencia = [
-    {
-      icon: Award,
-      titulo: "Más de 10 años",
-      descripcion: "Dedicada a la medicina ancestral oriental",
-    },
-    {
-      icon: Heart,
-      titulo: "+500 clientas",
-      descripcion: "Transformadas con el método LINFOREDUCTOX",
-    },
-    {
-      icon: Sparkles,
-      titulo: "Método único",
-      descripcion: "Fusión de técnicas milenarias y ciencia moderna",
-    },
-  ];
+  // Dividir el contenido de biografía en párrafos
+  const bioParagraphs = bio?.content?.split('\n\n').filter(p => p.trim()) || [];
+  const philosophyParagraphs = philosophy?.content?.split('\n\n').filter(p => p.trim()) || [];
 
   return (
     <>
@@ -56,8 +62,8 @@ export default function AlinVidalPage() {
         </div>
       </section>
 
-{/* Presentación con foto profesional */}
-<section className="section-padding bg-white">
+      {/* Presentación con foto profesional */}
+      <section className="section-padding bg-white">
   <div className="container-custom">
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
       {/* Foto profesional */}
@@ -66,120 +72,113 @@ export default function AlinVidalPage() {
           src="/alin-vidal-profesional.jpg"
           alt="Aline Vidal - Fundadora LINFOREDUCTOX"
           fill
-          className="object-contain"
+          className="object-cover object-top" // ← ✅ Cambio clave
           priority
         />
       </div>
 
-      {/* Contenido */}
+      {/* Contenido dinámico desde BD */}
       <div>
         <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-6">
-          Mi historia
+          {bio?.title || 'Mi historia'}
         </h2>
-        <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-          Coach corporal y facialista, diplomada en Acupuntura Estética, 
-          Osteopatía y Sistema Linfático.
-        </p>
-        <p className="text-lg font-semibold text-primary mb-6">
-          Creadora del método LINFOREDUCTOX.
-        </p>
-        <p className="text-gray-700 mb-6 leading-relaxed">
-          Más de 15 años dedicada a practicar métodos relacionados con el 
-          bienestar y la estética corporal y facial.
-        </p>
         
-        <h3 className="font-heading text-2xl font-semibold text-primary mb-4">
-          Formación y Experiencia Técnica:
-        </h3>
-        <ul className="space-y-2 mb-6">
-          <li className="flex items-start gap-3">
-            <span className="text-secondary mt-1">✦</span>
-            <span className="text-gray-700">Osteopatía y Sistema Linfático</span>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="text-secondary mt-1">✦</span>
-            <span className="text-gray-700">Masajes reductores y modeladores</span>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="text-secondary mt-1">✦</span>
-            <span className="text-gray-700">Acupuntura Estética (con y sin agujas)</span>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="text-secondary mt-1">✦</span>
-            <span className="text-gray-700">Aromaterapia y Cosmética Natural y Biológica</span>
-          </li>
-        </ul>
+        {bio?.subtitle && (
+          <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+            {bio.subtitle}
+          </p>
+        )}
 
-        <p className="text-gray-700 mb-6 leading-relaxed">
-          Con todo ello ha nacido <span className="font-semibold text-primary">LINFOREDUCTOX</span>, 
-          un método que no solo embellece el cuerpo, sino que libera bloqueos, 
-          armoniza los sistemas internos y conecta con el poder de la belleza 
-          del Sagrado Femenino.
-        </p>
-        
-        <p className="text-2xl text-center font-heading text-secondary italic">
-          «Un Arte hecho Masaje»
-        </p>
+        {bioParagraphs.map((paragraph, index) => (
+          <p 
+            key={index} 
+            className={`text-gray-700 leading-relaxed ${
+              index === 0 ? 'text-lg font-semibold text-primary mb-6' : 'mb-4'
+            }`}
+          >
+            {paragraph}
+          </p>
+        ))}
       </div>
     </div>
   </div>
 </section>
 
-      {/* Foto trabajando */}
+      {/* Experiencia */}
       <section className="section-padding bg-cream">
         <div className="container-custom">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Contenido */}
-            <div className="order-2 lg:order-1">
-              <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-6">
-                Mi filosofía
-              </h2>
-              <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-                Creo profundamente en el poder sanador del cuerpo cuando le damos
-                las herramientas correctas. No creo en soluciones rápidas ni
-                invasivas. Creo en el toque consciente, en los aceites esenciales
-                puros, en la respiración como puente entre cuerpo y mente.
-              </p>
-              <p className="text-gray-700 mb-6 leading-relaxed">
-                Cada tratamiento que ofrezco está diseñado para ir más allá de lo
-                estético. Es una experiencia integral donde la música, los aromas,
-                el ambiente y cada movimiento están pensados para que tu cuerpo
-                recuerde su capacidad natural de sanarse y renovarse.
-              </p>
-              <p className="text-gray-700 leading-relaxed">
-                El método LINFOREDUCTOX es el resultado de años de estudio,
-                práctica y la combinación perfecta entre tradición y ciencia.
-                Es mi manera de honrar las enseñanzas ancestrales mientras
-                abrazo la innovación.
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center p-8 bg-white rounded-2xl shadow-lg">
+              <Award size={48} className="text-secondary mx-auto mb-4" />
+              <h3 className="font-heading text-2xl font-bold text-primary mb-2">
+                Más de 10 años
+              </h3>
+              <p className="text-gray-600">
+                Dedicada a la medicina ancestral oriental
               </p>
             </div>
 
-            {/* Foto trabajando */}
-            <div className="relative h-[600px] rounded-2xl overflow-hidden shadow-2xl order-1 lg:order-2">
-              <Image
-                src="/alin-vidal.jpg"
-                alt="Alin Vidal trabajando"
-                fill
-                className="object-cover"
-              />
+            <div className="text-center p-8 bg-white rounded-2xl shadow-lg">
+              <Heart size={48} className="text-secondary mx-auto mb-4" />
+              <h3 className="font-heading text-2xl font-bold text-primary mb-2">
+                +500 clientas
+              </h3>
+              <p className="text-gray-600">
+                Transformadas con el método LINFOREDUCTOX
+              </p>
+            </div>
+
+            <div className="text-center p-8 bg-white rounded-2xl shadow-lg">
+              <Sparkles size={48} className="text-secondary mx-auto mb-4" />
+              <h3 className="font-heading text-2xl font-bold text-primary mb-2">
+                Método único
+              </h3>
+              <p className="text-gray-600">
+                Fusión de técnicas milenarias y ciencia moderna
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Formación */}
+      {/* Filosofía - Contenido dinámico */}
       <section className="section-padding bg-white">
-        <div className="container-custom max-w-5xl">
+        <div className="container-custom max-w-4xl">
+          <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-8 text-center">
+            {philosophy?.title || 'Mi Filosofía'}
+          </h2>
+          
+          {philosophyParagraphs.map((paragraph, index) => (
+            <div key={index} className="mb-8">
+              {index === 0 && paragraph.startsWith('"') ? (
+                <blockquote className="text-2xl md:text-3xl text-center text-gray-800 italic leading-relaxed">
+                  {paragraph}
+                </blockquote>
+              ) : (
+                <p className="text-lg text-gray-700 text-center leading-relaxed">
+                  {paragraph}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Formación */}
+      <section className="section-padding bg-cream">
+        <div className="container-custom max-w-4xl">
           <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-12 text-center">
             Formación y Certificaciones
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {formacion.map((item) => (
+          <div className="grid md:grid-cols-2 gap-6">
+            {formacion.map((item, index) => (
               <div
-                key={item}
-                className="flex items-start gap-4 bg-cream p-6 rounded-xl"
+                key={index}
+                className="flex items-start gap-4 bg-white p-6 rounded-xl shadow-sm"
               >
-                <span className="text-secondary text-2xl">✦</span>
+                <div className="bg-secondary/10 p-2 rounded-full flex-shrink-0">
+                  <Sparkles size={24} className="text-secondary" />
+                </div>
                 <p className="text-gray-700 font-medium">{item}</p>
               </div>
             ))}
@@ -187,45 +186,20 @@ export default function AlinVidalPage() {
         </div>
       </section>
 
-      {/* Experiencia */}
-      <section className="section-padding bg-primary text-white">
-        <div className="container-custom">
-          <h2 className="font-heading text-4xl md:text-5xl font-bold mb-12 text-center">
-            Mi experiencia en números
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {experiencia.map((item) => {
-              const Icon = item.icon;
-              return (
-                <div key={item.titulo} className="text-center">
-                  <div className="bg-secondary/20 w-20 h-20 rounded-full flex items-center justify-center mb-6 mx-auto">
-                    <Icon size={40} className="text-secondary" />
-                  </div>
-                  <h3 className="font-heading text-3xl font-bold mb-3">
-                    {item.titulo}
-                  </h3>
-                  <p className="text-white/90 text-lg">{item.descripcion}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
       {/* CTA */}
-      <section className="section-padding bg-cream">
-        <div className="container-custom text-center">
-          <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-6">
-            ¿Lista para transformar tu cuerpo?
+      <section className="section-padding bg-gradient-to-br from-primary to-primary-dark text-white">
+        <div className="container-custom text-center max-w-3xl">
+          <h2 className="font-heading text-4xl md:text-5xl font-bold mb-6">
+            ¿Lista para comenzar tu transformación?
           </h2>
-          <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
-            Reserva tu sesión y experimenta el poder del método LINFOREDUCTOX
+          <p className="text-xl text-white/90 mb-8">
+            Descubre el poder del método LINFOREDUCTOX y experimenta una transformación que va más allá de lo físico.
           </p>
           <Link
             href="/contacto"
-            className="inline-flex items-center gap-2 bg-primary text-white px-10 py-5 rounded-full font-medium text-lg hover:bg-primary-dark transition-all shadow-lg hover:shadow-xl"
+            className="inline-flex items-center gap-2 bg-secondary text-white px-10 py-5 rounded-full font-medium text-lg hover:bg-secondary-light transition-all"
           >
-            Reservar Ahora
+            Reservar Consulta
             <ArrowRight size={24} />
           </Link>
         </div>

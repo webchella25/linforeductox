@@ -1,27 +1,57 @@
+// app/layout.tsx
+
 import type { Metadata } from "next";
+import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import { Toaster } from 'react-hot-toast';
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: "LINFOREDUCTOX - Estética Avanzada y Medicina Ancestral",
-  description: "Centro de estética que fusiona medicina ancestral oriental con tecnología natural avanzada. Servicios de masajes corporales, faciales y acupuntura en Madrid.",
-  keywords: "estética, medicina ancestral, masajes, acupuntura, drenaje linfático, Madrid",
+  title: "LINFOREDUCTOX - Medicina Ancestral Oriental",
+  description:
+    "Centro especializado en tratamientos corporales, faciales y acupuntura. Descubre el método LINFOREDUCTOX de Aline Vidal.",
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <html lang="es">
-      <body className="antialiased">
+      <body className={`${playfair.variable} ${inter.variable} antialiased`}>
         <Header />
-        <main className="min-h-screen">
-          {children}
-        </main>
+        {children}
         <Footer />
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 3000,
+            style: {
+              background: '#333',
+              color: '#fff',
+            },
+            success: {
+              iconTheme: {
+                primary: '#A27B5C',
+                secondary: '#fff',
+              },
+            },
+          }}
+        />
       </body>
     </html>
   );

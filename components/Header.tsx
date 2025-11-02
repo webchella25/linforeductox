@@ -1,3 +1,5 @@
+// components/Header.tsx
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,10 +8,18 @@ import Image from "next/image";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+interface Service {
+  id: string;
+  name: string;
+  slug: string;
+  active: boolean;
+}
+
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isServicesOpen, setIsServicesOpen] = useState(false);
+  const [services, setServices] = useState<Service[]>([]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,6 +29,21 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Cargar servicios activos
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  const fetchServices = async () => {
+    try {
+      const res = await fetch('/api/services?active=true');
+      const data = await res.json();
+      setServices(data.services || []);
+    } catch (error) {
+      console.error('Error cargando servicios:', error);
+    }
+  };
+
   const navLinks = [
     { href: "/", label: "Inicio" },
     { href: "/aline-vidal", label: "Alin Vidal" },
@@ -26,11 +51,13 @@ const Header = () => {
     { href: "/contacto", label: "Contacto" },
   ];
 
+  // Links del menú de servicios (dinámicos)
   const serviciosLinks = [
     { href: "/servicios", label: "Todos los Servicios" },
-    { href: "/servicios/corporal", label: "Tratamientos Corporales" },
-    { href: "/servicios/facial", label: "Tratamientos Faciales" },
-    { href: "/servicios/acupuntura", label: "Acupuntura" },
+    ...services.map(service => ({
+      href: `/servicios/${service.slug}`,
+      label: service.name,
+    })),
   ];
 
   return (
@@ -128,7 +155,7 @@ const Header = () => {
                 isScrolled ? "text-gray-800" : "text-white"
               }`}
             >
-              Alin Vidal
+              Aline Vidal
             </Link>
           </li>
 
@@ -159,7 +186,7 @@ const Header = () => {
           {/* Botón Reservar */}
           <li>
             <Link
-              href="/contacto"
+              href="/reservar"
               className={`px-6 py-2.5 rounded-full font-medium transition-all ${
                 isScrolled
                   ? "bg-primary text-white hover:bg-primary-dark"
@@ -240,7 +267,7 @@ const Header = () => {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="block px-6 py-3 text-gray-800 hover:bg-cream hover:text-primary transition-colors"
                 >
-                  Alin Vidal
+                  Aline Vidal
                 </Link>
               </li>
 
@@ -268,7 +295,7 @@ const Header = () => {
 
               <li className="px-6 pt-2">
                 <Link
-                  href="/contacto"
+                  href="/reservar"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="block w-full text-center bg-primary text-white py-3 rounded-full hover:bg-primary-dark transition-colors"
                 >

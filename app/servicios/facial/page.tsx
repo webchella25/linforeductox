@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Heart, Check } from "lucide-react";
+import { ArrowRight, Heart, Check, Calendar } from "lucide-react";
 
 export default function FacialPage() {
   const tratamientos = [
@@ -74,6 +74,21 @@ export default function FacialPage() {
               ancestrales japonesas y chinas como el Kobido y el masaje facial de meridianos,
               combinadas con productos naturales de alta calidad para rejuvenecer tu piel
               de forma profunda y duradera.
+            </p>
+          </div>
+
+          {/* ✅ BOTÓN RESERVAR AÑADIDO */}
+          <div className="text-center mb-12">
+            <Link
+              href="/reservar?servicio=facial"
+              className="inline-flex items-center gap-3 bg-secondary text-white px-10 py-5 rounded-full font-semibold text-lg hover:bg-secondary-light transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            >
+              <Calendar size={24} />
+              Reservar Tratamiento Facial
+              <ArrowRight size={24} />
+            </Link>
+            <p className="text-sm text-gray-600 mt-4">
+              Recibirás confirmación en 24 horas
             </p>
           </div>
 
@@ -210,10 +225,12 @@ export default function FacialPage() {
           <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
             Experimenta el poder transformador de las técnicas ancestrales orientales
           </p>
+          {/* ✅ BOTÓN RESERVAR AÑADIDO */}
           <Link
-            href="/contacto"
+            href="/reservar?servicio=facial"
             className="inline-flex items-center gap-2 bg-primary text-white px-10 py-5 rounded-full font-medium text-lg hover:bg-primary-dark transition-all shadow-lg hover:shadow-xl"
           >
+            <Calendar size={24} />
             Reservar Tratamiento
             <ArrowRight size={24} />
           </Link>

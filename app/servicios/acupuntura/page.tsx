@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Zap, Check } from "lucide-react";
+import { Calendar } from 'lucide-react';
 
 export default function AcupunturaPage() {
   const tratamientos = [
@@ -99,7 +100,19 @@ export default function AcupunturaPage() {
               }}
             />
           </div>
-
+<div className="text-center mb-16">
+  <Link
+    href="/reservar?servicio=acupuntura"
+    className="inline-flex items-center gap-3 bg-secondary text-white px-10 py-5 rounded-full font-semibold text-lg hover:bg-secondary-light transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+  >
+    <Calendar size={24} />
+    Reservar Sesión de Acupuntura
+    <ArrowRight size={24} />
+  </Link>
+  <p className="text-sm text-gray-600 mt-4">
+    Recibirás confirmación en 24 horas
+  </p>
+</div>
           <div className="prose prose-lg max-w-none">
             <p className="text-gray-700 leading-relaxed mb-6">
               En LINFOREDUCTOX practicamos acupuntura tradicional auténtica, respetando los
@@ -237,23 +250,24 @@ export default function AcupunturaPage() {
       </section>
 
       {/* CTA */}
-      <section className="section-padding bg-white">
-        <div className="container-custom text-center">
-          <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-6">
-            Recupera tu equilibrio natural
-          </h2>
-          <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
-            Experimenta el poder sanador de la medicina tradicional china
-          </p>
-          <Link
-            href="/contacto"
-            className="inline-flex items-center gap-2 bg-primary text-white px-10 py-5 rounded-full font-medium text-lg hover:bg-primary-dark transition-all shadow-lg hover:shadow-xl"
-          >
-            Agendar Sesión
-            <ArrowRight size={24} />
-          </Link>
-        </div>
-      </section>
+      <section className="section-padding bg-gradient-to-br from-primary to-primary-dark text-white">
+  <div className="container-custom text-center">
+    <h2 className="font-heading text-4xl md:text-5xl font-bold mb-6">
+      Equilibra tu energía vital
+    </h2>
+    <p className="text-xl mb-8 max-w-2xl mx-auto opacity-90">
+      Descubre los beneficios de la medicina tradicional china
+    </p>
+    <Link
+      href="/reservar?servicio=acupuntura"
+      className="inline-flex items-center gap-3 bg-white text-primary px-10 py-5 rounded-full font-semibold text-lg hover:bg-cream transition-all shadow-lg hover:shadow-xl"
+    >
+      <Calendar size={24} />
+      Reservar Ahora
+      <ArrowRight size={24} />
+    </Link>
+  </div>
+</section>
     </>
   );
 }

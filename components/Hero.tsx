@@ -32,7 +32,7 @@ const Hero = () => {
             Ver Servicios
           </Link>
 		  <Link
-            href="/contacto"
+            href="/reservar"
             className="bg-secondary text-white px-8 py-4 rounded-full font-medium hover:bg-secondary-light transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
           >
             Reserva tu Experiencia
