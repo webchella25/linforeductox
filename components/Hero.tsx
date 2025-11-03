@@ -1,7 +1,14 @@
+// components/Hero.tsx
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
-const Hero = () => {
+interface HeroProps {
+  title?: string;
+  subtitle?: string;
+  description?: string;
+}
+
+const Hero = ({ title, subtitle, description }: HeroProps) => {
   return (
     <section className="relative h-screen flex items-center justify-center overflow-hidden pt-20">
       <div
@@ -16,22 +23,22 @@ const Hero = () => {
 
       <div className="relative z-10 text-center text-white px-6 max-w-5xl">
         <h1 className="font-heading text-5xl md:text-7xl font-bold mb-6">
-          Bienvenid@
-          <span className="block text-secondary mt-2">LINFOREDUCTOX</span>
+          {title || 'Bienvenid@'}
+          <span className="block text-secondary mt-2">
+            {subtitle || 'LINFOREDUCTOX'}
+          </span>
         </h1>
         <p className="text-xl md:text-2xl mb-8 text-white/90 max-w-3xl mx-auto">
-          Regenera y depura tu sistema	linfático.
-		  Activa tu metabolismo.
-		  Esculpe tu belleza facial y corpotal
+          {description || 'Regenera y depura tu sistema linfático. Activa tu metabolismo. Esculpe tu belleza facial y corporal.'}
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-			<Link
+          <Link
             href="/servicios"
             className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-full font-medium hover:bg-white hover:text-primary transition-all"
           >
             Ver Servicios
           </Link>
-		  <Link
+          <Link
             href="/reservar"
             className="bg-secondary text-white px-8 py-4 rounded-full font-medium hover:bg-secondary-light transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
           >
