@@ -1,7 +1,13 @@
 // app/api/bookings/available-slots/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+
+// Definir el tipo de Slot
+interface TimeSlot {
+  startTime: string;
+  endTime: string;
+  available: boolean;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -56,7 +62,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ slots: [] });
     }
 
-    // Obtener configuración del buffer
+    // Obtener configuración del buffer (tiempo entre citas)
     const bufferSetting = await prisma.settings.findUnique({
       where: { key: 'booking_buffer' },
     });
@@ -99,8 +105,8 @@ function generateAvailableSlots(
   serviceDuration: number,
   buffer: number,
   existingBookings: any[]
-) {
-  const slots = [];
+): TimeSlot[] {
+  const slots: TimeSlot[] = []; // ✅ TIPO EXPLÍCITO
   const { openTime, closeTime, breakStart, breakEnd } = workingHours;
 
   if (!openTime || !closeTime) return slots;
@@ -161,6 +167,6 @@ function generateAvailableSlots(
   return slots;
 }
 
-function isTimeInRange(time: string, rangeStart: string, rangeEnd: string) {
+function isTimeInRange(time: string, rangeStart: string, rangeEnd: string): boolean {
   return time >= rangeStart && time < rangeEnd;
 }
