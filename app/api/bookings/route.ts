@@ -11,7 +11,7 @@ const bookingSchema = z.object({
   date: z.string(),
   startTime: z.string(),
   endTime: z.string(),
-  notes: z.string().optional(),
+  clientNotes: z.string().optional(), // ✅ CORRECTO
 });
 
 // POST - Crear nueva reserva
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
         date: new Date(validatedData.date),
         startTime: validatedData.startTime,
         endTime: validatedData.endTime,
-        notes: validatedData.notes,
+        clientNotes: validatedData.clientNotes, // ✅ CORRECTO (ya no 'notes')
         status: 'PENDING',
       },
     });
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Datos inválidos', details: error.issues }, // ✅ CAMBIO
+        { error: 'Datos inválidos', details: error.issues },
         { status: 400 }
       );
     }
