@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Datos inválidos', details: error.issues }, // ✅ CAMBIO: errors → issues
+        { error: 'Datos inválidos', details: error.issues }, // ✅ CAMBIO
         { status: 400 }
       );
     }

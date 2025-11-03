@@ -1,90 +1,40 @@
 // app/api/bookings/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
 const bookingSchema = z.object({
   serviceId: z.string(),
+  clientName: z.string().min(2),
+  clientEmail: z.string().email(),
+  clientPhone: z.string().min(9),
   date: z.string(),
   startTime: z.string(),
   endTime: z.string(),
-  clientName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  clientEmail: z.string().email('Email inválido'),
-  clientPhone: z.string().min(9, 'Teléfono inválido'),
-  clientNotes: z.string().optional(),
+  notes: z.string().optional(),
 });
 
+// POST - Crear nueva reserva
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
-    // Validar datos
     const validatedData = bookingSchema.parse(body);
 
-    // Verificar que el servicio existe
-    const service = await prisma.service.findUnique({
-      where: { id: validatedData.serviceId },
-    });
-
-    if (!service) {
-      return NextResponse.json(
-        { error: 'Servicio no encontrado' },
-        { status: 404 }
-      );
-    }
-
-    // Verificar que el slot sigue disponible
-    const existingBooking = await prisma.booking.findFirst({
-      where: {
-        date: new Date(validatedData.date),
-        status: {
-          in: ['PENDING', 'CONFIRMED'],
-        },
-        OR: [
-          {
-            AND: [
-              { startTime: { lte: validatedData.startTime } },
-              { endTime: { gt: validatedData.startTime } },
-            ],
-          },
-          {
-            AND: [
-              { startTime: { lt: validatedData.endTime } },
-              { endTime: { gte: validatedData.endTime } },
-            ],
-          },
-        ],
-      },
-    });
-
-    if (existingBooking) {
-      return NextResponse.json(
-        { error: 'Este horario ya no está disponible' },
-        { status: 409 }
-      );
-    }
-
-    // Crear la reserva
     const booking = await prisma.booking.create({
       data: {
         serviceId: validatedData.serviceId,
-        date: new Date(validatedData.date),
-        startTime: validatedData.startTime,
-        endTime: validatedData.endTime,
         clientName: validatedData.clientName,
         clientEmail: validatedData.clientEmail,
         clientPhone: validatedData.clientPhone,
-        clientNotes: validatedData.clientNotes || null,
+        date: new Date(validatedData.date),
+        startTime: validatedData.startTime,
+        endTime: validatedData.endTime,
+        notes: validatedData.notes,
         status: 'PENDING',
-      },
-      include: {
-        service: true,
       },
     });
 
-    // TODO: Enviar email de confirmación al cliente
-    // TODO: Enviar notificación a Aline
+    // TODO: Enviar email de confirmación
 
     return NextResponse.json({
       success: true,
@@ -94,7 +44,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Datos inválidos', details: error.errors },
+        { error: 'Datos inválidos', details: error.issues }, // ✅ CAMBIO
         { status: 400 }
       );
     }
