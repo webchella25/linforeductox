@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { Clock, Calendar, Save, Plus, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -210,26 +209,29 @@ export default function HorariosPage() {
 
   if (isLoading) {
     return (
-      <>
-        <DashboardHeader
-          title="Configuración de Horarios"
-          description="Gestiona tu disponibilidad y días bloqueados"
-        />
+      <div className="space-y-6">
+        {/* ✅ TÍTULO SIN DashboardHeader */}
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Configuración de Horarios</h1>
+          <p className="text-gray-600 mt-2">Gestiona tu disponibilidad y días bloqueados</p>
+        </div>
+        
         <div className="p-8 text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-primary"></div>
         </div>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
-      <DashboardHeader
-        title="Configuración de Horarios"
-        description="Gestiona tu disponibilidad y días bloqueados"
-      />
+    <div className="space-y-6">
+      {/* ✅ TÍTULO SIN DashboardHeader */}
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">Configuración de Horarios</h1>
+        <p className="text-gray-600 mt-2">Gestiona tu disponibilidad y días bloqueados</p>
+      </div>
 
-      <div className="p-8 space-y-8">
+      <div className="space-y-8">
         {/* Horarios Semanales */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <div className="flex items-center justify-between mb-6">
@@ -515,6 +517,6 @@ export default function HorariosPage() {
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 }
