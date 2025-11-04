@@ -2,7 +2,6 @@
 
 import { Service } from '@prisma/client';
 import { Edit, Trash2, Eye, EyeOff } from 'lucide-react';
-import Image from 'next/image';
 
 interface ServiceCardProps {
   service: Service;
@@ -32,26 +31,11 @@ const ServiceCard = ({
   return (
     <div
       className={`bg-white rounded-xl shadow-sm border-2 transition-all ${
-        service.active ? 'border-gray-200' : 'border-gray-300 opacity-60'
+        service.active
+          ? 'border-gray-200'
+          : 'border-gray-300 opacity-60'
       }`}
     >
-      {/* Imagen */}
-      {service.imageUrl && (
-        <div className="relative h-48 w-full">
-          <Image
-            src={service.imageUrl}
-            alt={service.name}
-            fill
-            className="object-cover rounded-t-xl"
-          />
-          {!service.active && (
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-t-xl">
-              <span className="text-white font-semibold">INACTIVO</span>
-            </div>
-          )}
-        </div>
-      )}
-
       {/* Contenido */}
       <div className="p-6">
         {/* Header */}
@@ -62,35 +46,33 @@ const ServiceCard = ({
             </h3>
             <span
               className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                categoryColors[service.category as keyof typeof categoryColors]
+                categoryColors[service.category as keyof typeof categoryColors] || 'bg-gray-100 text-gray-700'
               }`}
             >
-              {categoryNames[service.category as keyof typeof categoryNames]}
+              {categoryNames[service.category as keyof typeof categoryNames] || service.category}
             </span>
           </div>
         </div>
 
         {/* Descripción */}
-        {service.shortDescription && (
-          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-            {service.shortDescription}
-          </p>
-        )}
+        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+          {service.description}
+        </p>
 
         {/* Info */}
         <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-          <span>⏱️ {service.durationMinutes} min</span>
+          <span>⏱️ {service.duration} min</span>
           {service.price && <span>💰 {service.price}€</span>}
         </div>
 
         {/* Beneficios */}
-        {service.benefits && (service.benefits as string[]).length > 0 && (
+        {service.benefits && service.benefits.length > 0 && (
           <div className="mb-4">
             <p className="text-xs font-semibold text-gray-500 mb-2">
               BENEFICIOS:
             </p>
             <div className="flex flex-wrap gap-2">
-              {(service.benefits as string[]).slice(0, 3).map((benefit, idx) => (
+              {service.benefits.slice(0, 3).map((benefit, idx) => (
                 <span
                   key={idx}
                   className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded"
@@ -98,9 +80,9 @@ const ServiceCard = ({
                   {benefit}
                 </span>
               ))}
-              {(service.benefits as string[]).length > 3 && (
+              {service.benefits.length > 3 && (
                 <span className="text-xs text-gray-500">
-                  +{(service.benefits as string[]).length - 3} más
+                  +{service.benefits.length - 3} más
                 </span>
               )}
             </div>
