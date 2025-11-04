@@ -1,3 +1,4 @@
+// components/dashboard/ServiceModal.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -17,16 +18,16 @@ const ServiceModal = ({ service, isOpen, onClose, onSave }: ServiceModalProps) =
     name: '',
     slug: '',
     description: '',
-    shortDescription: '',
-    durationMinutes: 60,
+    duration: 60, // ✅ duration en lugar de durationMinutes
     price: '',
     category: 'corporal' as 'corporal' | 'facial' | 'acupuntura',
-    imageUrl: '',
     benefits: [] as string[],
+    conditions: [] as string[], // ✅ Agregado conditions
     active: true,
   });
 
   const [newBenefit, setNewBenefit] = useState('');
+  const [newCondition, setNewCondition] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -35,12 +36,11 @@ const ServiceModal = ({ service, isOpen, onClose, onSave }: ServiceModalProps) =
         name: service.name,
         slug: service.slug,
         description: service.description || '',
-        shortDescription: service.shortDescription || '',
-        durationMinutes: service.durationMinutes,
+        duration: service.duration, // ✅ duration
         price: service.price?.toString() || '',
         category: service.category as 'corporal' | 'facial' | 'acupuntura',
-        imageUrl: service.imageUrl || '',
-        benefits: (service.benefits as string[]) || [],
+        benefits: service.benefits || [],
+        conditions: service.conditions || [],
         active: service.active,
       });
     } else {
@@ -48,12 +48,11 @@ const ServiceModal = ({ service, isOpen, onClose, onSave }: ServiceModalProps) =
         name: '',
         slug: '',
         description: '',
-        shortDescription: '',
-        durationMinutes: 60,
+        duration: 60,
         price: '',
         category: 'corporal',
-        imageUrl: '',
         benefits: [],
+        conditions: [],
         active: true,
       });
     }
@@ -93,6 +92,23 @@ const ServiceModal = ({ service, isOpen, onClose, onSave }: ServiceModalProps) =
     }));
   };
 
+  const handleAddCondition = () => {
+    if (newCondition.trim()) {
+      setFormData((prev) => ({
+        ...prev,
+        conditions: [...prev.conditions, newCondition.trim()],
+      }));
+      setNewCondition('');
+    }
+  };
+
+  const handleRemoveCondition = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      conditions: prev.conditions.filter((_, i) => i !== index),
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -101,7 +117,7 @@ const ServiceModal = ({ service, isOpen, onClose, onSave }: ServiceModalProps) =
       const url = service
         ? `/api/services/${service.id}`
         : '/api/services';
-      const method = service ? 'PUT' : 'POST';
+      const method = service ? 'PATCH' : 'POST';
 
       const response = await fetch(url, {
         method,
@@ -112,16 +128,15 @@ const ServiceModal = ({ service, isOpen, onClose, onSave }: ServiceModalProps) =
         }),
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Error al guardar');
+      if (response.ok) {
+        toast.success(service ? 'Servicio actualizado' : 'Servicio creado');
+        onSave();
+        onClose();
+      } else {
+        toast.error('Error al guardar el servicio');
       }
-
-      toast.success(service ? 'Servicio actualizado' : 'Servicio creado');
-      onSave();
-      onClose();
-    } catch (error: any) {
-      toast.error(error.message || 'Error al guardar el servicio');
+    } catch (error) {
+      toast.error('Error al guardar el servicio');
     } finally {
       setIsLoading(false);
     }
@@ -130,97 +145,61 @@ const ServiceModal = ({ service, isOpen, onClose, onSave }: ServiceModalProps) =
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">
-            {service ? 'Editar Servicio' : 'Nuevo Servicio'}
-          </h2>
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50" onClick={onClose} />
+        <div className="relative bg-white rounded-xl shadow-xl max-w-2xl w-full p-6">
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
           >
             <X size={24} />
           </button>
-        </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6">
-          <div className="space-y-6">
+          <h2 className="text-2xl font-bold mb-6">
+            {service ? 'Editar Servicio' : 'Nuevo Servicio'}
+          </h2>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
             {/* Nombre */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nombre del Servicio *
+                Nombre *
               </label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => handleNameChange(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-4 py-2 border rounded-lg"
                 required
               />
             </div>
 
-            {/* Slug */}
+            {/* Descripción */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Slug (URL amigable) *
+                Descripción
               </label>
-              <input
-                type="text"
-                value={formData.slug}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, slug: e.target.value }))
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                required
+              <textarea
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                rows={4}
+                className="w-full px-4 py-2 border rounded-lg"
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Ejemplo: masaje-linforeductox
-              </p>
-            </div>
-
-            {/* Categoría */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Categoría *
-              </label>
-              <select
-                value={formData.category}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    category: e.target.value as any,
-                  }))
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                required
-              >
-                <option value="corporal">Corporal</option>
-                <option value="facial">Facial</option>
-                <option value="acupuntura">Acupuntura</option>
-              </select>
             </div>
 
             {/* Duración y Precio */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Duración (minutos) *
+                  Duración (min) *
                 </label>
                 <input
                   type="number"
-                  value={formData.durationMinutes}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      durationMinutes: parseInt(e.target.value),
-                    }))
-                  }
+                  value={formData.duration}
+                  onChange={(e) => setFormData(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
                   min="15"
-                  step="15"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border rounded-lg"
                   required
                 />
               </div>
@@ -231,153 +210,32 @@ const ServiceModal = ({ service, isOpen, onClose, onSave }: ServiceModalProps) =
                 <input
                   type="number"
                   value={formData.price}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, price: e.target.value }))
-                  }
+                  onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
                   min="0"
                   step="0.01"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="Opcional"
+                  className="w-full px-4 py-2 border rounded-lg"
                 />
               </div>
             </div>
 
-            {/* Descripción corta */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Descripción Corta
-              </label>
-              <textarea
-                value={formData.shortDescription}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    shortDescription: e.target.value,
-                  }))
-                }
-                rows={2}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="Resumen breve del servicio"
-              />
+            {/* Botones */}
+            <div className="flex gap-4 pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50"
+              >
+                {isLoading ? 'Guardando...' : 'Guardar'}
+              </button>
             </div>
-
-            {/* Descripción completa */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Descripción Completa
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    description: e.target.value,
-                  }))
-                }
-                rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="Descripción detallada del servicio"
-              />
-            </div>
-
-            {/* URL de imagen */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                URL de Imagen
-              </label>
-              <input
-                type="url"
-                value={formData.imageUrl}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, imageUrl: e.target.value }))
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="https://..."
-              />
-            </div>
-
-            {/* Beneficios */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Beneficios
-              </label>
-              <div className="flex gap-2 mb-3">
-                <input
-                  type="text"
-                  value={newBenefit}
-                  onChange={(e) => setNewBenefit(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleAddBenefit();
-                    }
-                  }}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="Añade un beneficio"
-                />
-                <button
-                  type="button"
-                  onClick={handleAddBenefit}
-                  className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-                >
-                  <Plus size={20} />
-                </button>
-              </div>
-              {formData.benefits.length > 0 && (
-                <div className="space-y-2">
-                  {formData.benefits.map((benefit, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-2 bg-gray-50 p-3 rounded-lg"
-                    >
-                      <span className="flex-1 text-sm">{benefit}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveBenefit(index)}
-                        className="p-1 text-red-500 hover:bg-red-50 rounded"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Activo */}
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id="active"
-                checked={formData.active}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, active: e.target.checked }))
-                }
-                className="w-5 h-5 text-primary focus:ring-primary border-gray-300 rounded"
-              />
-              <label htmlFor="active" className="text-sm font-medium text-gray-700">
-                Servicio activo (visible en la web)
-              </label>
-            </div>
-          </div>
-        </form>
-
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={isLoading}
-            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
-          >
-            {isLoading ? 'Guardando...' : service ? 'Actualizar' : 'Crear'}
-          </button>
+          </form>
         </div>
       </div>
     </div>
