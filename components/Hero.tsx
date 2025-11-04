@@ -2,13 +2,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
-interface HeroProps {
-  title?: string;
-  subtitle?: string;
-  description?: string;
-}
-
-const Hero = ({ title, subtitle, description }: HeroProps) => {
+const Hero = () => {
   return (
     <section className="relative h-screen flex items-center justify-center overflow-hidden pt-20">
       <div
@@ -23,13 +17,13 @@ const Hero = ({ title, subtitle, description }: HeroProps) => {
 
       <div className="relative z-10 text-center text-white px-6 max-w-5xl">
         <h1 className="font-heading text-5xl md:text-7xl font-bold mb-6">
-          {title || 'Bienvenid@'}
-          <span className="block text-secondary mt-2">
-            {subtitle || 'LINFOREDUCTOX'}
-          </span>
+          Bienvenid@
+          <span className="block text-secondary mt-2">LINFOREDUCTOX</span>
         </h1>
         <p className="text-xl md:text-2xl mb-8 text-white/90 max-w-3xl mx-auto">
-          {description || 'Regenera y depura tu sistema linfático. Activa tu metabolismo. Esculpe tu belleza facial y corporal.'}
+          Regenera y depura tu sistema linfático.
+          Activa tu metabolismo.
+          Esculpe tu belleza facial y corporal
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Link

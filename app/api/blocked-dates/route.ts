@@ -6,11 +6,11 @@ import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
 const blockedDateSchema = z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (debe ser YYYY-MM-DD)'),
   reason: z.string().optional(),
   allDay: z.boolean().default(true),
-  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).optional().nullable(),
-  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).optional().nullable(),
+  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Formato de hora inválido (debe ser HH:MM)').optional().nullable(),
+  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Formato de hora inválido (debe ser HH:MM)').optional().nullable(),
 });
 
 // GET - Obtener fechas bloqueadas
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(blockedDates);
   } catch (error) {
-    console.error('Error obteniendo fechas bloqueadas:', error);
+    console.error('🔴 Error obteniendo fechas bloqueadas:', error);
     return NextResponse.json(
       { error: 'Error obteniendo fechas bloqueadas' },
       { status: 500 }
@@ -50,35 +50,57 @@ export async function GET(request: NextRequest) {
 // POST - Crear fecha bloqueada
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔹 POST /api/blocked-dates - Iniciando');
+    
     const session = await getServerSession(authOptions);
     if (!session) {
+      console.log('🔴 No autorizado');
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const body = await request.json();
-    const validatedData = blockedDateSchema.parse(body);
-
-    const blockedDate = await prisma.blockedDate.create({
-      data: {
-        date: new Date(validatedData.date),
-        reason: validatedData.reason,
-        allDay: validatedData.allDay,
-        startTime: validatedData.startTime,
-        endTime: validatedData.endTime,
-      },
-    });
-
-    return NextResponse.json(blockedDate, { status: 201 });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
+    console.log('🔹 Body recibido:', JSON.stringify(body, null, 2));
+    
+    // Validar con Zod
+    const validationResult = blockedDateSchema.safeParse(body);
+    
+    if (!validationResult.success) {
+      console.error('🔴 Error de validación Zod:', validationResult.error.issues);
       return NextResponse.json(
-        { error: 'Datos inválidos', details: error.issues }, // ✅ CAMBIO
+        { 
+          error: 'Datos inválidos', 
+          details: validationResult.error.issues 
+        },
         { status: 400 }
       );
     }
-    console.error('Error creando fecha bloqueada:', error);
+
+    const validatedData = validationResult.data;
+    console.log('🔹 Datos validados:', validatedData);
+
+    // Crear en la BD
+    const blockedDate = await prisma.blockedDate.create({
+      data: {
+        date: new Date(validatedData.date),
+        reason: validatedData.reason || null,
+        allDay: validatedData.allDay,
+        startTime: validatedData.startTime || null,
+        endTime: validatedData.endTime || null,
+      },
+    });
+
+    console.log('✅ Fecha bloqueada creada:', blockedDate.id);
+    return NextResponse.json(blockedDate, { status: 201 });
+    
+  } catch (error: any) {
+    console.error('🔴 Error creando fecha bloqueada:', error);
+    console.error('🔴 Stack:', error.stack);
+    
     return NextResponse.json(
-      { error: 'Error creando fecha bloqueada' },
+      { 
+        error: 'Error creando fecha bloqueada',
+        message: error.message 
+      },
       { status: 500 }
     );
   }

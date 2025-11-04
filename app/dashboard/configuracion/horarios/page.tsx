@@ -58,34 +58,46 @@ export default function HorariosPage() {
   }, []);
 
   const fetchData = async () => {
-    try {
-      const [hoursRes, blockedRes, contactRes] = await Promise.all([
-        fetch('/api/working-hours'),
-        fetch('/api/blocked-dates'),
-        fetch('/api/contact-info'),
-      ]);
+  try {
+    const [hoursRes, blockedRes, contactRes] = await Promise.all([
+      fetch('/api/working-hours'),
+      fetch('/api/blocked-dates'),
+      fetch('/api/contact-info'),
+    ]);
 
-      if (hoursRes.ok) {
-        const hours = await hoursRes.json();
-        setWorkingHours(hours);
-      }
-
-      if (blockedRes.ok) {
-        const blocked = await blockedRes.json();
-        setBlockedDates(blocked);
-      }
-
-      if (contactRes.ok) {
-        const contact = await contactRes.json();
-        setBufferMinutes(contact.bufferMinutes || 15);
-      }
-    } catch (error) {
-      toast.error('Error al cargar la configuración');
-      console.error(error);
-    } finally {
-      setIsLoading(false);
+    if (hoursRes.ok) {
+      const hours = await hoursRes.json();
+      
+      // ✅ MAPEO CORRECTO: API → Frontend
+      const mappedHours = hours.map((h: any) => ({
+        id: h.id,
+        dayOfWeek: h.dayOfWeek,
+        isActive: h.isOpen,           // ✅ isOpen → isActive
+        startTime: h.openTime || '09:00',   // ✅ openTime → startTime
+        endTime: h.closeTime || '20:00',    // ✅ closeTime → endTime
+        breakStart: h.breakStart,
+        breakEnd: h.breakEnd,
+      }));
+      
+      setWorkingHours(mappedHours);
     }
-  };
+
+    if (blockedRes.ok) {
+      const blocked = await blockedRes.json();
+      setBlockedDates(blocked);
+    }
+
+    if (contactRes.ok) {
+      const contact = await contactRes.json();
+      setBufferMinutes(contact.bufferMinutes || 15);
+    }
+  } catch (error) {
+    toast.error('Error al cargar la configuración');
+    console.error(error);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleWorkingHourChange = (
     dayOfWeek: number,
@@ -132,64 +144,110 @@ export default function HorariosPage() {
   };
 
   const handleSaveWorkingHours = async () => {
-    setIsSaving(true);
-    try {
-      // Guardar cada día
-      for (const day of DAYS) {
-        const hour = getWorkingHour(day.value);
-        await fetch('/api/working-hours', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(hour),
-        });
-      }
+  setIsSaving(true);
+  try {
+    // Guardar cada día
+    for (const day of DAYS) {
+      const hour = getWorkingHour(day.value);
+      
+      // ✅ MAPEO CORRECTO: Frontend → API
+      const payload = {
+        dayOfWeek: hour.dayOfWeek,
+        isActive: hour.isActive,
+        startTime: hour.startTime,
+        endTime: hour.endTime,
+        breakStart: hour.breakStart || null,
+        breakEnd: hour.breakEnd || null,
+      };
 
-      // Guardar buffer
-      await fetch('/api/contact-info', {
-        method: 'PUT',
+      await fetch('/api/working-hours', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bufferMinutes }),
+        body: JSON.stringify(payload),
       });
-
-      toast.success('Horarios guardados correctamente');
-      fetchData();
-    } catch (error) {
-      toast.error('Error al guardar los horarios');
-      console.error(error);
-    } finally {
-      setIsSaving(false);
     }
-  };
+
+    // Guardar buffer
+    await fetch('/api/contact-info', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bufferMinutes }),
+    });
+
+    toast.success('Horarios guardados correctamente');
+    
+    // ✅ Recargar datos para actualizar el formulario
+    await fetchData();
+  } catch (error) {
+    toast.error('Error al guardar los horarios');
+    console.error(error);
+  } finally {
+    setIsSaving(false);
+  }
+};
 
   const handleAddBlockedDate = async () => {
-    if (!newBlockedDate.date) {
-      toast.error('Selecciona una fecha');
+  if (!newBlockedDate.date) {
+    toast.error('Selecciona una fecha');
+    return;
+  }
+
+  try {
+    const payload = {
+      date: newBlockedDate.date,
+      reason: newBlockedDate.reason || undefined, // ✅ undefined en lugar de string vacío
+      allDay: newBlockedDate.allDay,
+      startTime: newBlockedDate.allDay ? null : (newBlockedDate.startTime || null),
+      endTime: newBlockedDate.allDay ? null : (newBlockedDate.endTime || null),
+    };
+    
+    console.log('🔹 Sending blocked date:', payload);
+    
+    const response = await fetch('/api/blocked-dates', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    console.log('🔹 Response status:', response.status);
+    
+    let data;
+    try {
+      data = await response.json();
+      console.log('🔹 Response data:', data);
+    } catch (e) {
+      console.error('🔴 No se pudo parsear la respuesta JSON:', e);
+      toast.error('Error del servidor');
+      return;
+    }
+    
+    if (!response.ok) {
+      console.error('🔴 Error response:', data);
+      
+      // Mostrar detalles de validación si existen
+      if (data.details) {
+        console.error('🔴 Validation details:', data.details);
+        toast.error(`Validación: ${data.details.map((d: any) => d.message).join(', ')}`);
+      } else {
+        toast.error(data.error || 'Error al crear fecha bloqueada');
+      }
       return;
     }
 
-    try {
-      const response = await fetch('/api/blocked-dates', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newBlockedDate),
-      });
-
-      if (!response.ok) throw new Error('Error al crear fecha bloqueada');
-
-      toast.success('Fecha bloqueada añadida');
-      setNewBlockedDate({
-        date: '',
-        reason: '',
-        allDay: true,
-        startTime: '',
-        endTime: '',
-      });
-      fetchData();
-    } catch (error) {
-      toast.error('Error al añadir fecha bloqueada');
-      console.error(error);
-    }
-  };
+    toast.success('Fecha bloqueada añadida');
+    setNewBlockedDate({
+      date: '',
+      reason: '',
+      allDay: true,
+      startTime: '',
+      endTime: '',
+    });
+    await fetchData();
+  } catch (error) {
+    console.error('🔴 Catch error:', error);
+    toast.error('Error al añadir fecha bloqueada');
+  }
+};
 
   const handleDeleteBlockedDate = async (id: string) => {
     try {

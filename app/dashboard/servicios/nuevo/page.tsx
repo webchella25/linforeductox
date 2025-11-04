@@ -303,20 +303,26 @@ export default function NuevoServicioPage() {
         {/* Orden y Estado */}
         <div className="grid md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Orden
-            </label>
-            <input
-              type="number"
-              min="0"
-              value={formData.order}
-              onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-            />
-            <p className="text-sm text-gray-500 mt-1">
-              Determina el orden en la página de servicios
-            </p>
-          </div>
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    Orden
+  </label>
+  <input
+    type="number"
+    min="0"
+    value={formData.order || 0}  // ✅ Fallback a 0
+    onChange={(e) => {
+      const value = e.target.value;
+      setFormData({ 
+        ...formData, 
+        order: value === '' ? 0 : parseInt(value) || 0  // ✅ Manejo de string vacío
+      });
+    }}
+    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+  />
+  <p className="text-sm text-gray-500 mt-1">
+    Determina el orden en la página de servicios
+  </p>
+</div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">

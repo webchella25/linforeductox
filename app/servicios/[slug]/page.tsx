@@ -1,14 +1,12 @@
 // app/servicios/[slug]/page.tsx
-
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowRight, Check, Calendar, Clock } from 'lucide-react';
+import { ArrowRight, Check, Calendar, Clock, Star } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
+import type { Metadata } from 'next';
 
 interface ServicePageProps {
-  params: {
-    slug: string;
-  };
+  params: Promise<{ slug: string }>;
 }
 
 async function getService(slug: string) {
@@ -19,7 +17,6 @@ async function getService(slug: string) {
         active: true,
       },
     });
-
     return service;
   } catch (error) {
     console.error('Error obteniendo servicio:', error);
@@ -27,30 +24,106 @@ async function getService(slug: string) {
   }
 }
 
+// ✅ SEO dinámico para cada servicio
+export async function generateMetadata({ params }: ServicePageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const service = await getService(slug);
+
+  if (!service) {
+    return {
+      title: 'Servicio no encontrado | LINFOREDUCTOX',
+      description: 'Este servicio no está disponible actualmente.',
+    };
+  }
+
+  const title = `${service.name} | LINFOREDUCTOX - Estética y Medicina Ancestral`;
+  const description = service.description?.slice(0, 160) || 
+    `Descubre los beneficios del ${service.name}. Tratamiento de ${service.duration} minutos en Madrid.`;
+
+  return {
+    title,
+    description,
+    keywords: `${service.name}, ${service.category}, estética, medicina ancestral, Madrid, drenaje linfático, ${service.conditions?.join(', ')}`,
+    openGraph: {
+      title,
+      description,
+      url: `https://linforeductox.vercel.app/servicios/${slug}`,
+      siteName: 'LINFOREDUCTOX',
+      type: 'website',
+      locale: 'es_ES',
+      images: [
+        {
+          url: 'https://linforeductox.vercel.app/og-image.jpg', // ✅ Cambiar por tu imagen real
+          width: 1200,
+          height: 630,
+          alt: `${service.name} - LINFOREDUCTOX`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ['https://linforeductox.vercel.app/og-image.jpg'],
+    },
+    alternates: {
+      canonical: `https://linforeductox.vercel.app/servicios/${slug}`,
+    },
+  };
+}
+
+// Mapeo de categorías a colores e imágenes
+const categoryConfig: Record<string, {
+  gradient: string;
+  image: string;
+  icon: string;
+}> = {
+  corporal: {
+    gradient: 'from-blue-600/90 via-blue-500/80 to-blue-700/90',
+    image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=2070',
+    icon: '💆‍♀️'
+  },
+  facial: {
+    gradient: 'from-pink-600/90 via-pink-500/80 to-pink-700/90',
+    image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=2070',
+    icon: '✨'
+  },
+  acupuntura: {
+    gradient: 'from-purple-600/90 via-purple-500/80 to-purple-700/90',
+    image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=2070',
+    icon: '🌿'
+  },
+  default: {
+    gradient: 'from-primary/90 via-primary/70 to-primary-dark/90',
+    image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=2070',
+    icon: '💫'
+  }
+};
+
 export default async function ServicePage({ params }: ServicePageProps) {
-  const service = await getService(params.slug);
+  const { slug } = await params;
+  const service = await getService(slug);
 
   if (!service) {
     notFound();
   }
 
+  const config = categoryConfig[service.category || 'default'] || categoryConfig.default;
+
   return (
     <>
-      {/* Hero */}
+      {/* Hero Dinámico */}
       <section className="relative h-[70vh] flex items-center justify-center overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=2070')",
+            backgroundImage: `url('${config.image}')`,
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary/70 to-primary-dark/90" />
+          <div className={`absolute inset-0 bg-gradient-to-br ${config.gradient}`} />
         </div>
         <div className="relative z-10 text-center text-white px-6 max-w-4xl">
-          <div className="bg-secondary/20 backdrop-blur-sm w-20 h-20 rounded-full flex items-center justify-center mb-6 mx-auto">
-            <Calendar size={40} className="text-secondary" />
-          </div>
+          <div className="text-7xl mb-6 animate-bounce">{config.icon}</div>
           <h1 className="font-heading text-5xl md:text-6xl font-bold mb-4">
             {service.name}
           </h1>
@@ -73,7 +146,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
         <div className="container-custom max-w-5xl">
           <div className="text-center mb-12">
             <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-6">
-              {service.name}
+              ¿Qué es {service.name}?
             </h2>
             <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-line">
               {service.description}
@@ -83,37 +156,40 @@ export default async function ServicePage({ params }: ServicePageProps) {
           {/* CTA Reservar */}
           <div className="text-center mb-16">
             <Link
-              href={`/reservar?servicio=${service.slug}`}
+              href={`/contacto?servicio=${service.slug}`}
               className="inline-flex items-center gap-3 bg-secondary text-white px-10 py-5 rounded-full font-semibold text-lg hover:bg-secondary-light transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
               <Calendar size={24} />
               Reservar {service.name}
               <ArrowRight size={24} />
             </Link>
-            <p className="text-sm text-gray-600 mt-4">
-              Recibirás confirmación en 24 horas
-            </p>
           </div>
         </div>
       </section>
 
-      {/* Beneficios */}
+      {/* Beneficios - Solo si existen */}
       {service.benefits && service.benefits.length > 0 && (
         <section className="section-padding bg-cream">
-          <div className="container-custom max-w-6xl">
-            <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-12 text-center">
-              Beneficios
-            </h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              {service.benefits.map((beneficio, index) => (
+          <div className="container-custom max-w-5xl">
+            <div className="text-center mb-12">
+              <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-4">
+                Beneficios de {service.name}
+              </h2>
+              <p className="text-xl text-gray-700">
+                Todo lo que obtendrás con este tratamiento
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {service.benefits.map((benefit, index) => (
                 <div
                   key={index}
-                  className="flex items-start gap-4 bg-white p-6 rounded-xl shadow-sm"
+                  className="flex items-start gap-4 bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow"
                 >
-                  <div className="bg-primary/10 p-2 rounded-full flex-shrink-0">
-                    <Check size={24} className="text-primary" />
+                  <div className="flex-shrink-0 w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                    <Check className="text-green-600" size={20} />
                   </div>
-                  <p className="text-gray-700 font-medium">{beneficio}</p>
+                  <p className="text-gray-700 leading-relaxed">{benefit}</p>
                 </div>
               ))}
             </div>
@@ -121,21 +197,26 @@ export default async function ServicePage({ params }: ServicePageProps) {
         </section>
       )}
 
-      {/* Condiciones que trata */}
+      {/* Condiciones que trata - Solo si existen */}
       {service.conditions && service.conditions.length > 0 && (
         <section className="section-padding bg-white">
-          <div className="container-custom max-w-6xl">
-            <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-12 text-center">
-              ¿Qué condiciones trata?
-            </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {service.conditions.map((condicion, index) => (
+          <div className="container-custom max-w-5xl">
+            <div className="text-center mb-12">
+              <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-4">
+                ¿Para qué es efectivo {service.name}?
+              </h2>
+              <p className="text-xl text-gray-700">
+                Este tratamiento es especialmente recomendado para
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {service.conditions.map((condition, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-3 bg-cream p-4 rounded-lg"
+                  className="bg-primary/5 border-2 border-primary/20 rounded-xl p-4 text-center hover:border-primary/40 hover:bg-primary/10 transition-all"
                 >
-                  <div className="w-2 h-2 bg-secondary rounded-full flex-shrink-0" />
-                  <span className="text-gray-700">{condicion}</span>
+                  <p className="text-gray-800 font-medium">{condition}</p>
                 </div>
               ))}
             </div>
@@ -143,117 +224,96 @@ export default async function ServicePage({ params }: ServicePageProps) {
         </section>
       )}
 
-      {/* Información adicional */}
-      <section className="section-padding bg-gradient-to-br from-primary to-primary-dark text-white">
-        <div className="container-custom max-w-4xl">
-          <div className="text-center mb-12">
-            <h2 className="font-heading text-4xl md:text-5xl font-bold mb-6">
-              Detalles del Tratamiento
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-white/10 backdrop-blur-sm p-8 rounded-xl">
-              <h3 className="font-heading text-2xl font-semibold mb-4 flex items-center gap-3">
-                <Clock size={28} className="text-secondary" />
+      {/* Información Adicional */}
+      <section className="section-padding bg-cream">
+        <div className="container-custom max-w-5xl">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Duración */}
+            <div className="bg-white rounded-xl p-8 text-center shadow-md">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Clock className="text-primary" size={32} />
+              </div>
+              <h3 className="font-heading text-xl font-bold text-primary mb-2">
                 Duración
               </h3>
-              <p className="text-3xl font-bold text-secondary mb-2">
+              <p className="text-gray-700 text-2xl font-semibold">
                 {service.duration} minutos
-              </p>
-              <p className="text-white/80">
-                Tiempo dedicado exclusivamente a tu bienestar
               </p>
             </div>
 
+            {/* Precio */}
             {service.price && (
-              <div className="bg-white/10 backdrop-blur-sm p-8 rounded-xl">
-                <h3 className="font-heading text-2xl font-semibold mb-4">
-                  Inversión
+              <div className="bg-white rounded-xl p-8 text-center shadow-md">
+                <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Star className="text-secondary" size={32} />
+                </div>
+                <h3 className="font-heading text-xl font-bold text-primary mb-2">
+                  Precio
                 </h3>
-                <p className="text-3xl font-bold text-secondary mb-2">
+                <p className="text-gray-700 text-2xl font-semibold">
                   {service.price}€
-                </p>
-                <p className="text-white/80">
-                  Por sesión individual
                 </p>
               </div>
             )}
-          </div>
 
-          <div className="mt-12 bg-white/10 backdrop-blur-sm p-8 rounded-xl">
-            <h3 className="font-heading text-2xl font-semibold mb-4">
-              ¿Qué incluye?
-            </h3>
-            <ul className="space-y-3">
-              <li className="flex items-start gap-3">
-                <Check className="text-secondary flex-shrink-0 mt-1" size={20} />
-                <span>Consulta personalizada inicial</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <Check className="text-secondary flex-shrink-0 mt-1" size={20} />
-                <span>Tratamiento completo de {service.duration} minutos</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <Check className="text-secondary flex-shrink-0 mt-1" size={20} />
-                <span>Productos naturales y ecológicos</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <Check className="text-secondary flex-shrink-0 mt-1" size={20} />
-                <span>Ambiente relajante con aromaterapia y música</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <Check className="text-secondary flex-shrink-0 mt-1" size={20} />
-                <span>Recomendaciones personalizadas post-tratamiento</span>
-              </li>
-            </ul>
+            {/* Categoría */}
+            <div className="bg-white rounded-xl p-8 text-center shadow-md">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">
+                {config.icon}
+              </div>
+              <h3 className="font-heading text-xl font-bold text-primary mb-2">
+                Tipo
+              </h3>
+              <p className="text-gray-700 text-lg font-medium capitalize">
+                {service.category || 'Tratamiento'}
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* CTA Final */}
-      <section className="section-padding bg-cream">
-        <div className="container-custom text-center max-w-3xl">
-          <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-6">
-            ¿Lista para transformarte?
+      <section className="section-padding bg-primary text-white">
+        <div className="container-custom max-w-4xl text-center">
+          <h2 className="font-heading text-4xl md:text-5xl font-bold mb-6">
+            ¿Lista para experimentar {service.name}?
           </h2>
-          <p className="text-xl text-gray-700 mb-8">
-            Reserva tu sesión de {service.name} y comienza tu viaje hacia el bienestar
+          <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+            Reserva tu cita ahora y descubre los beneficios de este tratamiento
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link
+            href={`/contacto?servicio=${service.slug}`}
+            className="inline-flex items-center gap-3 bg-secondary text-white px-10 py-5 rounded-full font-semibold text-lg hover:bg-secondary-light transition-all shadow-lg hover:shadow-xl"
+          >
+            <Calendar size={24} />
+            Contactar Ahora
+            <ArrowRight size={24} />
+          </Link>
+        </div>
+      </section>
+
+      {/* Servicios Relacionados */}
+      <section className="section-padding bg-cream">
+        <div className="container-custom">
+          <div className="text-center mb-12">
+            <h2 className="font-heading text-4xl font-bold text-primary mb-4">
+              Otros Servicios
+            </h2>
+            <p className="text-lg text-gray-700">
+              Descubre más tratamientos que pueden interesarte
+            </p>
+          </div>
+          <div className="text-center">
             <Link
-              href={`/reservar?servicio=${service.slug}`}
-              className="inline-flex items-center gap-2 bg-primary text-white px-10 py-5 rounded-full font-medium text-lg hover:bg-primary-dark transition-all shadow-lg hover:shadow-xl"
+              href="/servicios"
+              className="inline-flex items-center gap-2 text-primary hover:text-secondary font-semibold text-lg transition-colors"
             >
-              <Calendar size={24} />
-              Reservar Ahora
-              <ArrowRight size={24} />
-            </Link>
-            <Link
-              href="/contacto"
-              className="inline-flex items-center gap-2 bg-white text-primary border-2 border-primary px-10 py-5 rounded-full font-medium text-lg hover:bg-cream transition-all"
-            >
-              Consultar Dudas
+              Ver todos los servicios
+              <ArrowRight size={20} />
             </Link>
           </div>
         </div>
       </section>
     </>
   );
-}
-
-// Generar metadata dinámica para SEO
-export async function generateMetadata({ params }: ServicePageProps) {
-  const service = await getService(params.slug);
-
-  if (!service) {
-    return {
-      title: 'Servicio no encontrado - LINFOREDUCTOX',
-    };
-  }
-
-  return {
-    title: `${service.name} - LINFOREDUCTOX`,
-    description: service.description.substring(0, 160),
-  };
 }
