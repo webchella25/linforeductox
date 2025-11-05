@@ -9,8 +9,10 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth(); // ✅ Reemplazo correcto
-    if (!session || session.user.role !== 'admin') {
+    const session = await auth();
+
+    // ✅ Protección completa contra undefined
+    if (!session?.user?.role || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
