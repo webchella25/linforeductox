@@ -1,7 +1,6 @@
 // app/api/blocked-dates/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from "@/lib/auth";
-import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/prisma';
 
 // DELETE - Eliminar fecha bloqueada
@@ -10,12 +9,11 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
+    const session = await auth(); // ✅ Reemplazo correcto
+    if (!session || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // ✅ AWAIT params antes de usarlo
     const params = await context.params;
     const { id } = params;
 

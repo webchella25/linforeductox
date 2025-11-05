@@ -1,7 +1,6 @@
 // app/api/content/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from "@/lib/auth";
-import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 // GET - Obtener contenido (público o por sección)
@@ -11,7 +10,6 @@ export async function GET(request: NextRequest) {
     const section = searchParams.get('section');
 
     if (section) {
-      // Obtener contenido de una sección específica
       const content = await prisma.content.findUnique({
         where: { section },
       });
@@ -25,7 +23,6 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json(content);
     } else {
-      // Obtener todo el contenido
       const contents = await prisma.content.findMany({
         orderBy: { section: 'asc' },
       });
@@ -43,9 +40,9 @@ export async function GET(request: NextRequest) {
 // PUT - Actualizar contenido (requiere autenticación)
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth(); // ✅ Reemplazo correcto
 
-    if (!session) {
+    if (!session || session.user.role !== 'admin') {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }

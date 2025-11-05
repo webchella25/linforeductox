@@ -1,7 +1,6 @@
 // app/api/contact-info/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from "@/lib/auth";
-import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
@@ -21,15 +20,14 @@ const contactInfoSchema = z.object({
 // GET - Obtener info de contacto
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
+    const session = await auth(); // ✅ Usar auth() en lugar de getServerSession
+    if (!session || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const contactInfo = await prisma.contactInfo.findFirst();
 
     if (!contactInfo) {
-      // Crear registro por defecto si no existe
       const newContactInfo = await prisma.contactInfo.create({
         data: {
           phone: '+34 123 456 789',
@@ -53,15 +51,14 @@ export async function GET() {
 // PUT - Actualizar info de contacto
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
+    const session = await auth(); // ✅ Usar auth() en lugar de getServerSession
+    if (!session || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const body = await request.json();
     const validatedData = contactInfoSchema.parse(body);
 
-    // Obtener el primer registro (solo debería haber uno)
     const existing = await prisma.contactInfo.findFirst();
 
     if (!existing) {
@@ -80,7 +77,7 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Datos inválidos', details: error.issues }, // ✅ CAMBIO
+        { error: 'Datos inválidos', details: error.issues },
         { status: 400 }
       );
     }

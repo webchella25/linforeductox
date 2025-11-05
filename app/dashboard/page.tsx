@@ -102,14 +102,6 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  return (
-    <div>
-      <h1>Bienvenida, {session.user.email}</h1>
-      <p>Este es tu panel de administración.</p>
-    </div>
-  );
-
-
   const stats = await getDashboardStats();
   const recentBookings = await getRecentBookings();
 

@@ -1,7 +1,6 @@
 // app/api/blocked-dates/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from "@/lib/auth";
-import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
@@ -16,8 +15,8 @@ const blockedDateSchema = z.object({
 // GET - Obtener fechas bloqueadas
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
+    const session = await auth(); // ✅ Usar auth() en lugar de getServerSession
+    if (!session || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
@@ -51,25 +50,25 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     console.log('🔹 POST /api/blocked-dates - Iniciando');
-    
-    const session = await getServerSession(authOptions);
-    if (!session) {
+
+    const session = await auth(); // ✅ Usar auth() en lugar de getServerSession
+    if (!session || session.user.role !== 'admin') {
       console.log('🔴 No autorizado');
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const body = await request.json();
     console.log('🔹 Body recibido:', JSON.stringify(body, null, 2));
-    
+
     // Validar con Zod
     const validationResult = blockedDateSchema.safeParse(body);
-    
+
     if (!validationResult.success) {
       console.error('🔴 Error de validación Zod:', validationResult.error.issues);
       return NextResponse.json(
-        { 
-          error: 'Datos inválidos', 
-          details: validationResult.error.issues 
+        {
+          error: 'Datos inválidos',
+          details: validationResult.error.issues,
         },
         { status: 400 }
       );
@@ -91,15 +90,14 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Fecha bloqueada creada:', blockedDate.id);
     return NextResponse.json(blockedDate, { status: 201 });
-    
   } catch (error: any) {
     console.error('🔴 Error creando fecha bloqueada:', error);
     console.error('🔴 Stack:', error.stack);
-    
+
     return NextResponse.json(
-      { 
+      {
         error: 'Error creando fecha bloqueada',
-        message: error.message 
+        message: error.message,
       },
       { status: 500 }
     );

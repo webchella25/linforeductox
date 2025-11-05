@@ -1,7 +1,6 @@
 // app/api/working-hours/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from "@/lib/auth";
-import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
@@ -17,8 +16,8 @@ const workingHoursSchema = z.object({
 // GET - Obtener todos los horarios
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
+    const session = await auth(); // ✅ Usar auth() en lugar de getServerSession
+    if (!session || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
@@ -39,15 +38,14 @@ export async function GET() {
 // POST - Crear o actualizar horario
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
+    const session = await auth(); // ✅ Usar auth() en lugar de getServerSession
+    if (!session || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const body = await request.json();
     const validatedData = workingHoursSchema.parse(body);
 
-    // Mapeo explícito a los campos del modelo Prisma
     const prismaData = {
       dayOfWeek: validatedData.dayOfWeek,
       isOpen: validatedData.isActive,
@@ -67,7 +65,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Datos inválidos', details: error.issues }, // ✅ CAMBIO
+        { error: 'Datos inválidos', details: error.issues },
         { status: 400 }
       );
     }

@@ -1,8 +1,7 @@
 // app/api/services/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from "@/lib/auth";;
-import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/prisma'; // ✅ CORRECTO
+import { auth } from "@/lib/auth";
+import { prisma } from '@/lib/prisma';
 
 // GET - Obtener un servicio específico
 export async function GET(
@@ -10,8 +9,8 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
+    const session = await auth(); // ✅ Reemplazo correcto
+    if (!session || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
@@ -45,8 +44,8 @@ export async function PATCH(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
+    const session = await auth(); // ✅ Reemplazo correcto
+    if (!session || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
@@ -76,8 +75,8 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
+    const session = await auth(); // ✅ Reemplazo correcto
+    if (!session || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 

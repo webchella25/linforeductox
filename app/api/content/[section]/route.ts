@@ -1,7 +1,6 @@
 // app/api/content/[section]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from "@/lib/auth";
-import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 // GET - Obtener contenido por sección
@@ -40,8 +39,8 @@ export async function PATCH(
   context: { params: Promise<{ section: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
+    const session = await auth(); // ✅ Usar auth() en lugar de getServerSession
+    if (!session || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 

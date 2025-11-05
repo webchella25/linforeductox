@@ -1,7 +1,6 @@
 // app/api/testimonials/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from "@/lib/auth";
-import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 // GET - Obtener un testimonio
@@ -10,12 +9,12 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
+    const session = await auth(); // ✅ Reemplazo correcto
+    if (!session || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const params = await context.params; // ✅ AWAIT params
+    const params = await context.params;
     const { id } = params;
 
     const testimonial = await prisma.testimonial.findUnique({
@@ -45,12 +44,12 @@ export async function PATCH(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
+    const session = await auth(); // ✅ Reemplazo correcto
+    if (!session || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const params = await context.params; // ✅ AWAIT params
+    const params = await context.params;
     const { id } = params;
 
     const body = await request.json();
@@ -76,12 +75,12 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
+    const session = await auth(); // ✅ Reemplazo correcto
+    if (!session || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const params = await context.params; // ✅ AWAIT params
+    const params = await context.params;
     const { id } = params;
 
     await prisma.testimonial.delete({
