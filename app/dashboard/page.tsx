@@ -1,6 +1,6 @@
 // app/dashboard/page.tsx
 
-import { getServerSession } from 'next-auth';
+import { auth } from "@/lib/auth";
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
@@ -96,11 +96,19 @@ async function getRecentBookings() {
 }
 
 export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
 
   if (!session) {
-    redirect('/login');
+    redirect("/login");
   }
+
+  return (
+    <div>
+      <h1>Bienvenida, {session.user.email}</h1>
+      <p>Este es tu panel de administración.</p>
+    </div>
+  );
+
 
   const stats = await getDashboardStats();
   const recentBookings = await getRecentBookings();

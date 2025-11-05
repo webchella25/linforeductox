@@ -1,9 +1,7 @@
 // app/api/services/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 
 // GET - Obtener servicios (público si active=true, admin para todos)
 export async function GET(request: NextRequest) {
@@ -14,21 +12,17 @@ export async function GET(request: NextRequest) {
 
     const where: any = {};
 
-    // Si se pide solo activos
     if (activeOnly === 'true') {
       where.active = true;
     }
 
-    // Filtrar por categoría
     if (category) {
       where.category = category;
     }
 
     const services = await prisma.service.findMany({
       where,
-      orderBy: {
-        order: 'asc',
-      },
+      orderBy: { order: 'asc' },
       select: {
         id: true,
         name: true,
@@ -57,7 +51,7 @@ export async function GET(request: NextRequest) {
 // POST - Crear servicio (solo admin)
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth(); // 👈 Sesión autenticada
 
     if (!session) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
@@ -77,7 +71,6 @@ export async function POST(request: NextRequest) {
       order,
     } = body;
 
-    // Validaciones básicas
     if (!name || !slug || !description || !duration || !category) {
       return NextResponse.json(
         { error: 'Campos requeridos: name, slug, description, duration, category' },
@@ -85,10 +78,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verificar que el slug no exista
-    const existingService = await prisma.service.findUnique({
-      where: { slug },
-    });
+    const existingService = await prisma.service.findUnique({ where: { slug } });
 
     if (existingService) {
       return NextResponse.json(

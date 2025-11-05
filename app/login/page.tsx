@@ -1,18 +1,33 @@
 'use client';
 
-import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Mail, Lock, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useSession, signIn } from 'next-auth/react'; // ✅ Importación correcta
 
 export default function LoginPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.replace('/dashboard');
+    }
+  }, [status, router]);
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-cream to-secondary/5">
+        <p className="text-gray-600">Cargando...</p>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +49,7 @@ export default function LoginPage() {
         router.push('/dashboard');
         router.refresh();
       }
-    } catch (error) {
+    } catch {
       setError('Ocurrió un error. Inténtalo de nuevo.');
       toast.error('Error al iniciar sesión');
     } finally {
@@ -45,7 +60,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-cream to-secondary/5 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        {/* Logo y Título */}
         <div className="text-center mb-8">
           <div className="relative w-20 h-20 mx-auto mb-4">
             <Image
@@ -61,10 +75,8 @@ export default function LoginPage() {
           <p className="text-gray-600">Panel de Administración</p>
         </div>
 
-        {/* Formulario */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Email
@@ -86,7 +98,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Password */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Contraseña
@@ -108,7 +119,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Error */}
             {error && (
               <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-lg">
                 <AlertCircle size={20} />
@@ -116,7 +126,6 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={isLoading}
@@ -127,7 +136,6 @@ export default function LoginPage() {
           </form>
         </div>
 
-        {/* Footer */}
         <p className="text-center text-gray-500 text-sm mt-6">
           © {new Date().getFullYear()} LINFOREDUCTOX
         </p>
