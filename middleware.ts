@@ -1,23 +1,19 @@
-// middleware.ts
-import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export default auth((req) => {
-  // Protección de rutas
-  const isLoggedIn = !!req.auth;
+export function middleware(req: NextRequest) {
+  const token = req.cookies.get("next-auth.session-token")?.value;
   const { pathname } = req.nextUrl;
 
-  // Rutas protegidas
   const protectedRoutes = ["/dashboard", "/admin"];
 
-  if (!isLoggedIn && protectedRoutes.some((path) => pathname.startsWith(path))) {
+  if (!token && protectedRoutes.some((path) => pathname.startsWith(path))) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
   return NextResponse.next();
-});
+}
 
-// Solo aplica auth middleware a las rutas indicadas
 export const config = {
   matcher: ["/dashboard/:path*", "/admin/:path*"],
 };
