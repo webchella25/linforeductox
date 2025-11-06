@@ -12,6 +12,11 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // ✅ NUEVO en Next.js 16: se movió de experimental a raíz
+  serverExternalPackages: ['@prisma/client', 'prisma'],
+  
+  // ✅ Configuración vacía de turbopack para silenciar el warning
+  turbopack: {},
 };
 
 export default nextConfig;
