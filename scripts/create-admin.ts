@@ -44,7 +44,7 @@ async function createAdmin() {
         data: {
           phone: '+34 123 456 789',
           email: 'info@linforeductox.com',
-          whatsappNumber: '+34123456789',
+          whatsapp: '+34123456789',
           bufferMinutes: 15,
         },
       });

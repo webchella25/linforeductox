@@ -1,4 +1,3 @@
-// app/api/services/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
@@ -51,9 +50,10 @@ export async function GET(request: NextRequest) {
 // POST - Crear servicio (solo admin)
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth(); // 👈 Sesión autenticada
+    const session = await auth();
 
-    if (!session) {
+    // ✅ Protección completa contra undefined
+    if (!session?.user?.role || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 

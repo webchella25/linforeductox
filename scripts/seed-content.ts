@@ -1,11 +1,17 @@
 // scripts/seed-content.ts
 import { prisma } from '../lib/prisma';
 
+type ContentSeed = {
+  section: string;
+  title: string | null;
+  subtitle: string | null;
+  content: string;
+};
+
 async function main() {
   console.log('🌱 Seeding content...');
 
-  const contentData = [
-    // PÁGINA PRINCIPAL (HOME)
+  const contentData: ContentSeed[] = [
     {
       section: 'home_hero',
       title: '"Cuando el Sistema Linfático fluye con libertad, Tu Belleza y Salud Florecen"',
@@ -24,8 +30,6 @@ async function main() {
       subtitle: null,
       content: 'Cada masaje es una fusión que combina Ciencia, Arte y Energía',
     },
-
-    // PÁGINA SOBRE NOSOTROS
     {
       section: 'about_intro',
       title: 'Filosofía LINFOREDUCTOX',
@@ -38,8 +42,6 @@ async function main() {
       subtitle: 'Fusión de Tradición y Ciencia',
       content: 'Nuestro método único combina la sabiduría milenaria de la medicina oriental con técnicas modernas de estética avanzada, creando experiencias transformadoras que actúan en cuerpo, mente y espíritu.',
     },
-
-    // PÁGINA ALINE VIDAL
     {
       section: 'aline_bio',
       title: 'Mi historia',

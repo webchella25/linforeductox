@@ -6,17 +6,17 @@ function generateSlug(name: string): string {
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '') // Eliminar acentos
-    .replace(/[^a-z0-9]+/g, '-') // Reemplazar caracteres especiales con -
-    .replace(/^-+|-+$/g, ''); // Eliminar - al inicio y final
+    .replace(/[^a-z0-9]+/g, '-')     // Reemplazar caracteres especiales con -
+    .replace(/^-+|-+$/g, '');        // Eliminar - al inicio y final
 }
 
 async function main() {
-  console.log('🌱 Seeding services...');
+  console.log('🚀 Seeding services...');
 
   const services = [
     {
       name: 'Drenaje Linfático Manual',
-      slug: 'drenaje-linfatico-manual',
+      slug: generateSlug('Drenaje Linfático Manual'),
       description: 'Técnica suave de masaje que estimula el sistema linfático para eliminar toxinas y reducir la retención de líquidos. Ideal para desintoxicar el cuerpo y mejorar la circulación.',
       duration: 60,
       price: 50,
@@ -39,7 +39,7 @@ async function main() {
     },
     {
       name: 'Masaje Reductivo',
-      slug: 'masaje-reductivo',
+      slug: generateSlug('Masaje Reductivo'),
       description: 'Masaje intenso enfocado en eliminar grasa localizada y remodelar la figura. Combina técnicas de amasamiento profundo y presión para activar la circulación.',
       duration: 60,
       price: 55,
@@ -62,7 +62,7 @@ async function main() {
     },
     {
       name: 'Presoterapia',
-      slug: 'presoterapia',
+      slug: generateSlug('Presoterapia'),
       description: 'Tratamiento con botas de compresión que mejora el retorno venoso y linfático. Perfecto para piernas cansadas y retención de líquidos.',
       duration: 45,
       price: 40,
@@ -85,7 +85,7 @@ async function main() {
     },
     {
       name: 'Tratamiento Facial Kobido',
-      slug: 'tratamiento-facial-kobido',
+      slug: generateSlug('Tratamiento Facial Kobido'),
       description: 'Antigua técnica japonesa de masaje facial que rejuvenece, tonifica y reafirma la piel del rostro de forma natural.',
       duration: 60,
       price: 60,
@@ -108,7 +108,7 @@ async function main() {
     },
     {
       name: 'Limpieza Facial Profunda',
-      slug: 'limpieza-facial-profunda',
+      slug: generateSlug('Limpieza Facial Profunda'),
       description: 'Limpieza completa que elimina impurezas, puntos negros y células muertas, dejando la piel luminosa y renovada.',
       duration: 75,
       price: 50,
@@ -131,7 +131,7 @@ async function main() {
     },
     {
       name: 'Acupuntura Tradicional China',
-      slug: 'acupuntura-tradicional-china',
+      slug: generateSlug('Acupuntura Tradicional China'),
       description: 'Medicina milenaria que equilibra la energía del cuerpo mediante la inserción de agujas en puntos específicos. Trata dolor, estrés y diversas afecciones.',
       duration: 60,
       price: 45,
@@ -155,7 +155,7 @@ async function main() {
     },
     {
       name: 'Auriculoterapia',
-      slug: 'auriculoterapia',
+      slug: generateSlug('Auriculoterapia'),
       description: 'Técnica de medicina china que estimula puntos de la oreja para tratar diversas afecciones. Efectiva para control de peso y adicciones.',
       duration: 30,
       price: 30,
@@ -178,7 +178,7 @@ async function main() {
     },
     {
       name: 'Moxibustión',
-      slug: 'moxibustion',
+      slug: generateSlug('Moxibustión'),
       description: 'Terapia complementaria de acupuntura que utiliza calor de artemisa para estimular puntos energéticos y mejorar el flujo de Qi.',
       duration: 45,
       price: 35,
@@ -210,7 +210,7 @@ async function main() {
     console.log(`✅ Service created/updated: ${service.name}`);
   }
 
-  console.log('✨ Seeding completed!');
+  console.log('🎉 Seeding completed!');
 }
 
 main()
@@ -218,4 +218,6 @@ main()
     console.error('❌ Error seeding services:', e);
     process.exit(1);
   })
-  .fina
+  .finally(() => {
+    prisma.$disconnect();
+  });

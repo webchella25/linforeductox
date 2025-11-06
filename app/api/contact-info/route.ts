@@ -1,4 +1,3 @@
-// app/api/contact-info/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from "@/lib/auth";
 import { prisma } from '@/lib/prisma';
@@ -20,8 +19,8 @@ const contactInfoSchema = z.object({
 // GET - Obtener info de contacto
 export async function GET() {
   try {
-    const session = await auth(); // ✅ Usar auth() en lugar de getServerSession
-    if (!session || session.user.role !== 'admin') {
+    const session = await auth();
+    if (!session?.user?.role || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
@@ -51,8 +50,8 @@ export async function GET() {
 // PUT - Actualizar info de contacto
 export async function PUT(request: NextRequest) {
   try {
-    const session = await auth(); // ✅ Usar auth() en lugar de getServerSession
-    if (!session || session.user.role !== 'admin') {
+    const session = await auth();
+    if (!session?.user?.role || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 

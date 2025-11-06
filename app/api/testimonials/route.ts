@@ -1,4 +1,3 @@
-// app/api/testimonials/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from "@/lib/auth";
@@ -44,8 +43,8 @@ export async function GET(request: NextRequest) {
 // PATCH - Actualizar estado de testimonio (solo admin)
 export async function PATCH(request: NextRequest) {
   try {
-    const session = await auth(); // ✅ Reemplazo correcto
-    if (!session || session.user.role !== 'admin') {
+    const session = await auth();
+    if (!session?.user?.role || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
@@ -81,8 +80,8 @@ export async function PATCH(request: NextRequest) {
 // DELETE - Eliminar testimonio (solo admin)
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await auth(); // ✅ Reemplazo correcto
-    if (!session || session.user.role !== 'admin') {
+    const session = await auth();
+    if (!session?.user?.role || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 

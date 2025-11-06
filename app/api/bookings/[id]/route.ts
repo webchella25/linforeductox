@@ -1,4 +1,3 @@
-// app/api/bookings/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from "@/lib/auth";
 import { prisma } from '@/lib/prisma';
@@ -9,8 +8,8 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth(); // ✅ Reemplazo correcto
-    if (!session || session.user.role !== 'admin') {
+    const session = await auth();
+    if (!session?.user?.role || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
@@ -45,8 +44,8 @@ export async function PATCH(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth(); // ✅ Reemplazo correcto
-    if (!session || session.user.role !== 'admin') {
+    const session = await auth();
+    if (!session?.user?.role || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
@@ -77,8 +76,8 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth(); // ✅ Reemplazo correcto
-    if (!session || session.user.role !== 'admin') {
+    const session = await auth();
+    if (!session?.user?.role || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 

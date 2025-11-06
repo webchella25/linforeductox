@@ -2,6 +2,9 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import type { JWT } from "next-auth/jwt";
+import type { Session } from "next-auth";
+import type { User } from "next-auth";
 
 export const authConfig = {
   providers: [
@@ -19,19 +22,21 @@ export const authConfig = {
           throw new Error("Faltan credenciales");
         }
 
+        const { email, password } = credentials as { email: string; password: string };
+
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email },
         });
 
         if (!user) {
-          console.log("❌ [AUTH] Usuario no encontrado:", credentials.email);
+          console.log("❌ [AUTH] Usuario no encontrado:", email);
           throw new Error("Usuario no encontrado");
         }
 
-        const valid = await bcrypt.compare(credentials.password, user.password);
+        const valid = await bcrypt.compare(password, user.password);
 
         if (!valid) {
-          console.log("❌ [AUTH] Contraseña incorrecta:", credentials.email);
+          console.log("❌ [AUTH] Contraseña incorrecta:", email);
           throw new Error("Contraseña incorrecta");
         }
 
@@ -44,20 +49,29 @@ export const authConfig = {
   pages: {
     signIn: "/login",
   },
-  session: { strategy: "jwt" },
+  session: {
+    strategy: "jwt" as const,
+  },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) token.role = user.role;
+    async jwt({ token, user }: { token: JWT; user?: User }) {
+      if (user) {
+        token.role = (user as any).role;
+        token.sub = (user as any).id;
+      }
       return token;
     },
-    async session({ session, token }) {
-      session.user.role = token.role;
+    async session({ session, token }: { session: Session; token: JWT }) {
+      session.user = {
+        name: token.name ?? "",
+        email: token.email ?? "",
+        image: token.picture ?? "",
+        id: token.sub ?? "",
+        role: token.role as string,
+      };
       return session;
     },
   },
 };
 
 export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
-
-// ✅ Añade esta línea para que puedas usar getServerSession con authOptions
 export const authOptions = authConfig;

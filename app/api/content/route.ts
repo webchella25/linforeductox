@@ -1,4 +1,3 @@
-// app/api/content/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from "@/lib/auth";
 import { prisma } from '@/lib/prisma';
@@ -40,9 +39,10 @@ export async function GET(request: NextRequest) {
 // PUT - Actualizar contenido (requiere autenticación)
 export async function PUT(request: NextRequest) {
   try {
-    const session = await auth(); // ✅ Reemplazo correcto
+    const session = await auth();
 
-    if (!session || session.user.role !== 'admin') {
+    // ✅ Protección completa contra undefined
+    if (!session?.user?.role || session.user.role !== 'admin') {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }

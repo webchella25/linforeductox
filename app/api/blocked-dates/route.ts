@@ -1,4 +1,3 @@
-// app/api/blocked-dates/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from "@/lib/auth";
 import { prisma } from '@/lib/prisma';
@@ -15,8 +14,8 @@ const blockedDateSchema = z.object({
 // GET - Obtener fechas bloqueadas
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth(); // ✅ Usar auth() en lugar de getServerSession
-    if (!session || session.user.role !== 'admin') {
+    const session = await auth();
+    if (!session?.user?.role || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
@@ -51,8 +50,8 @@ export async function POST(request: NextRequest) {
   try {
     console.log('🔹 POST /api/blocked-dates - Iniciando');
 
-    const session = await auth(); // ✅ Usar auth() en lugar de getServerSession
-    if (!session || session.user.role !== 'admin') {
+    const session = await auth();
+    if (!session?.user?.role || session.user.role !== 'admin') {
       console.log('🔴 No autorizado');
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
@@ -60,7 +59,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log('🔹 Body recibido:', JSON.stringify(body, null, 2));
 
-    // Validar con Zod
     const validationResult = blockedDateSchema.safeParse(body);
 
     if (!validationResult.success) {
@@ -77,7 +75,6 @@ export async function POST(request: NextRequest) {
     const validatedData = validationResult.data;
     console.log('🔹 Datos validados:', validatedData);
 
-    // Crear en la BD
     const blockedDate = await prisma.blockedDate.create({
       data: {
         date: new Date(validatedData.date),

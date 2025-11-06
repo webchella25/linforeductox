@@ -1,4 +1,3 @@
-// app/api/working-hours/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from "@/lib/auth";
 import { prisma } from '@/lib/prisma';
@@ -16,8 +15,8 @@ const workingHoursSchema = z.object({
 // GET - Obtener todos los horarios
 export async function GET() {
   try {
-    const session = await auth(); // ✅ Usar auth() en lugar de getServerSession
-    if (!session || session.user.role !== 'admin') {
+    const session = await auth();
+    if (!session?.user?.role || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
@@ -38,8 +37,8 @@ export async function GET() {
 // POST - Crear o actualizar horario
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth(); // ✅ Usar auth() en lugar de getServerSession
-    if (!session || session.user.role !== 'admin') {
+    const session = await auth();
+    if (!session?.user?.role || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
