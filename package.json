@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
+	"vercel-build": "prisma generate && prisma db push --skip-generate && next build",
     "db:init": "tsx scripts/create-admin.ts",
     "seed-services": "tsx scripts/seed-services.ts",
     "seed-testimonials": "tsx scripts/seed-testimonials.ts",
