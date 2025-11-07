@@ -1,6 +1,5 @@
 // app/dashboard/page.tsx
 
-/ app/dashboard/page.tsx
 import { auth } from "@/lib/auth";
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
