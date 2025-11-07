@@ -16,7 +16,6 @@
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
-    "@prisma/extension-accelerate": "^2.0.2",
     "@tanstack/react-query": "^5.90.6",
     "@vercel/postgres": "^0.10.0",
     "bcryptjs": "^3.0.2",
