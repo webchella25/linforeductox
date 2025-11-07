@@ -1,5 +1,6 @@
 // app/dashboard/page.tsx
 
+/ app/dashboard/page.tsx
 import { auth } from "@/lib/auth";
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
@@ -30,21 +31,17 @@ async function getDashboardStats() {
     approvedTestimonials,
     pendingTestimonials,
   ] = await Promise.all([
-    // Total de reservas
     prisma.booking.count(),
-    // Reservas pendientes
     prisma.booking.count({
       where: {
-        status: 'PENDING', // ✅ MAYÚSCULAS
+        status: 'PENDING',
       },
     }),
-    // Reservas confirmadas
     prisma.booking.count({
       where: {
-        status: 'CONFIRMED', // ✅ MAYÚSCULAS
+        status: 'CONFIRMED',
       },
     }),
-    // Reservas de hoy
     prisma.booking.count({
       where: {
         date: {
@@ -52,20 +49,18 @@ async function getDashboardStats() {
           lt: tomorrow,
         },
         status: {
-          in: ['PENDING', 'CONFIRMED'], // ✅ MAYÚSCULAS
+          in: ['PENDING', 'CONFIRMED'],
         },
       },
     }),
-    // Testimonios aprobados
     prisma.testimonial.count({
       where: {
-        status: 'APPROVED', // ✅ MAYÚSCULAS
+        status: 'APPROVED',
       },
     }),
-    // Testimonios pendientes
     prisma.testimonial.count({
       where: {
-        status: 'PENDING', // ✅ MAYÚSCULAS
+        status: 'PENDING',
       },
     }),
   ]);
@@ -84,11 +79,11 @@ async function getRecentBookings() {
   return await prisma.booking.findMany({
     where: {
       status: {
-        in: ['PENDING', 'CONFIRMED'], // ✅ MAYÚSCULAS
+        in: ['PENDING', 'CONFIRMED'],
       },
     },
     include: {
-      service: true,
+      service: true,  // ← ASEGÚRATE DE QUE ESTO ESTÉ
     },
     orderBy: [{ date: 'asc' }, { startTime: 'asc' }],
     take: 5,
@@ -99,7 +94,7 @@ export default async function DashboardPage() {
   const session = await auth();
 
   if (!session) {
-    redirect("/login");
+    redirect('/login');
   }
 
   const stats = await getDashboardStats();
