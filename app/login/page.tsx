@@ -1,37 +1,20 @@
+// app/login/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Mail, Lock, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useSession, signIn } from 'next-auth/react'; // ✅ Importación correcta
 
 export default function LoginPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (status === 'authenticated') {
-      router.replace('/dashboard');
-    }
-  }, [status, router]);
-
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-cream to-secondary/5">
-        <p className="text-gray-600">Cargando...</p>
-      </div>
-    );
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setIsLoading(true);
 
     try {
@@ -42,15 +25,14 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError('Email o contraseña incorrectos');
-        toast.error('Credenciales inválidas');
-      } else {
-        toast.success('¡Bienvenida Aline!');
+        toast.error('Credenciales incorrectas');
+      } else if (result?.ok) {
+        toast.success('¡Bienvenida, Aline!');
         router.push('/dashboard');
-        router.refresh();
+        router.refresh(); // ← IMPORTANTE
       }
-    } catch {
-      setError('Ocurrió un error. Inténtalo de nuevo.');
+    } catch (error) {
+      console.error('Error en login:', error);
       toast.error('Error al iniciar sesión');
     } finally {
       setIsLoading(false);
@@ -58,87 +40,71 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-cream to-secondary/5 flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="relative w-20 h-20 mx-auto mb-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl">
+        <div>
+          <div className="flex justify-center">
             <Image
-              src="/logo.png"
-              alt="LINFOREDUCTOX"
-              fill
-              className="object-contain"
+              src="/logo.svg"
+              alt="Linforeductox Logo"
+              width={80}
+              height={80}
+              className="h-20 w-auto"
             />
           </div>
-          <h1 className="font-heading text-3xl font-bold text-primary mb-2">
-            LINFOREDUCTOX
-          </h1>
-          <p className="text-gray-600">Panel de Administración</p>
+          <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
+            Iniciar Sesión
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Panel de administración
+          </p>
         </div>
-
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email
               </label>
-              <div className="relative">
-                <Mail
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={20}
-                />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="tu@email.com"
-                  required
-                  disabled={isLoading}
-                />
-              </div>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                placeholder="tu@email.com"
+              />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Contraseña
               </label>
-              <div className="relative">
-                <Lock
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={20}
-                />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="••••••••"
-                  required
-                  disabled={isLoading}
-                />
-              </div>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                placeholder="••••••••"
+              />
             </div>
+          </div>
 
-            {error && (
-              <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-lg">
-                <AlertCircle size={20} />
-                <span className="text-sm">{error}</span>
-              </div>
-            )}
-
+          <div>
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
             </button>
-          </form>
-        </div>
-
-        <p className="text-center text-gray-500 text-sm mt-6">
-          © {new Date().getFullYear()} LINFOREDUCTOX
-        </p>
+          </div>
+        </form>
       </div>
     </div>
   );

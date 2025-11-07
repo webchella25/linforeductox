@@ -1,78 +1,88 @@
+// lib/auth.ts
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import type { JWT } from "next-auth/jwt";
 import type { Session } from "next-auth";
-import type { User } from "next-auth";
 
-export const authConfig = {
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true, // ← CRÍTICO para Vercel
   providers: [
     Credentials({
-      name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "text" },
+        email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        console.log("🟦 [AUTH] Intentando login con:", credentials?.email);
-
         if (!credentials?.email || !credentials?.password) {
-          console.log("❌ [AUTH] Faltan credenciales");
-          throw new Error("Faltan credenciales");
+          console.error('🔴 [AUTH] Credenciales faltantes');
+          return null;
         }
 
-        const { email, password } = credentials as { email: string; password: string };
+        const email = credentials.email as string;
+        const password = credentials.password as string;
 
-        const user = await prisma.user.findUnique({
-          where: { email },
-        });
+        console.log('🟦 [AUTH] Intentando login con:', email);
 
-        if (!user) {
-          console.log("❌ [AUTH] Usuario no encontrado:", email);
-          throw new Error("Usuario no encontrado");
+        try {
+          const user = await prisma.user.findUnique({
+            where: { email },
+          });
+
+          if (!user) {
+            console.error('🔴 [AUTH] Usuario no encontrado:', email);
+            return null;
+          }
+
+          const isPasswordValid = await bcrypt.compare(password, user.password);
+
+          if (!isPasswordValid) {
+            console.error('🔴 [AUTH] Contraseña incorrecta para:', email);
+            return null;
+          }
+
+          console.log('✅ [AUTH] Login correcto:', email);
+          
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          };
+        } catch (error) {
+          console.error('🔴 [AUTH] Error en authorize:', error);
+          return null;
         }
-
-        const valid = await bcrypt.compare(password, user.password);
-
-        if (!valid) {
-          console.log("❌ [AUTH] Contraseña incorrecta:", email);
-          throw new Error("Contraseña incorrecta");
-        }
-
-        console.log("✅ [AUTH] Login correcto:", user.email);
-
-        return { id: user.id, email: user.email, role: user.role };
       },
     }),
   ],
   pages: {
-    signIn: "/login",
+    signIn: '/login',
   },
-  session: {
-    strategy: "jwt" as const,
-  },
-  secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    async jwt({ token, user }: { token: JWT; user?: User }) {
+    async jwt({ token, user }: { token: JWT; user?: any }) {
       if (user) {
-        token.role = (user as any).role;
-        token.sub = (user as any).id;
+        token.id = user.id;
+        token.role = user.role;
       }
       return token;
     },
     async session({ session, token }: { session: Session; token: JWT }) {
-      session.user = {
-        name: token.name ?? "",
-        email: token.email ?? "",
-        image: token.picture ?? "",
-        id: token.sub ?? "",
-        role: token.role as string,
-      };
+      if (session.user) {
+        session.user.id = token.id as string;
+        session.user.role = token.role as string;
+      }
       return session;
     },
   },
-};
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 días
+  },
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+});
 
-export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
-export const authOptions = authConfig;
+export const authOptions = {
+  providers: [],
+};
