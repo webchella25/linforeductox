@@ -15,6 +15,7 @@ import {
   X,
   Menu,
   Home,
+  Phone,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -54,6 +55,7 @@ const menuItems = [
         label: 'Horarios',
         icon: Clock,
       },
+	  { label: 'Información de Contacto', href: '/dashboard/configuracion/contacto', icon: Phone },
     ],
   },
 ];
