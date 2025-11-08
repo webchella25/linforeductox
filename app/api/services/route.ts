@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
         category: true,
         benefits: true,
         conditions: true,
+        faqs: true, // ✅ INCLUIR FAQS
         active: true,
         order: true,
       },
@@ -52,7 +53,6 @@ export async function POST(request: NextRequest) {
   try {
     const session = await auth();
 
-    // ✅ Protección completa contra undefined
     if (!session?.user?.role || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
@@ -67,6 +67,7 @@ export async function POST(request: NextRequest) {
       category,
       benefits,
       conditions,
+      faqs, // ✅ RECIBIR FAQS
       active,
       order,
     } = body;
@@ -97,6 +98,7 @@ export async function POST(request: NextRequest) {
         category,
         benefits: benefits || [],
         conditions: conditions || [],
+        faqs: faqs || null, // ✅ GUARDAR FAQS
         active: active !== undefined ? active : true,
         order: order || 0,
       },

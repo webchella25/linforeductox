@@ -28,6 +28,7 @@ model Service {
   category    String
   benefits    String[]
   conditions  String[]
+  faqs        Json?     // ✅ NUEVO CAMPO PARA FAQs
   active      Boolean   @default(true)
   order       Int       @default(0)
   createdAt   DateTime  @default(now())
