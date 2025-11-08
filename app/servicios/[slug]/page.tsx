@@ -116,12 +116,11 @@ export default async function ServicePage({ params }: ServicePageProps) {
 
   const config = categoryConfig[service.category] || categoryConfig.otro;
   
-  // ✅ FIX: Parsear FAQs desde JSON de forma segura
+  // ✅ Parsear FAQs desde JSON de forma segura
   let faqs: FAQ[] = [];
   
   try {
     if (service.faqs) {
-      // Convertir JsonValue a string y luego parsear
       const faqsData = JSON.parse(JSON.stringify(service.faqs));
       if (Array.isArray(faqsData)) {
         faqs = faqsData as FAQ[];
@@ -132,7 +131,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
     faqs = [];
   }
 
-  // ✅ Schema.org JSON-LD para SEO
+  // ✅ Schema.org JSON-LD para FAQ
   const faqSchema = faqs.length > 0 ? {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -145,6 +144,35 @@ export default async function ServicePage({ params }: ServicePageProps) {
       },
     })),
   } : null;
+
+  // ✅ Schema.org JSON-LD para Service
+  const serviceSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: service.name,
+    description: service.description,
+    provider: {
+      '@type': 'LocalBusiness',
+      name: 'LINFOREDUCTOX',
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: 'Errenteria',
+        addressRegion: 'Gipuzkoa',
+        addressCountry: 'ES',
+      },
+    },
+    areaServed: {
+      '@type': 'City',
+      name: 'Errenteria',
+    },
+    ...(service.price && {
+      offers: {
+        '@type': 'Offer',
+        price: service.price,
+        priceCurrency: 'EUR',
+      },
+    }),
+  };
 
   return (
     <>
