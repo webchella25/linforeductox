@@ -185,11 +185,12 @@ export default async function Home() {
               {/* Imagen */}
               <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl">
                 <Image
-                  src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=2070"
-                  alt="Aline Vidal - Fundadora de LINFOREDUCTOX"
-                  fill
-                  className="object-cover"
-                />
+  src="/alin-vidal-profesional.jpg"  // ✅ LA FOTO REAL DE ALINE
+  alt="Aline Vidal - Fundadora de LINFOREDUCTOX"
+  fill
+  className="object-cover object-top"  // ✅ object-top para centrar la cara
+  priority  // ✅ Para que cargue rápido
+/>
               </div>
 
               {/* Contenido */}
