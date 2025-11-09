@@ -18,13 +18,6 @@ interface Testimonial {
   updatedAt: Date;
 }
 
-// ✅ Metadatos para SEO (en layout o mediante Head)
-export const metadata = {
-  title: "Testimonios - LINFOREDUCTOX | Opiniones de Nuestros Clientes",
-  description: "Lee las experiencias reales de nuestros clientes con los tratamientos de drenaje linfático, medicina ancestral y acupuntura en Errenteria.",
-  keywords: "testimonios, opiniones, reseñas, clientes satisfechos, Errenteria",
-};
-
 // Componente del carrusel destacado
 function TestimonialCarousel({ testimonials }: { testimonials: Testimonial[] }) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: 'center' });
