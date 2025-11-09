@@ -3,8 +3,19 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Award, Heart, Sparkles } from "lucide-react";
 import { prisma } from '@/lib/prisma';
+import type { Metadata } from 'next';
 
 export const revalidate = 60;
+
+// ✅ METADATA PARA SEO
+export const metadata: Metadata = {
+  title: "Aline Vidal - Fundadora de LINFOREDUCTOX | Terapeuta y Coach",
+  description: "Conoce a Aline Vidal, fundadora de LINFOREDUCTOX. Especialista en drenaje linfático, medicina ancestral china y acupuntura estética en Errenteria.",
+  keywords: "Aline Vidal, terapeuta, coach corporal, acupuntura, medicina china, Errenteria",
+  alternates: {
+    canonical: "https://linforeductox.com/aline-vidal",
+  },
+};
 
 async function getAlineContent() {
   try {
@@ -32,12 +43,62 @@ export default async function AlineVidalPage() {
     "Especialización en Gua Sha y Moxibustión",
   ];
 
-  // Dividir el contenido de biografía en párrafos
   const bioParagraphs = bio?.content?.split('\n\n').filter(p => p.trim()) || [];
   const philosophyParagraphs = philosophy?.content?.split('\n\n').filter(p => p.trim()) || [];
 
+  // ✅ Schema.org Person
+  const personSchema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "Aline Vidal",
+    jobTitle: "Terapeuta y Coach Corporal",
+    description: bio?.subtitle || "Coach corporal y facialista, diplomada en Acupuntura Estética",
+    url: "https://linforeductox.com/aline-vidal",
+    worksFor: {
+      "@type": "MedicalBusiness",
+      name: "LINFOREDUCTOX",
+    },
+    knowsAbout: [
+      "Medicina Tradicional China",
+      "Drenaje Linfático Manual",
+      "Acupuntura Estética",
+      "Kobido",
+      "Aromaterapia",
+    ],
+  };
+
+  // ✅ Breadcrumb
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Inicio",
+        item: "https://linforeductox.com",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Aline Vidal",
+        item: "https://linforeductox.com/aline-vidal",
+      },
+    ],
+  };
+
   return (
     <>
+      {/* ✅ Schema.org Scripts */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+
       {/* Hero */}
       <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
         <div
@@ -64,45 +125,45 @@ export default async function AlineVidalPage() {
 
       {/* Presentación con foto profesional */}
       <section className="section-padding bg-white">
-  <div className="container-custom">
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-      {/* Foto profesional */}
-      <div className="relative h-[600px] rounded-2xl overflow-hidden shadow-2xl bg-cream">
-        <Image
-          src="/alin-vidal-profesional.jpg"
-          alt="Aline Vidal - Fundadora LINFOREDUCTOX"
-          fill
-          className="object-cover object-top" // ← ✅ Cambio clave
-          priority
-        />
-      </div>
+        <div className="container-custom">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Foto profesional */}
+            <div className="relative h-[600px] rounded-2xl overflow-hidden shadow-2xl bg-cream">
+              <Image
+                src="/alin-vidal-profesional.jpg"
+                alt="Aline Vidal - Fundadora LINFOREDUCTOX"
+                fill
+                className="object-cover object-top"
+                priority
+              />
+            </div>
 
-      {/* Contenido dinámico desde BD */}
-      <div>
-        <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-6">
-          {bio?.title || 'Mi historia'}
-        </h2>
-        
-        {bio?.subtitle && (
-          <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-            {bio.subtitle}
-          </p>
-        )}
+            {/* Contenido dinámico desde BD */}
+            <div>
+              <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-6">
+                {bio?.title || 'Mi historia'}
+              </h2>
+              
+              {bio?.subtitle && (
+                <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+                  {bio.subtitle}
+                </p>
+              )}
 
-        {bioParagraphs.map((paragraph, index) => (
-          <p 
-            key={index} 
-            className={`text-gray-700 leading-relaxed ${
-              index === 0 ? 'text-lg font-semibold text-primary mb-6' : 'mb-4'
-            }`}
-          >
-            {paragraph}
-          </p>
-        ))}
-      </div>
-    </div>
-  </div>
-</section>
+              {bioParagraphs.map((paragraph, index) => (
+                <p 
+                  key={index} 
+                  className={`text-gray-700 leading-relaxed ${
+                    index === 0 ? 'text-lg font-semibold text-primary mb-6' : 'mb-4'
+                  }`}
+                >
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Experiencia */}
       <section className="section-padding bg-cream">
@@ -196,7 +257,7 @@ export default async function AlineVidalPage() {
             Descubre el poder del método LINFOREDUCTOX y experimenta una transformación que va más allá de lo físico.
           </p>
           <Link
-            href="/contacto"
+            href="/reservar"
             className="inline-flex items-center gap-2 bg-secondary text-white px-10 py-5 rounded-full font-medium text-lg hover:bg-secondary-light transition-all"
           >
             Reservar Consulta
