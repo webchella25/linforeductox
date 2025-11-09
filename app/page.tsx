@@ -144,23 +144,26 @@ export default async function Home() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <ServiceCard
-                title="Tratamientos Corporales"
-                description="Masajes especializados que combinan técnicas ancestrales para eliminar celulitis, grasa localizada y flacidez. Activa tu circulación y recupera la vitalidad de tu cuerpo."
-                icon="💆‍♀️"
-                link="/servicios/corporal"
-              />
-              <ServiceCard
-                title="Tratamientos Faciales"
-                description="Cuidado facial personalizado que fusiona acupuntura estética con técnicas naturales para rejuvenecer tu piel desde el interior."
-                icon="✨"
-                link="/servicios/facial"
-              />
-              <ServiceCard
-                title="Acupuntura"
-                description="Medicina ancestral china para equilibrar tu energía vital, aliviar dolores y mejorar tu bienestar general de forma natural."
-                icon="🌿"
-                link="/servicios/acupuntura"
-              />
+  title="Tratamientos Corporales"
+  description="Masajes especializados que combinan técnicas ancestrales para eliminar celulitis, grasa localizada y flacidez. Activa tu circulación y recupera la vitalidad de tu cuerpo."
+  iconName="sparkles"  // ✅ CORRECTO
+  href="/servicios/corporal"  // ✅ CORRECTO
+  delay={0}
+/>
+<ServiceCard
+  title="Tratamientos Faciales"
+  description="Rejuvenece tu rostro con técnicas naturales que restauran la luminosidad, elasticidad y juventud de tu piel, desde el interior."
+  iconName="heart"  // ✅ CORRECTO
+  href="/servicios/facial"  // ✅ CORRECTO
+  delay={0.2}
+/>
+<ServiceCard
+  title="Acupuntura"
+  description="Tecnicas Tradiciones para equilibrar tu energía vital, aliviar dolores y restaurar el bienestar integral."
+  iconName="zap"  // ✅ CORRECTO
+  href="/servicios/acupuntura"  // ✅ CORRECTO
+  delay={0.4}
+/>
             </div>
 
             <div className="text-center mt-12">
