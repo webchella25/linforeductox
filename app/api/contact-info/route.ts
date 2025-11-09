@@ -1,18 +1,17 @@
+// app/api/contact-info/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from "@/lib/auth";
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
+// ✅ ARREGLADO: Usar zipCode en lugar de postalCode
 const contactInfoSchema = z.object({
   phone: z.string().optional(),
-  email: z.string().email().optional(),
+  email: z.string().email().optional().or(z.literal('')),
+  whatsapp: z.string().optional(),
   address: z.string().optional(),
   city: z.string().optional(),
-  postalCode: z.string().optional(),
-  whatsappNumber: z.string().optional(),
-  instagramUrl: z.string().url().optional().or(z.literal('')),
-  facebookUrl: z.string().url().optional().or(z.literal('')),
-  mapsEmbedUrl: z.string().optional(),
+  zipCode: z.string().optional(),  // ✅ CAMBIO: postalCode → zipCode
   bufferMinutes: z.number().min(0).max(60).optional(),
 });
 
@@ -56,7 +55,13 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
+    
+    // ✅ Log para debug
+    console.log('📝 Contact Info recibido:', body);
+    
     const validatedData = contactInfoSchema.parse(body);
+    
+    console.log('✅ Contact Info validado:', validatedData);
 
     const existing = await prisma.contactInfo.findFirst();
 
@@ -75,6 +80,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json(contactInfo);
   } catch (error) {
     if (error instanceof z.ZodError) {
+      console.error('❌ Zod validation error:', error.issues);
       return NextResponse.json(
         { error: 'Datos inválidos', details: error.issues },
         { status: 400 }

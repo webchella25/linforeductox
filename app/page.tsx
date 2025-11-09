@@ -185,7 +185,7 @@ export default async function Home() {
               {/* Imagen */}
               <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl">
                 <Image
-  src="/alin-vidal-profesional.jpg"  // ✅ LA FOTO REAL DE ALINE
+  src="/alin-vidal.jpg"  // ✅ LA FOTO REAL DE ALINE
   alt="Aline Vidal - Fundadora de LINFOREDUCTOX"
   fill
   className="object-cover object-top"  // ✅ object-top para centrar la cara
