@@ -22,6 +22,11 @@ async function getService(slug: string) {
         slug,
         active: true,
       },
+      include: {
+        faqs: {
+          orderBy: { order: 'asc' }
+        }
+      }  // ✅ AÑADIR ESTE INCLUDE
     });
     return service;
   } catch (error) {
