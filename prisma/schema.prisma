@@ -28,12 +28,13 @@ model Service {
   category    String
   benefits    String[]
   conditions  String[]
-  faqs        Json?     // ✅ NUEVO CAMPO PARA FAQs
   active      Boolean   @default(true)
   order       Int       @default(0)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  
   bookings    Booking[]
+  faqs        FAQ[]     // ✅ NUEVA RELACIÓN
 }
 
 model WorkingHours {
@@ -93,7 +94,7 @@ model Testimonial {
   id        String            @id @default(cuid())
   name      String
   email     String?
-  service   String?
+  service   String?           // ✅ Se mantiene como String (no relación)
   rating    Int
   text      String
   image     String?
@@ -126,6 +127,20 @@ model ContactInfo {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   bufferMinutes Int?
+}
+
+// ✅ NUEVO MODELO FAQ
+model FAQ {
+  id         String   @id @default(cuid())
+  serviceId  String
+  service    Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  question   String
+  answer     String
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([serviceId])
 }
 
 enum BookingStatus {
