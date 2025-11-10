@@ -4,15 +4,15 @@ import { auth } from "@/lib/auth";
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
-// ✅ ARREGLADO: Usar zipCode en lugar de postalCode
+// ✅ ARREGLADO: Coincide con Prisma Schema
 const contactInfoSchema = z.object({
-  phone: z.string().optional(),
-  email: z.string().email().optional().or(z.literal('')),
-  whatsapp: z.string().optional(),
-  address: z.string().optional(),
-  city: z.string().optional(),
-  zipCode: z.string().optional(),  // ✅ CAMBIO: postalCode → zipCode
-  bufferMinutes: z.number().min(0).max(60).optional(),
+  phone: z.string().nullable().optional(),
+  email: z.string().email().nullable().optional().or(z.literal('')),
+  whatsapp: z.string().nullable().optional(),  // ✅ whatsapp (no whatsappNumber)
+  address: z.string().nullable().optional(),
+  city: z.string().nullable().optional(),
+  zipCode: z.string().nullable().optional(),  // ✅ zipCode (no postalCode)
+  bufferMinutes: z.number().min(0).max(60).nullable().optional(),
 });
 
 // GET - Obtener info de contacto
