@@ -18,6 +18,11 @@ export async function GET(
 
     const service = await prisma.service.findUnique({
       where: { id },
+      include: {
+        faqs: {
+          orderBy: { order: 'asc' }
+        }
+      }
     });
 
     if (!service) {
@@ -52,10 +57,47 @@ export async function PATCH(
     const { id } = params;
 
     const body = await request.json();
+    
+    // Extraer FAQs del body si existen
+    const { faqs, ...serviceData } = body;
 
-    const service = await prisma.service.update({
-      where: { id },
-      data: body,
+    // Actualizar servicio y FAQs en una transacción
+    const service = await prisma.$transaction(async (tx) => {
+      // 1. Actualizar datos del servicio
+      const updatedService = await tx.service.update({
+        where: { id },
+        data: serviceData,
+      });
+
+      // 2. Si hay FAQs, actualizarlos
+      if (faqs && Array.isArray(faqs)) {
+        // Eliminar FAQs existentes
+        await tx.fAQ.deleteMany({
+          where: { serviceId: id }
+        });
+
+        // Crear nuevos FAQs
+        if (faqs.length > 0) {
+          await tx.fAQ.createMany({
+            data: faqs.map((faq: any, index: number) => ({
+              serviceId: id,
+              question: faq.question,
+              answer: faq.answer,
+              order: faq.order ?? index
+            }))
+          });
+        }
+      }
+
+      // 3. Retornar servicio con FAQs
+      return await tx.service.findUnique({
+        where: { id },
+        include: {
+          faqs: {
+            orderBy: { order: 'asc' }
+          }
+        }
+      });
     });
 
     return NextResponse.json(service);
@@ -82,6 +124,7 @@ export async function DELETE(
     const params = await context.params;
     const { id } = params;
 
+    // Los FAQs se eliminan automáticamente por el onDelete: Cascade
     await prisma.service.delete({
       where: { id },
     });
