@@ -1,8 +1,57 @@
+// app/servicios/acupuntura/page.tsx
 import Link from "next/link";
-import { ArrowRight, Zap, Check } from "lucide-react";
-import { Calendar } from 'lucide-react';
+import { ArrowRight, Zap, Check, Calendar } from "lucide-react";
+import { prisma } from '@/lib/prisma';
+import type { Metadata } from 'next';
 
-export default function AcupunturaPage() {
+export const revalidate = 60;
+
+// ✅ Cargar servicio completo desde BD
+async function getAcupunturaService() {
+  try {
+    return await prisma.service.findUnique({
+      where: { slug: 'acupuntura-tradicional-china' }, // ✅ O el slug que uses
+      include: {
+        faqs: {
+          orderBy: { order: 'asc' }
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching service:', error);
+    return null;
+  }
+}
+
+// ✅ METADATA dinámica
+export async function generateMetadata(): Promise<Metadata> {
+  const service = await getAcupunturaService();
+  
+  if (!service) {
+    return {
+      title: "Acupuntura - LINFOREDUCTOX",
+      description: "Acupuntura tradicional china para equilibrar tu energía vital.",
+    };
+  }
+
+  return {
+    title: `${service.name} - LINFOREDUCTOX | Medicina Tradicional China`,
+    description: service.description?.slice(0, 160) || "Descubre los beneficios de la acupuntura tradicional china.",
+    keywords: `${service.name}, acupuntura, medicina china, dolor crónico, estrés, Errenteria`,
+    alternates: {
+      canonical: "https://linforeductox.com/servicios/acupuntura",
+    },
+  };
+}
+
+export default async function AcupunturaPage() {
+  const service = await getAcupunturaService();
+
+  // ✅ Valores por defecto
+  const serviceName = service?.name || 'Acupuntura';
+  const serviceDescription = service?.description || 'Medicina milenaria que equilibra la energía del cuerpo mediante la inserción de agujas en puntos específicos. Trata dolor, estrés y diversas afecciones.';
+  const faqs = service?.faqs || [];
+
   const tratamientos = [
     {
       nombre: "Acupuntura Tradicional",
@@ -27,30 +76,56 @@ export default function AcupunturaPage() {
   ];
 
   const beneficios = [
-    "Alivio del dolor crónico sin medicamentos",
-    "Reducción del estrés y la ansiedad",
+    "Alivio natural del dolor crónico",
+    "Reducción del estrés y ansiedad",
     "Mejora de la calidad del sueño",
-    "Fortalecimiento del sistema inmunológico",
-    "Equilibrio hormonal natural",
-    "Aumento de energía y vitalidad",
-    "Tratamiento de migrañas y cefaleas",
-    "Regulación digestiva",
+    "Equilibrio del sistema nervioso",
+    "Fortalecimiento del sistema inmune",
+    "Tratamiento de migrañas",
+    "Mejora de la digestión",
+    "Regulación hormonal natural",
   ];
 
-  const condiciones = [
-    "Dolores musculares y articulares",
-    "Migrañas y cefaleas tensionales",
-    "Estrés, ansiedad y depresión",
-    "Insomnio y problemas del sueño",
-    "Problemas digestivos",
-    "Alergias y problemas respiratorios",
-    "Fatiga crónica",
-    "Desequilibrios hormonales",
-  ];
+  // ✅ Schema.org FAQPage
+  const faqSchema = faqs.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  } : null;
+
+  // ✅ Breadcrumb
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Inicio", item: "https://linforeductox.com" },
+      { "@type": "ListItem", position: 2, name: "Servicios", item: "https://linforeductox.com/servicios" },
+      { "@type": "ListItem", position: 3, name: serviceName, item: "https://linforeductox.com/servicios/acupuntura" },
+    ],
+  };
 
   return (
     <>
-      {/* Hero */}
+      {/* ✅ Schema.org Scripts */}
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+
+      {/* Hero - ✅ TÍTULO DINÁMICO */}
       <section className="relative h-[70vh] flex items-center justify-center overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -66,65 +141,49 @@ export default function AcupunturaPage() {
             <Zap size={40} className="text-secondary" />
           </div>
           <h1 className="font-heading text-5xl md:text-6xl font-bold mb-4">
-            Acupuntura
+            {serviceName}
           </h1>
           <p className="text-xl md:text-2xl text-white/90">
-            Equilibra tu energía, sana tu cuerpo
+            Equilibra tu energía, restaura tu salud
           </p>
         </div>
       </section>
 
-      {/* Descripción Principal */}
+      {/* Descripción Principal - ✅ DESCRIPCIÓN DINÁMICA */}
       <section className="section-padding bg-white">
         <div className="container-custom max-w-5xl">
           <div className="text-center mb-12">
             <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-6">
-              Medicina ancestral china con más de 3000 años
+              Medicina Ancestral China
             </h2>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              La acupuntura es una de las prácticas más antiguas y efectivas de la medicina
-              tradicional china. Mediante la inserción de finas agujas en puntos específicos
-              del cuerpo, restauramos el equilibrio del Qi (energía vital), activamos la
-              capacidad natural de sanación del organismo y tratamos la raíz de los problemas
-              de salud, no solo los síntomas.
+            <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-line">
+              {serviceDescription}
             </p>
           </div>
 
-          {/* Imagen */}
-          <div className="relative h-96 rounded-2xl overflow-hidden shadow-2xl mb-12">
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{
-                backgroundImage:
-                  "url('https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=2070')",
-              }}
-            />
-          </div>
-<div className="text-center mb-16">
-  <Link
-    href="/reservar?servicio=acupuntura"
-    className="inline-flex items-center gap-3 bg-secondary text-white px-10 py-5 rounded-full font-semibold text-lg hover:bg-secondary-light transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-  >
-    <Calendar size={24} />
-    Reservar Sesión de Acupuntura
-    <ArrowRight size={24} />
-  </Link>
-  <p className="text-sm text-gray-600 mt-4">
-    Recibirás confirmación en 24 horas
-  </p>
-</div>
-          <div className="prose prose-lg max-w-none">
-            <p className="text-gray-700 leading-relaxed mb-6">
-              En LINFOREDUCTOX practicamos acupuntura tradicional auténtica, respetando los
-              principios milenarios de la medicina china. Cada sesión comienza con una evaluación
-              completa de tu estado energético, pulsos y lengua para diseñar un tratamiento
-              personalizado que aborde tus necesidades específicas.
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              Las agujas utilizadas son ultrafinas, estériles y de un solo uso, haciendo que
-              el procedimiento sea prácticamente indoloro. La mayoría de las personas experimentan
-              una profunda sensación de relajación durante y después del tratamiento.
-            </p>
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-2xl">
+              <img
+                src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=2070"
+                alt="Acupuntura tradicional china"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-primary mb-4">
+                ¿Cómo funciona?
+              </h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                Cada sesión comienza con una evaluación completa de tu estado energético, 
+                pulsos y lengua para diseñar un tratamiento personalizado que aborde tus 
+                necesidades específicas.
+              </p>
+              <p className="text-gray-700 leading-relaxed">
+                Las agujas utilizadas son ultrafinas, estériles y de un solo uso, haciendo que
+                el procedimiento sea prácticamente indoloro. La mayoría de las personas experimentan
+                una profunda sensación de relajación durante y después del tratamiento.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -187,87 +246,137 @@ export default function AcupunturaPage() {
             Condiciones que tratamos
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {condiciones.map((condicion) => (
+            {[
+              'Dolor crónico y agudo',
+              'Migrañas y cefaleas',
+              'Estrés y ansiedad',
+              'Insomnio',
+              'Problemas digestivos',
+              'Alergias',
+              'Fibromialgia',
+              'Dolor menstrual',
+              'Lesiones deportivas',
+              'Fatiga crónica',
+              'Problemas hormonales',
+              'Sistema inmune debilitado',
+            ].map((condition, idx) => (
               <div
-                key={condicion}
-                className="flex items-start gap-4 bg-white/10 backdrop-blur-sm p-6 rounded-xl"
+                key={idx}
+                className="flex items-start gap-3 bg-white/10 backdrop-blur-sm p-4 rounded-lg"
               >
-                <div className="bg-secondary/30 p-2 rounded-full flex-shrink-0">
-                  <Zap size={20} className="text-white" />
-                </div>
-                <p className="text-white/90 font-medium">{condicion}</p>
+                <Check size={20} className="text-secondary flex-shrink-0 mt-1" />
+                <span className="text-white/90">{condition}</span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Cómo funciona */}
+      {/* Proceso */}
       <section className="section-padding bg-cream">
-        <div className="container-custom max-w-5xl">
-          <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-12 text-center">
-            ¿Cómo funciona la Acupuntura?
+        <div className="container-custom max-w-4xl">
+          <h2 className="font-heading text-4xl font-bold text-primary text-center mb-12">
+            ¿Cómo es una sesión?
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="bg-secondary w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-white mb-6 mx-auto">
+          <div className="space-y-8">
+            <div className="flex gap-6 items-start">
+              <div className="bg-secondary w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold text-white flex-shrink-0">
                 1
               </div>
-              <h3 className="font-heading text-2xl font-semibold text-primary mb-4">
-                Diagnóstico
-              </h3>
-              <p className="text-gray-700 leading-relaxed">
-                Evaluamos tu estado energético mediante el análisis de pulsos, lengua y
-                síntomas para identificar desequilibrios.
-              </p>
+              <div>
+                <h3 className="font-heading text-2xl font-semibold text-primary mb-3">
+                  Evaluación
+                </h3>
+                <p className="text-gray-700 leading-relaxed">
+                  Analizamos tu estado general, pulso, lengua y puntos de dolor para 
+                  crear un diagnóstico energético completo.
+                </p>
+              </div>
             </div>
-            <div className="text-center">
-              <div className="bg-secondary w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-white mb-6 mx-auto">
+            <div className="flex gap-6 items-start">
+              <div className="bg-secondary w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold text-white flex-shrink-0">
                 2
               </div>
-              <h3 className="font-heading text-2xl font-semibold text-primary mb-4">
-                Tratamiento
-              </h3>
-              <p className="text-gray-700 leading-relaxed">
-                Insertamos agujas ultrafinas en puntos específicos para restaurar el flujo
-                de energía y activar la sanación natural.
-              </p>
+              <div>
+                <h3 className="font-heading text-2xl font-semibold text-primary mb-3">
+                  Tratamiento
+                </h3>
+                <p className="text-gray-700 leading-relaxed">
+                  Insertamos agujas ultrafinas en puntos estratégicos para equilibrar 
+                  tu energía vital (Qi) y activar tu capacidad natural de sanación.
+                </p>
+              </div>
             </div>
-            <div className="text-center">
-              <div className="bg-secondary w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-white mb-6 mx-auto">
+            <div className="flex gap-6 items-start">
+              <div className="bg-secondary w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold text-white flex-shrink-0">
                 3
               </div>
-              <h3 className="font-heading text-2xl font-semibold text-primary mb-4">
-                Recuperación
-              </h3>
-              <p className="text-gray-700 leading-relaxed">
-                Los resultados suelen sentirse inmediatamente, con mejorías progresivas
-                en cada sesión subsecuente.
-              </p>
+              <div>
+                <h3 className="font-heading text-2xl font-semibold text-primary mb-3">
+                  Recuperación
+                </h3>
+                <p className="text-gray-700 leading-relaxed">
+                  Los resultados suelen sentirse inmediatamente, con mejorías progresivas
+                  en cada sesión subsecuente.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
+      {/* ✅ FAQs - SECCIÓN DINÁMICA */}
+      {faqs.length > 0 && (
+        <section className="section-padding bg-white">
+          <div className="container-custom max-w-4xl">
+            <div className="text-center mb-12">
+              <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-4">
+                Preguntas Frecuentes
+              </h2>
+              <p className="text-xl text-gray-700">
+                Resolvemos tus dudas sobre {serviceName.toLowerCase()}
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              {faqs.map((faq) => (
+                <div
+                  key={faq.id}
+                  className="bg-cream rounded-2xl p-8 shadow-md hover:shadow-lg transition-shadow"
+                >
+                  <h3 className="text-xl font-bold text-primary mb-4 flex items-start gap-3">
+                    <span className="text-secondary flex-shrink-0">Q:</span>
+                    {faq.question}
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed pl-8">
+                    {faq.answer}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* CTA - ✅ CON /reservar */}
       <section className="section-padding bg-gradient-to-br from-primary to-primary-dark text-white">
-  <div className="container-custom text-center">
-    <h2 className="font-heading text-4xl md:text-5xl font-bold mb-6">
-      Equilibra tu energía vital
-    </h2>
-    <p className="text-xl mb-8 max-w-2xl mx-auto opacity-90">
-      Descubre los beneficios de la medicina tradicional china
-    </p>
-    <Link
-      href="/reservar?servicio=acupuntura"
-      className="inline-flex items-center gap-3 bg-white text-primary px-10 py-5 rounded-full font-semibold text-lg hover:bg-cream transition-all shadow-lg hover:shadow-xl"
-    >
-      <Calendar size={24} />
-      Reservar Ahora
-      <ArrowRight size={24} />
-    </Link>
-  </div>
-</section>
+        <div className="container-custom text-center">
+          <h2 className="font-heading text-4xl md:text-5xl font-bold mb-6">
+            Equilibra tu energía vital
+          </h2>
+          <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+            Descubre los beneficios de la medicina tradicional china
+          </p>
+          <Link
+            href="/reservar?servicio=acupuntura"
+            className="inline-flex items-center gap-3 bg-secondary text-white px-10 py-5 rounded-full font-semibold text-lg hover:bg-secondary-light transition-all shadow-lg hover:shadow-xl"
+          >
+            <Calendar size={24} />
+            Reservar {serviceName}
+            <ArrowRight size={24} />
+          </Link>
+        </div>
+      </section>
     </>
   );
 }

@@ -1,7 +1,57 @@
+// app/servicios/facial/page.tsx
 import Link from "next/link";
 import { ArrowRight, Heart, Check, Calendar } from "lucide-react";
+import { prisma } from '@/lib/prisma';
+import type { Metadata } from 'next';
 
-export default function FacialPage() {
+export const revalidate = 60;
+
+// ✅ Cargar servicio completo desde BD
+async function getFacialService() {
+  try {
+    return await prisma.service.findUnique({
+      where: { slug: 'tratamientos-faciales' }, // ✅ O el slug que uses
+      include: {
+        faqs: {
+          orderBy: { order: 'asc' }
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching service:', error);
+    return null;
+  }
+}
+
+// ✅ METADATA dinámica
+export async function generateMetadata(): Promise<Metadata> {
+  const service = await getFacialService();
+  
+  if (!service) {
+    return {
+      title: "Tratamientos Faciales - LINFOREDUCTOX",
+      description: "Tratamientos faciales con técnicas ancestrales y naturales.",
+    };
+  }
+
+  return {
+    title: `${service.name} - LINFOREDUCTOX | Rejuvenecimiento Natural`,
+    description: service.description?.slice(0, 160) || "Descubre nuestros tratamientos faciales con técnicas ancestrales.",
+    keywords: `${service.name}, tratamiento facial, rejuvenecimiento, kobido, Errenteria`,
+    alternates: {
+      canonical: "https://linforeductox.com/servicios/facial",
+    },
+  };
+}
+
+export default async function FacialPage() {
+  const service = await getFacialService();
+
+  // ✅ Valores por defecto
+  const serviceName = service?.name || 'Tratamientos Faciales';
+  const serviceDescription = service?.description || 'Nuestros tratamientos faciales van más allá de la superficie. Combinamos técnicas ancestrales con el poder de los aceites esenciales para rejuvenecer tu piel desde el interior.';
+  const faqs = service?.faqs || [];
+
   const tratamientos = [
     {
       nombre: "Lifting Facial Natural",
@@ -36,9 +86,46 @@ export default function FacialPage() {
     "Relajación y bienestar emocional",
   ];
 
+  // ✅ Schema.org FAQPage
+  const faqSchema = faqs.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  } : null;
+
+  // ✅ Breadcrumb
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Inicio", item: "https://linforeductox.com" },
+      { "@type": "ListItem", position: 2, name: "Servicios", item: "https://linforeductox.com/servicios" },
+      { "@type": "ListItem", position: 3, name: serviceName, item: "https://linforeductox.com/servicios/facial" },
+    ],
+  };
+
   return (
     <>
-      {/* Hero */}
+      {/* ✅ Schema.org Scripts */}
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+
+      {/* Hero - ✅ TÍTULO DINÁMICO */}
       <section className="relative h-[70vh] flex items-center justify-center overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -54,7 +141,7 @@ export default function FacialPage() {
             <Heart size={40} className="text-secondary" />
           </div>
           <h1 className="font-heading text-5xl md:text-6xl font-bold mb-4">
-            Tratamientos Faciales
+            {serviceName}
           </h1>
           <p className="text-xl md:text-2xl text-white/90">
             Rejuvenece tu rostro, eleva tu belleza
@@ -62,58 +149,39 @@ export default function FacialPage() {
         </div>
       </section>
 
-      {/* Descripción Principal */}
+      {/* Descripción Principal - ✅ DESCRIPCIÓN DINÁMICA */}
       <section className="section-padding bg-white">
         <div className="container-custom max-w-5xl">
           <div className="text-center mb-12">
             <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-6">
               Belleza auténtica desde el interior
             </h2>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              Nuestros tratamientos faciales van más allá de la superficie. Utilizamos técnicas
-              ancestrales japonesas y chinas como el Kobido y el masaje facial de meridianos,
-              combinadas con productos naturales de alta calidad para rejuvenecer tu piel
-              de forma profunda y duradera.
+            <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-line">
+              {serviceDescription}
             </p>
           </div>
 
-          {/* ✅ BOTÓN RESERVAR AÑADIDO */}
-          <div className="text-center mb-12">
-            <Link
-              href="/reservar?servicio=facial"
-              className="inline-flex items-center gap-3 bg-secondary text-white px-10 py-5 rounded-full font-semibold text-lg hover:bg-secondary-light transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-            >
-              <Calendar size={24} />
-              Reservar Tratamiento Facial
-              <ArrowRight size={24} />
-            </Link>
-            <p className="text-sm text-gray-600 mt-4">
-              Recibirás confirmación en 24 horas
-            </p>
-          </div>
-
-          {/* Imagen */}
-          <div className="relative h-96 rounded-2xl overflow-hidden shadow-2xl mb-12">
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{
-                backgroundImage:
-                  "url('https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=80&w=2070')",
-              }}
-            />
-          </div>
-
-          <div className="prose prose-lg max-w-none">
-            <p className="text-gray-700 leading-relaxed mb-6">
-              Cada tratamiento facial es un ritual diseñado para estimular la producción natural
-              de colágeno, mejorar la circulación sanguínea y linfática del rostro, y liberar
-              las tensiones acumuladas en los músculos faciales.
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              No usamos máquinas invasivas ni productos químicos agresivos. Creemos en el poder
-              del toque consciente, los aceites esenciales puros y las técnicas milenarias que
-              han demostrado su eficacia durante siglos.
-            </p>
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h3 className="text-2xl font-bold text-primary mb-4">
+                Filosofía natural
+              </h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                Creemos en el poder del toque consciente y las técnicas milenarias
+                que han demostrado su eficacia durante siglos.
+              </p>
+              <p className="text-gray-700 leading-relaxed">
+                No usamos máquinas invasivas ni productos químicos agresivos. Nuestro método
+                combina aceites esenciales puros con técnicas orientales ancestrales.
+              </p>
+            </div>
+            <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-2xl">
+              <img
+                src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=2070"
+                alt="Tratamiento facial natural"
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -181,17 +249,8 @@ export default function FacialPage() {
                 Kobido Japonés
               </h3>
               <p className="text-white/90 leading-relaxed">
-                Masaje facial ancestral japonés con más de 500 años de historia. Combina
-                movimientos rápidos y lentos para tonificar, rejuvenecer y esculpir el rostro.
-              </p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm p-8 rounded-2xl">
-              <h3 className="font-heading text-2xl font-semibold mb-4">
-                Meridianos Faciales
-              </h3>
-              <p className="text-white/90 leading-relaxed">
-                Estimulación de puntos energéticos del rostro según la medicina tradicional
-                china para equilibrar el chi y promover la regeneración celular.
+                Masaje facial ancestral japonés con más de 500 años de historia.
+                Tonifica, esculpe y rejuvenece el rostro de forma natural.
               </p>
             </div>
             <div className="bg-white/10 backdrop-blur-sm p-8 rounded-2xl">
@@ -199,39 +258,80 @@ export default function FacialPage() {
                 Gua Sha
               </h3>
               <p className="text-white/90 leading-relaxed">
-                Técnica china milenaria con piedras de jade o cuarzo rosa que drena toxinas,
-                reduce inflamación y esculpe el óvalo facial.
+                Técnica china milenaria que mejora la circulación, reduce inflamación
+                y potencia la absorción de productos naturales.
               </p>
             </div>
             <div className="bg-white/10 backdrop-blur-sm p-8 rounded-2xl">
               <h3 className="font-heading text-2xl font-semibold mb-4">
-                Aromaterapia Facial
+                Acupuntura Facial
               </h3>
               <p className="text-white/90 leading-relaxed">
-                Aceites esenciales puros seleccionados según tu tipo de piel para nutrir,
-                regenerar y equilibrar mientras disfrutas de un momento de paz profunda.
+                Estimulación de puntos energéticos faciales para rejuvenecer,
+                equilibrar y revitalizar la piel desde el interior.
+              </p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm p-8 rounded-2xl">
+              <h3 className="font-heading text-2xl font-semibold mb-4">
+                Aromaterapia
+              </h3>
+              <p className="text-white/90 leading-relaxed">
+                Aceites esenciales puros que nutren, regeneran y aportan
+                propiedades terapéuticas a cada tratamiento.
               </p>
             </div>
           </div>
         </div>
       </section>
 
+      {/* ✅ FAQs - SECCIÓN DINÁMICA */}
+      {faqs.length > 0 && (
+        <section className="section-padding bg-cream">
+          <div className="container-custom max-w-4xl">
+            <div className="text-center mb-12">
+              <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-4">
+                Preguntas Frecuentes
+              </h2>
+              <p className="text-xl text-gray-700">
+                Resolvemos tus dudas sobre {serviceName.toLowerCase()}
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              {faqs.map((faq) => (
+                <div
+                  key={faq.id}
+                  className="bg-white rounded-2xl p-8 shadow-md hover:shadow-lg transition-shadow"
+                >
+                  <h3 className="text-xl font-bold text-primary mb-4 flex items-start gap-3">
+                    <span className="text-secondary flex-shrink-0">Q:</span>
+                    {faq.question}
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed pl-8">
+                    {faq.answer}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* CTA */}
-      <section className="section-padding bg-cream">
+      <section className="section-padding bg-gradient-to-br from-primary to-primary-dark text-white">
         <div className="container-custom text-center">
-          <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-6">
-            Recupera la juventud de tu rostro
+          <h2 className="font-heading text-4xl md:text-5xl font-bold mb-6">
+            Descubre tu belleza más auténtica
           </h2>
-          <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
-            Experimenta el poder transformador de las técnicas ancestrales orientales
+          <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+            Cada tratamiento facial es una experiencia única de rejuvenecimiento
           </p>
-          {/* ✅ BOTÓN RESERVAR AÑADIDO */}
           <Link
             href="/reservar?servicio=facial"
-            className="inline-flex items-center gap-2 bg-primary text-white px-10 py-5 rounded-full font-medium text-lg hover:bg-primary-dark transition-all shadow-lg hover:shadow-xl"
+            className="inline-flex items-center gap-3 bg-secondary text-white px-10 py-5 rounded-full font-semibold text-lg hover:bg-secondary-light transition-all shadow-lg hover:shadow-xl"
           >
             <Calendar size={24} />
-            Reservar Tratamiento
+            Reservar {serviceName}
             <ArrowRight size={24} />
           </Link>
         </div>
