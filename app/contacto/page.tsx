@@ -181,7 +181,7 @@ export default async function ContactPage() {
                         <p className="text-gray-600">
                           {contactInfo?.address || 'Calle Principal 123'}
                           <br />
-                          {contactInfo?.zipCode || '20100'} {contactInfo?.city || 'Errenteria'}, Gipuzkoa
+                          {contactInfo?.zipCode || '20100'} {contactInfo?.city || 'Errenteria'},
                         </p>
                       </div>
                     </div>
