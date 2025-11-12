@@ -1,37 +1,96 @@
 // lib/email.ts
-import * as SibApiV3Sdk from 'sib-api-v3-sdk';
-
-// Configurar cliente de Brevo
-const defaultClient = SibApiV3Sdk.ApiClient.instance;
-const apiKey = defaultClient.authentications['api-key'];
-apiKey.apiKey = process.env.BREVO_API_KEY;
-
-const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+import { prisma } from '@/lib/prisma';
 
 // Tipos
+interface EmailRecipient {
+  email: string;
+  name?: string;
+}
+
 interface EmailParams {
-  to: { email: string; name?: string }[];
+  to: EmailRecipient[];
   subject: string;
   htmlContent: string;
   textContent?: string;
+  replyTo?: EmailRecipient;
 }
 
-// Función principal para enviar emails
-export async function sendEmail({ to, subject, htmlContent, textContent }: EmailParams) {
+// ✅ NUEVA FUNCIÓN: Obtener datos de contacto desde BD
+async function getContactInfo() {
   try {
-    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+    const contactInfo = await prisma.contactInfo.findFirst();
+    
+    if (!contactInfo) {
+      // Valores por defecto si no hay datos en BD
+      return {
+        phone: '+34 123 456 789',
+        email: 'info@linforeductox.com',
+        whatsapp: '+34123456789',
+        address: 'Dirección no configurada',
+      };
+    }
 
-    sendSmtpEmail.sender = {
-      email: 'noreply@linforeductox.com',
-      name: 'LINFOREDUCTOX',
+    return {
+      phone: contactInfo.phone || '+34 123 456 789',
+      email: contactInfo.email || 'info@linforeductox.com',
+      whatsapp: contactInfo.whatsapp || contactInfo.phone || '+34123456789',
+      address: contactInfo.address 
+        ? `${contactInfo.address}${contactInfo.city ? ', ' + contactInfo.city : ''}${contactInfo.zipCode ? ', ' + contactInfo.zipCode : ''}`
+        : 'Dirección no configurada',
     };
+  } catch (error) {
+    console.error('Error obteniendo contactInfo:', error);
+    // Valores por defecto en caso de error
+    return {
+      phone: '+34 123 456 789',
+      email: 'info@linforeductox.com',
+      whatsapp: '+34123456789',
+      address: 'Dirección no configurada',
+    };
+  }
+}
 
-    sendSmtpEmail.to = to;
-    sendSmtpEmail.subject = subject;
-    sendSmtpEmail.htmlContent = htmlContent;
-    sendSmtpEmail.textContent = textContent || htmlContent.replace(/<[^>]*>/g, '');
+// Función principal para enviar emails con Brevo API
+export async function sendEmail({ 
+  to, 
+  subject, 
+  htmlContent, 
+  textContent,
+  replyTo 
+}: EmailParams) {
+  try {
+    const contactInfo = await getContactInfo();
 
-    const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': process.env.BREVO_API_KEY || '',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        sender: {
+          email: 'noreply@linforeductox.com',
+          name: 'LINFOREDUCTOX',
+        },
+        to: to,
+        replyTo: replyTo || {
+          email: contactInfo.email, // ✅ Dinámico desde BD
+          name: 'LINFOREDUCTOX',
+        },
+        subject: subject,
+        htmlContent: htmlContent,
+        textContent: textContent || htmlContent.replace(/<[^>]*>/g, ''),
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('❌ Error de Brevo API:', error);
+      throw new Error(`Brevo API error: ${JSON.stringify(error)}`);
+    }
+
+    const result = await response.json();
     console.log('✅ Email enviado:', result);
     return { success: true, messageId: result.messageId };
   } catch (error) {
@@ -60,6 +119,9 @@ export async function sendBookingConfirmationToClient({
   startTime: string;
   endTime: string;
 }) {
+  // ✅ Obtener datos de contacto dinámicamente
+  const contactInfo = await getContactInfo();
+
   const subject = `✅ Reserva confirmada - ${serviceName}`;
   
   const htmlContent = `
@@ -77,7 +139,6 @@ export async function sendBookingConfirmationToClient({
           .detail-row:last-child { border-bottom: none; }
           .label { font-weight: bold; color: #2C5F2D; }
           .footer { text-align: center; padding: 20px; color: #666; font-size: 14px; }
-          .button { display: inline-block; background-color: #2C5F2D; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
         </style>
       </head>
       <body>
@@ -109,9 +170,12 @@ export async function sendBookingConfirmationToClient({
             </ul>
 
             <p>Si tienes alguna pregunta, no dudes en contactarnos:</p>
-            <p>📞 Teléfono: +34 123 456 789<br>
-            📧 Email: info@linforeductox.com<br>
-            📍 Dirección: [Tu dirección aquí]</p>
+            <p>
+              📞 Teléfono: <a href="tel:${contactInfo.phone}">${contactInfo.phone}</a><br>
+              📧 Email: <a href="mailto:${contactInfo.email}">${contactInfo.email}</a>
+              ${contactInfo.whatsapp ? `<br>💬 WhatsApp: <a href="https://wa.me/${contactInfo.whatsapp.replace(/\D/g, '')}">${contactInfo.whatsapp}</a>` : ''}
+              ${contactInfo.address !== 'Dirección no configurada' ? `<br>📍 Dirección: ${contactInfo.address}` : ''}
+            </p>
 
             <p>¡Nos vemos pronto!</p>
             <p><em>Equipo LINFOREDUCTOX</em></p>
@@ -154,6 +218,9 @@ export async function sendBookingNotificationToAdmin({
   endTime: string;
   clientNotes?: string;
 }) {
+  // ✅ Obtener email de admin dinámicamente
+  const contactInfo = await getContactInfo();
+
   const subject = `🔔 Nueva reserva: ${serviceName} - ${clientName}`;
   
   const htmlContent = `
@@ -228,7 +295,7 @@ export async function sendBookingNotificationToAdmin({
   `;
 
   return sendEmail({
-    to: [{ email: 'aline@linforeductox.com', name: 'Aline Vidal' }],
+    to: [{ email: contactInfo.email, name: 'Aline Vidal' }], // ✅ Dinámico desde BD
     subject,
     htmlContent,
   });
@@ -246,6 +313,9 @@ export async function sendContactFormNotification({
   phone: string;
   message: string;
 }) {
+  // ✅ Obtener email de admin dinámicamente
+  const contactInfo = await getContactInfo();
+
   const subject = `💬 Nuevo mensaje de contacto - ${name}`;
   
   const htmlContent = `
@@ -305,7 +375,7 @@ export async function sendContactFormNotification({
   `;
 
   return sendEmail({
-    to: [{ email: 'aline@linforeductox.com', name: 'Aline Vidal' }],
+    to: [{ email: contactInfo.email, name: 'Aline Vidal' }], // ✅ Dinámico desde BD
     subject,
     htmlContent,
   });
@@ -319,6 +389,9 @@ export async function sendContactFormAutoReply({
   name: string;
   email: string;
 }) {
+  // ✅ Obtener datos de contacto dinámicamente
+  const contactInfo = await getContactInfo();
+
   const subject = 'Hemos recibido tu mensaje - LINFOREDUCTOX';
   
   const htmlContent = `
@@ -343,8 +416,11 @@ export async function sendContactFormAutoReply({
             <p>Hemos recibido tu mensaje y nos pondremos en contacto contigo lo antes posible.</p>
             <p>Nuestro horario de atención es de <strong>lunes a viernes de 9:00 a 19:00</strong>.</p>
             <p>Si tu consulta es urgente, puedes contactarnos directamente:</p>
-            <p>📞 Teléfono: +34 123 456 789<br>
-            📧 Email: info@linforeductox.com</p>
+            <p>
+              📞 Teléfono: <a href="tel:${contactInfo.phone}">${contactInfo.phone}</a><br>
+              📧 Email: <a href="mailto:${contactInfo.email}">${contactInfo.email}</a>
+              ${contactInfo.whatsapp ? `<br>💬 WhatsApp: <a href="https://wa.me/${contactInfo.whatsapp.replace(/\D/g, '')}">${contactInfo.whatsapp}</a>` : ''}
+            </p>
             <p>¡Gracias por confiar en LINFOREDUCTOX!</p>
           </div>
         </div>
