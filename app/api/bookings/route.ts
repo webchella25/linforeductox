@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { sendBookingConfirmationToClient, sendBookingNotificationToAdmin } from '@/lib/email';
 
 const bookingSchema = z.object({
   serviceId: z.string(),
@@ -11,7 +12,7 @@ const bookingSchema = z.object({
   date: z.string(),
   startTime: z.string(),
   endTime: z.string(),
-  clientNotes: z.string().optional(), // ✅ CORRECTO
+  clientNotes: z.string().optional(),
 });
 
 // POST - Crear nueva reserva
@@ -20,6 +21,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = bookingSchema.parse(body);
 
+    // Crear reserva en BD
     const booking = await prisma.booking.create({
       data: {
         serviceId: validatedData.serviceId,
@@ -29,17 +31,48 @@ export async function POST(request: NextRequest) {
         date: new Date(validatedData.date),
         startTime: validatedData.startTime,
         endTime: validatedData.endTime,
-        clientNotes: validatedData.clientNotes, // ✅ CORRECTO (ya no 'notes')
+        clientNotes: validatedData.clientNotes,
         status: 'PENDING',
+      },
+      include: {
+        service: true,
       },
     });
 
-    // TODO: Enviar email de confirmación
+    // ✅ ENVIAR EMAILS
+    try {
+      // 1. Email al cliente
+      await sendBookingConfirmationToClient({
+        clientName: booking.clientName,
+        clientEmail: booking.clientEmail,
+        serviceName: booking.service.name,
+        date: validatedData.date,
+        startTime: validatedData.startTime,
+        endTime: validatedData.endTime,
+      });
+
+      // 2. Notificación a Aline
+      await sendBookingNotificationToAdmin({
+        clientName: booking.clientName,
+        clientEmail: booking.clientEmail,
+        clientPhone: booking.clientPhone,
+        serviceName: booking.service.name,
+        date: validatedData.date,
+        startTime: validatedData.startTime,
+        endTime: validatedData.endTime,
+        clientNotes: validatedData.clientNotes,
+      });
+
+      console.log('✅ Emails enviados correctamente');
+    } catch (emailError) {
+      console.error('❌ Error enviando emails:', emailError);
+      // NO fallar la reserva si el email falla
+    }
 
     return NextResponse.json({
       success: true,
       booking,
-      message: 'Reserva creada exitosamente. Recibirás un email de confirmación pronto.',
+      message: 'Reserva creada exitosamente. Recibirás un email de confirmación.',
     });
   } catch (error) {
     if (error instanceof z.ZodError) {

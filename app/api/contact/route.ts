@@ -1,5 +1,6 @@
 // app/api/contact/route.ts
 import { NextRequest, NextResponse } from 'next/server';
+import { sendContactFormNotification, sendContactFormAutoReply } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,29 +24,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: Aquí puedes implementar el envío de email
-    // Por ahora solo registramos en consola
-    console.log('📧 Nuevo mensaje de contacto:');
-    console.log('Nombre:', name);
-    console.log('Email:', email);
-    console.log('Teléfono:', phone);
-    console.log('Mensaje:', message);
+    // ✅ ENVIAR EMAILS
+    try {
+      // 1. Notificación a Aline
+      await sendContactFormNotification({
+        name,
+        email,
+        phone,
+        message,
+      });
 
-    // TODO: Implementar envío de email con Resend, SendGrid, etc.
-    // Ejemplo con Resend:
-    // await resend.emails.send({
-    //   from: 'contacto@linforeductox.com',
-    //   to: 'aline@linforeductox.com',
-    //   subject: `Nuevo mensaje de ${name}`,
-    //   html: `
-    //     <h2>Nuevo mensaje de contacto</h2>
-    //     <p><strong>Nombre:</strong> ${name}</p>
-    //     <p><strong>Email:</strong> ${email}</p>
-    //     <p><strong>Teléfono:</strong> ${phone}</p>
-    //     <p><strong>Mensaje:</strong></p>
-    //     <p>${message}</p>
-    //   `,
-    // });
+      // 2. Auto-respuesta al remitente
+      await sendContactFormAutoReply({
+        name,
+        email,
+      });
+
+      console.log('✅ Emails de contacto enviados correctamente');
+    } catch (emailError) {
+      console.error('❌ Error enviando emails:', emailError);
+      // NO fallar el formulario si el email falla
+    }
 
     return NextResponse.json(
       { 
