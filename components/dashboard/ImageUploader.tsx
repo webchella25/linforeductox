@@ -110,18 +110,21 @@ export default function ImageUploader({
 
       {value ? (
         // Mostrar imagen subida
-        <div className="relative group">
-          <div
-            className="relative w-full overflow-hidden rounded-lg border-2 border-gray-200"
-            style={{ aspectRatio }}
-          >
-            <Image
-              src={value}
-              alt="Imagen subida"
-              fill
-              className="object-cover"
-            />
-          </div>
+       {value ? (
+  // Mostrar imagen subida
+  <div className="relative group">
+    <div
+      className="relative w-full overflow-hidden rounded-lg border-2 border-gray-200"
+      style={{ aspectRatio }}
+    >
+      <Image
+        src={value}
+        alt="Imagen subida"
+        fill
+        className="object-cover"
+        unoptimized  // ✅ AGREGAR esto temporalmente para Cloudinary
+      />
+    </div>
           <button
             type="button"
             onClick={handleRemove}

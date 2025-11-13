@@ -144,11 +144,12 @@ export default function EditServicePage({ params }: PageProps) {
       const cleanedConditions = formData.conditions.filter((c) => c.trim() !== '');
 
       const dataToSend = {
-        ...formData,
-        benefits: cleanedBenefits,
-        conditions: cleanedConditions,
-        price: formData.price || null,
-      };
+  ...formData,
+  benefits: cleanedBenefits,
+  conditions: cleanedConditions,
+  duration: Number(formData.duration) || 60,  // ✅ AGREGAR
+  price: formData.price ? Number(formData.price) : null,  // ✅ MEJORAR
+};
 
       const url = isNew ? '/api/services' : `/api/services/${resolvedParams.id}`;
       const method = isNew ? 'POST' : 'PATCH';
@@ -265,16 +266,16 @@ export default function EditServicePage({ params }: PageProps) {
                 Duración (minutos) *
               </label>
               <input
-                type="number"
-                required
-                min="15"
-                step="15"
-                value={formData.duration}
-                onChange={(e) =>
-                  setFormData({ ...formData, duration: parseInt(e.target.value) })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
+  type="number"
+  required
+  min="15"
+  step="15"
+  value={formData.duration}
+  onChange={(e) =>
+    setFormData({ ...formData, duration: parseInt(e.target.value) || 60 })  // ✅ Agregar || 60
+  }
+  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+/>
             </div>
 
             {/* Precio */}
@@ -282,17 +283,17 @@ export default function EditServicePage({ params }: PageProps) {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Precio (€) - Opcional
               </label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={formData.price}
-                onChange={(e) =>
-                  setFormData({ ...formData, price: parseFloat(e.target.value) })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="0.00"
-              />
+             <input
+  type="number"
+  min="0"
+  step="0.01"
+  value={formData.price || ''}  // ✅ CAMBIAR esto
+  onChange={(e) =>
+    setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })  // ✅ Agregar || 0
+  }
+  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+  placeholder="0.00"
+/>
             </div>
 
             {/* Estado */}
