@@ -1,3 +1,4 @@
+// app/api/services/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
@@ -32,9 +33,11 @@ export async function GET(request: NextRequest) {
         category: true,
         benefits: true,
         conditions: true,
-        faqs: true, // ✅ INCLUIR FAQS
+        faqs: true,
         active: true,
         order: true,
+        heroImage: true, // ✅ AGREGAR
+        images: true,    // ✅ AGREGAR
       },
     });
 
@@ -52,7 +55,6 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();
-
     if (!session?.user?.role || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
@@ -67,9 +69,11 @@ export async function POST(request: NextRequest) {
       category,
       benefits,
       conditions,
-      faqs, // ✅ RECIBIR FAQS
+      faqs,
       active,
       order,
+      heroImage,  // ✅ AGREGAR
+      images,     // ✅ AGREGAR
     } = body;
 
     if (!name || !slug || !description || !duration || !category) {
@@ -80,7 +84,6 @@ export async function POST(request: NextRequest) {
     }
 
     const existingService = await prisma.service.findUnique({ where: { slug } });
-
     if (existingService) {
       return NextResponse.json(
         { error: 'Ya existe un servicio con ese slug' },
@@ -98,9 +101,11 @@ export async function POST(request: NextRequest) {
         category,
         benefits: benefits || [],
         conditions: conditions || [],
-        faqs: faqs || null, // ✅ GUARDAR FAQS
+        faqs: faqs || null,
         active: active !== undefined ? active : true,
         order: order || 0,
+        heroImage: heroImage || null,  // ✅ AGREGAR
+        images: images || [],          // ✅ AGREGAR
       },
     });
 

@@ -1,6 +1,7 @@
 // app/servicios/[slug]/page.tsx
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, Check, Calendar, Clock } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
 import type { Metadata } from 'next';
@@ -15,6 +16,13 @@ interface FAQ {
   answer: string;
 }
 
+interface ServiceImage {
+  url: string;
+  position: number;
+  alt: string;
+  publicId?: string;
+}
+
 async function getService(slug: string) {
   try {
     const service = await prisma.service.findUnique({
@@ -26,7 +34,7 @@ async function getService(slug: string) {
         faqs: {
           orderBy: { order: 'asc' }
         }
-      }  // ✅ AÑADIR ESTE INCLUDE
+      }
     });
     return service;
   } catch (error) {
@@ -49,12 +57,15 @@ export async function generateMetadata({ params }: ServicePageProps): Promise<Me
 
   const title = `${service.name} | LINFOREDUCTOX - Estética y Medicina Ancestral`;
   const description = service.description?.slice(0, 160) || 
-    `Descubre los beneficios del ${service.name}. Tratamiento de ${service.duration} minutos en Errenteria.`;
+    `Descubre los beneficios del ${service.name}. Tratamiento de ${service.duration} minutos en Madrid.`;
+
+  // ✅ Usar heroImage si existe, sino imagen por defecto
+  const ogImage = service.heroImage || 'https://linforeductox.com/og-image.jpg';
 
   return {
     title,
     description,
-    keywords: `${service.name}, ${service.category}, estética, medicina ancestral, Errenteria, Gipuzkoa, drenaje linfático, ${service.conditions?.join(', ')}`,
+    keywords: `${service.name}, ${service.category}, estética, medicina ancestral, Madrid, drenaje linfático, ${service.conditions?.join(', ')}`,
     openGraph: {
       title,
       description,
@@ -64,7 +75,7 @@ export async function generateMetadata({ params }: ServicePageProps): Promise<Me
       locale: 'es_ES',
       images: [
         {
-          url: 'https://linforeductox.com/og-image.jpg',
+          url: ogImage,
           width: 1200,
           height: 630,
           alt: `${service.name} - LINFOREDUCTOX`,
@@ -75,7 +86,7 @@ export async function generateMetadata({ params }: ServicePageProps): Promise<Me
       card: 'summary_large_image',
       title,
       description,
-      images: ['https://linforeductox.com/og-image.jpg'],
+      images: [ogImage],
     },
     alternates: {
       canonical: `https://linforeductox.com/servicios/${slug}`,
@@ -83,7 +94,7 @@ export async function generateMetadata({ params }: ServicePageProps): Promise<Me
   };
 }
 
-// Mapeo de categorías a colores e imágenes
+// Mapeo de categorías a colores e imágenes por defecto
 const categoryConfig: Record<string, {
   gradient: string;
   image: string;
@@ -136,6 +147,23 @@ export default async function ServicePage({ params }: ServicePageProps) {
     faqs = [];
   }
 
+  // ✅ Parsear imágenes adicionales
+  let contentImages: ServiceImage[] = [];
+  try {
+    if (service.images) {
+      const imagesData = typeof service.images === 'string' 
+        ? JSON.parse(service.images) 
+        : service.images;
+      
+      if (Array.isArray(imagesData)) {
+        contentImages = imagesData.sort((a, b) => a.position - b.position);
+      }
+    }
+  } catch (error) {
+    console.error('Error parsing images:', error);
+    contentImages = [];
+  }
+
   // ✅ Schema.org JSON-LD para FAQ
   const faqSchema = faqs.length > 0 ? {
     '@context': 'https://schema.org',
@@ -156,19 +184,20 @@ export default async function ServicePage({ params }: ServicePageProps) {
     '@type': 'Service',
     name: service.name,
     description: service.description,
+    image: service.heroImage || config.image,
     provider: {
       '@type': 'LocalBusiness',
       name: 'LINFOREDUCTOX',
       address: {
         '@type': 'PostalAddress',
-        addressLocality: 'Errenteria',
-        addressRegion: 'Gipuzkoa',
+        addressLocality: 'Madrid',
+        addressRegion: 'Madrid',
         addressCountry: 'ES',
       },
     },
     areaServed: {
       '@type': 'City',
-      name: 'Errenteria',
+      name: 'Madrid',
     },
     ...(service.price && {
       offers: {
@@ -178,6 +207,9 @@ export default async function ServicePage({ params }: ServicePageProps) {
       },
     }),
   };
+
+  // ✅ Usar heroImage si existe, sino imagen por defecto
+  const heroImageUrl = service.heroImage || config.image;
 
   return (
     <>
@@ -193,13 +225,18 @@ export default async function ServicePage({ params }: ServicePageProps) {
         />
       )}
 
-      {/* Hero Section */}
+      {/* ✅ Hero Section con imagen dinámica */}
       <section className="relative h-[60vh] min-h-[500px] flex items-center justify-center overflow-hidden">
         {/* Imagen de fondo */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url('${config.image}')` }}
-        >
+        <div className="absolute inset-0">
+          <Image
+            src={heroImageUrl}
+            alt={service.name}
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
+          />
           <div className={`absolute inset-0 bg-gradient-to-r ${config.gradient}`} />
         </div>
 
@@ -227,60 +264,146 @@ export default async function ServicePage({ params }: ServicePageProps) {
         </div>
       </section>
 
-      {/* Descripción Principal */}
+      {/* ✅ Descripción + Primera Imagen (Layout Alternado) */}
       <section className="section-padding bg-white">
-        <div className="container-custom max-w-4xl">
-          <h2 className="font-heading text-4xl font-bold text-primary mb-8 text-center">
+        <div className="container-custom max-w-6xl">
+          <h2 className="font-heading text-4xl font-bold text-primary mb-12 text-center">
             ¿En qué consiste este tratamiento?
           </h2>
-          <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
-            <p className="text-xl">{service.description}</p>
-          </div>
+          
+          {contentImages.length > 0 ? (
+            // Layout con imagen
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+                <p className="text-xl">{service.description}</p>
+              </div>
+              
+              {/* Primera imagen */}
+              <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-2xl">
+                <Image
+                  src={contentImages[0].url}
+                  alt={contentImages[0].alt || service.name}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+              </div>
+            </div>
+          ) : (
+            // Sin imágenes, solo texto centrado
+            <div className="prose prose-lg max-w-4xl mx-auto text-gray-700 leading-relaxed">
+              <p className="text-xl text-center">{service.description}</p>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Beneficios */}
+      {/* ✅ Beneficios + Segunda Imagen (si existe) */}
       {service.benefits && service.benefits.length > 0 && (
         <section className="section-padding bg-cream">
-          <div className="container-custom max-w-4xl">
-            <h2 className="font-heading text-4xl font-bold text-primary mb-8 text-center">
+          <div className="container-custom max-w-6xl">
+            <h2 className="font-heading text-4xl font-bold text-primary mb-12 text-center">
               Beneficios Principales
             </h2>
-            <div className="grid md:grid-cols-2 gap-4">
-              {service.benefits.map((benefit, index) => (
-                <div
-                  key={index}
-                  className="flex items-start gap-3 bg-white p-4 rounded-xl shadow-sm"
-                >
-                  <div className="flex-shrink-0 w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center mt-1">
-                    <Check size={16} className="text-primary" />
-                  </div>
-                  <p className="text-gray-700 leading-relaxed">{benefit}</p>
+            
+            {contentImages.length > 1 ? (
+              // Layout revista: Imagen izquierda + Beneficios derecha
+              <div className="grid md:grid-cols-2 gap-12 items-start">
+                {/* Segunda imagen */}
+                <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl order-2 md:order-1">
+                  <Image
+                    src={contentImages[1].url}
+                    alt={contentImages[1].alt || `${service.name} - Beneficios`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
                 </div>
-              ))}
-            </div>
+
+                {/* Beneficios */}
+                <div className="space-y-4 order-1 md:order-2">
+                  {service.benefits.map((benefit, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start gap-3 bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex-shrink-0 w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center mt-1">
+                        <Check size={16} className="text-primary" />
+                      </div>
+                      <p className="text-gray-700 leading-relaxed text-lg">{benefit}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              // Sin segunda imagen, grid normal
+              <div className="grid md:grid-cols-2 gap-4 max-w-4xl mx-auto">
+                {service.benefits.map((benefit, index) => (
+                  <div
+                    key={index}
+                    className="flex items-start gap-3 bg-white p-4 rounded-xl shadow-sm"
+                  >
+                    <div className="flex-shrink-0 w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center mt-1">
+                      <Check size={16} className="text-primary" />
+                    </div>
+                    <p className="text-gray-700 leading-relaxed">{benefit}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       )}
 
-      {/* Indicado para */}
+      {/* ✅ Indicado para + Tercera Imagen (si existe) */}
       {service.conditions && service.conditions.length > 0 && (
         <section className="section-padding bg-white">
-          <div className="container-custom max-w-4xl">
-            <h2 className="font-heading text-4xl font-bold text-primary mb-8 text-center">
+          <div className="container-custom max-w-6xl">
+            <h2 className="font-heading text-4xl font-bold text-primary mb-12 text-center">
               Indicado Para
             </h2>
-            <div className="grid md:grid-cols-2 gap-4">
-              {service.conditions.map((condition, index) => (
-                <div
-                  key={index}
-                  className="flex items-start gap-3 bg-cream p-4 rounded-xl"
-                >
-                  <div className="flex-shrink-0 text-2xl">{config.icon}</div>
-                  <p className="text-gray-700 leading-relaxed">{condition}</p>
+            
+            {contentImages.length > 2 ? (
+              // Layout revista: Condiciones izquierda + Imagen derecha
+              <div className="grid md:grid-cols-2 gap-12 items-start">
+                {/* Condiciones */}
+                <div className="space-y-4">
+                  {service.conditions.map((condition, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start gap-3 bg-cream p-5 rounded-xl hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex-shrink-0 text-2xl">{config.icon}</div>
+                      <p className="text-gray-700 leading-relaxed text-lg">{condition}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+
+                {/* Tercera imagen */}
+                <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl">
+                  <Image
+                    src={contentImages[2].url}
+                    alt={contentImages[2].alt || `${service.name} - Indicaciones`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                </div>
+              </div>
+            ) : (
+              // Sin tercera imagen, grid normal
+              <div className="grid md:grid-cols-2 gap-4 max-w-4xl mx-auto">
+                {service.conditions.map((condition, index) => (
+                  <div
+                    key={index}
+                    className="flex items-start gap-3 bg-cream p-4 rounded-xl"
+                  >
+                    <div className="flex-shrink-0 text-2xl">{config.icon}</div>
+                    <p className="text-gray-700 leading-relaxed">{condition}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       )}
@@ -361,11 +484,11 @@ export default async function ServicePage({ params }: ServicePageProps) {
             Reserva tu cita ahora y descubre los beneficios de este tratamiento
           </p>
           <Link
-            href={`/contacto?servicio=${service.slug}`}
+            href={`/reservar?servicio=${service.slug}`}
             className="inline-flex items-center gap-3 bg-secondary text-white px-10 py-5 rounded-full font-semibold text-lg hover:bg-secondary-light transition-all shadow-lg hover:shadow-xl"
           >
             <Calendar size={24} />
-            Contactar Ahora
+            Reservar Ahora
             <ArrowRight size={24} />
           </Link>
         </div>

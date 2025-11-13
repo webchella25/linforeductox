@@ -1,3 +1,5 @@
+// prisma/schema.prisma
+
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
@@ -30,11 +32,21 @@ model Service {
   conditions  String[]
   active      Boolean   @default(true)
   order       Int       @default(0)
+  
+  // ✅ NUEVO: Sistema de imágenes
+  heroImage   String?   // URL de Cloudinary para imagen principal del hero
+  images      Json?     // Array de imágenes adicionales (max 3)
+  // Formato: [
+  //   { url: "https://cloudinary...", position: 1, alt: "Descripción", publicId: "..." },
+  //   { url: "https://cloudinary...", position: 2, alt: "Descripción", publicId: "..." },
+  //   { url: "https://cloudinary...", position: 3, alt: "Descripción", publicId: "..." }
+  // ]
+  
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   
   bookings    Booking[]
-  faqs        FAQ[]     // ✅ NUEVA RELACIÓN
+  faqs        FAQ[]
 }
 
 model WorkingHours {
@@ -84,8 +96,9 @@ model Booking {
   cancelReason String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  
   service      Service       @relation(fields: [serviceId], references: [id])
-
+  
   @@index([date, status])
   @@index([clientEmail])
 }
@@ -94,7 +107,7 @@ model Testimonial {
   id        String            @id @default(cuid())
   name      String
   email     String?
-  service   String?           // ✅ Se mantiene como String (no relación)
+  service   String?
   rating    Int
   text      String
   image     String?
@@ -102,7 +115,7 @@ model Testimonial {
   order     Int               @default(0)
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
-
+  
   @@index([status])
 }
 
@@ -124,12 +137,11 @@ model ContactInfo {
   address       String?
   city          String?
   zipCode       String?
+  bufferMinutes Int?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  bufferMinutes Int?
 }
 
-// ✅ NUEVO MODELO FAQ
 model FAQ {
   id         String   @id @default(cuid())
   serviceId  String
@@ -139,8 +151,19 @@ model FAQ {
   order      Int      @default(0)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-
+  
   @@index([serviceId])
+}
+
+model LegalPage {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("legal_pages")
 }
 
 enum BookingStatus {
@@ -155,16 +178,4 @@ enum TestimonialStatus {
   PENDING
   APPROVED
   REJECTED
-}
-
-// Modelo para gestionar páginas legales desde el dashboard
-model LegalPage {
-  id        String   @id @default(cuid())
-  slug      String   @unique // privacidad, aviso-legal, cookies
-  title     String
-  content   String   @db.Text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("legal_pages")
 }

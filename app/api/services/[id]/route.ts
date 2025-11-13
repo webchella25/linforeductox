@@ -1,3 +1,4 @@
+// app/api/services/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from "@/lib/auth";
 import { prisma } from '@/lib/prisma';
@@ -55,18 +56,21 @@ export async function PATCH(
 
     const params = await context.params;
     const { id } = params;
-
     const body = await request.json();
     
     // Extraer FAQs del body si existen
-    const { faqs, ...serviceData } = body;
+    const { faqs, heroImage, images, ...serviceData } = body; // ✅ AGREGAR heroImage e images aquí
 
     // Actualizar servicio y FAQs en una transacción
     const service = await prisma.$transaction(async (tx) => {
-      // 1. Actualizar datos del servicio
+      // 1. Actualizar datos del servicio (incluyendo imágenes)
       const updatedService = await tx.service.update({
         where: { id },
-        data: serviceData,
+        data: {
+          ...serviceData,
+          heroImage: heroImage !== undefined ? heroImage : undefined, // ✅ AGREGAR
+          images: images !== undefined ? images : undefined,         // ✅ AGREGAR
+        },
       });
 
       // 2. Si hay FAQs, actualizarlos
