@@ -151,7 +151,7 @@ export default function EditServicePage({ params }: PageProps) {
       };
 
       const url = isNew ? '/api/services' : `/api/services/${resolvedParams.id}`;
-      const method = isNew ? 'POST' : 'PUT';
+      const method = isNew ? 'POST' : 'PATCH';
 
       const res = await fetch(url, {
         method,
