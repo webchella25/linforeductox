@@ -12,7 +12,7 @@
     "db:init": "tsx scripts/create-admin.ts",
     "seed-services": "tsx scripts/seed-services.ts",
     "seed-testimonials": "tsx scripts/seed-testimonials.ts",
-	"seed-legal": "tsx scripts/seed-legal-pages.ts",
+    "seed-legal": "tsx scripts/seed-legal-pages.ts",
     "seed-content": "tsx scripts/seed-content.ts"
   },
   "dependencies": {
@@ -21,6 +21,7 @@
     "@tanstack/react-query": "^5.90.6",
     "@vercel/postgres": "^0.10.0",
     "bcryptjs": "^3.0.2",
+    "cloudinary": "^2.8.0",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
     "embla-carousel-autoplay": "^8.6.0",
