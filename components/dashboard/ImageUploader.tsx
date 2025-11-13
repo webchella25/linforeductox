@@ -109,8 +109,7 @@ export default function ImageUploader({
       )}
 
       {value ? (
-        // Mostrar imagen subida
-       {value ? (
+
   // Mostrar imagen subida
   <div className="relative group">
     <div
