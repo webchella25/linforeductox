@@ -207,9 +207,35 @@ export default async function Footer() {
       <div className="border-t border-white/10">
         <div className="container-custom py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-white/60">
-            <p>
-              © {currentYear} LINFOREDUCTOX. Todos los derechos reservados.
-            </p>
+            <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4">
+              <p>
+                © {currentYear} LINFOREDUCTOX. Todos los derechos reservados.
+              </p>
+              {/* ✅ ENLACES LEGALES */}
+              <div className="flex items-center gap-3 md:gap-4">
+                <span className="hidden md:inline text-white/20">|</span>
+                <Link
+                  href="/privacidad"
+                  className="text-white/60 hover:text-white transition-colors"
+                >
+                  Privacidad
+                </Link>
+                <span className="text-white/20">·</span>
+                <Link
+                  href="/aviso-legal"
+                  className="text-white/60 hover:text-white transition-colors"
+                >
+                  Aviso Legal
+                </Link>
+                <span className="text-white/20">·</span>
+                <Link
+                  href="/cookies"
+                  className="text-white/60 hover:text-white transition-colors"
+                >
+                  Cookies
+                </Link>
+              </div>
+            </div>
             <p>
               Diseñado y desarrollado por{' '}
               <Link

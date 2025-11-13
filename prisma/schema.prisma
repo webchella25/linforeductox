@@ -156,3 +156,15 @@ enum TestimonialStatus {
   APPROVED
   REJECTED
 }
+
+// Modelo para gestionar páginas legales desde el dashboard
+model LegalPage {
+  id        String   @id @default(cuid())
+  slug      String   @unique // privacidad, aviso-legal, cookies
+  title     String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("legal_pages")
+}

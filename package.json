@@ -12,6 +12,7 @@
     "db:init": "tsx scripts/create-admin.ts",
     "seed-services": "tsx scripts/seed-services.ts",
     "seed-testimonials": "tsx scripts/seed-testimonials.ts",
+	"seed-legal": "tsx scripts/seed-legal-pages.ts",
     "seed-content": "tsx scripts/seed-content.ts"
   },
   "dependencies": {

@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Toaster } from "react-hot-toast";
 import { SessionProvider } from "next-auth/react";
+import CookieBanner from '@/components/CookieBanner';
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -20,14 +21,14 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "LINFOREDUCTOX - Estética y Medicina Ancestral Oriental en Errenteria",
+  title: "LINFOREDUCTOX - Estética y Medicina Ancestral Oriental en Madrid",
   description:
-    "Centro especializado en drenaje linfático, tratamientos corporales, faciales y acupuntura en Errenteria, Gipuzkoa. Descubre el método LINFOREDUCTOX de Aline Vidal.",
-  keywords: "drenaje linfático, masaje corporal, tratamiento facial, acupuntura, medicina ancestral, estética avanzada, Errenteria, Gipuzkoa, País Vasco, Aline Vidal, LINFOREDUCTOX",
+    "Centro especializado en drenaje linfático, tratamientos corporales, faciales y acupuntura en Madrid. Descubre el método LINFOREDUCTOX de Aline Vidal.",
+  keywords: "drenaje linfático, masaje corporal, tratamiento facial, acupuntura, medicina ancestral, estética avanzada, Madrid, Aline Vidal, LINFOREDUCTOX",
   authors: [{ name: "Luis Granero", url: "https://www.luisgranero.com" }],
   openGraph: {
     title: "LINFOREDUCTOX - Estética y Medicina Ancestral Oriental",
-    description: "Centro especializado en drenaje linfático, tratamientos corporales, faciales y acupuntura en Errenteria, Gipuzkoa.",
+    description: "Centro especializado en drenaje linfático, tratamientos corporales, faciales y acupuntura en Madrid.",
     url: "https://linforeductox.com",
     siteName: "LINFOREDUCTOX",
     type: "website",
@@ -44,7 +45,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "LINFOREDUCTOX - Estética y Medicina Ancestral Oriental",
-    description: "Centro especializado en drenaje linfático y medicina ancestral en Errenteria",
+    description: "Centro especializado en drenaje linfático y medicina ancestral en Madrid",
     images: ["https://linforeductox.com/og-image.jpg"],
   },
   alternates: {
@@ -83,10 +84,10 @@ const organizationSchema = {
     addressCountry: "ES",
   },
   geo: {
-  "@type": "GeoCoordinates",
-  latitude: "40.4168",
-  longitude: "-3.7038"
-},
+    "@type": "GeoCoordinates",
+    latitude: "40.4168",
+    longitude: "-3.7038"
+  },
   openingHoursSpecification: [
     {
       "@type": "OpeningHoursSpecification",
@@ -94,10 +95,16 @@ const organizationSchema = {
       opens: "09:00",
       closes: "19:00",
     },
+    {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: "Saturday",
+      opens: "10:00",
+      closes: "14:00",
+    },
   ],
   sameAs: [
     "https://www.instagram.com/linforeductox",
-    // ✅ Añadir Facebook si tienen
+    "https://www.facebook.com/linforeductox",
   ],
   priceRange: "€€",
   areaServed: {
@@ -142,6 +149,8 @@ export default function RootLayout({
             }}
           />
         </SessionProvider>
+        {/* ✅ COOKIE BANNER AL FINAL */}
+        <CookieBanner />
       </body>
     </html>
   );
