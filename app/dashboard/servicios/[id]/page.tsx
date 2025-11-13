@@ -3,25 +3,6 @@
 
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { toast } from 'react-hot-toast';
-import { ArrowLeft, Save, Plus, X, Loader2 } from 'lucide-react';
-import Link from 'next/link';
-
-interface Props {
-  params: Promise<{ id: string }>;
-}
-
-interface FAQ {
-  question: string;
-  answer: string;
-}
-
-export default function EditarServicioPage({ params }: Props) {
-  const route// app/dashboard/servicios/[id]/page.tsx
-'use client';
-
-import { useState, useEffect, use } from 'react';
-import { useRouter } from 'next/navigation';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
