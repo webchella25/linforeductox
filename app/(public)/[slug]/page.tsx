@@ -1,5 +1,6 @@
 // app/(public)/[slug]/page.tsx
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import type { Metadata } from 'next';
 
@@ -78,12 +79,12 @@ export default async function LegalPage({ params }: LegalPageProps) {
 
         {/* Botón volver */}
         <div className="mt-12 text-center">
-          
+          <Link
             href="/"
             className="inline-block px-8 py-3 bg-primary text-white rounded-full hover:bg-primary-dark transition-all"
           >
             ← Volver al inicio
-          </a>
+          </Link>
         </div>
       </div>
     </div>
