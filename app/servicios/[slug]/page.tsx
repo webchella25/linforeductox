@@ -236,7 +236,8 @@ export default async function ServicePage({ params }: ServicePageProps) {
             className="object-cover"
             priority
             sizes="100vw"
-          />
+  unoptimized  // ✅ AGREGAR
+/>
           <div className={`absolute inset-0 bg-gradient-to-r ${config.gradient}`} />
         </div>
 
@@ -286,6 +287,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 50vw"
+				    unoptimized  // ✅ AGREGAR
                 />
               </div>
             </div>
@@ -317,6 +319,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 50vw"
+					  unoptimized  // ✅ AGREGAR
                   />
                 </div>
 
@@ -387,6 +390,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 50vw"
+					  unoptimized  // ✅ AGREGAR
                   />
                 </div>
               </div>

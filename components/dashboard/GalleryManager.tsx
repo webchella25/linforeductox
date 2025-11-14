@@ -186,15 +186,16 @@ export default function GalleryManager({
 
               {/* Vista previa o uploader */}
               {image.url ? (
-                <div className="relative group">
-                  <div className="relative w-full h-40 rounded-lg overflow-hidden border border-gray-200">
-                    <Image
-                      src={image.url}
-                      alt={image.alt || `Imagen ${index + 1}`}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
+  <div className="relative group">
+    <div className="relative w-full h-40 rounded-lg overflow-hidden border border-gray-200">
+      <Image
+        src={image.url}
+        alt={image.alt || `Imagen ${index + 1}`}
+        fill
+        className="object-cover"
+        unoptimized  // ✅ AGREGAR ESTA LÍNEA
+      />
+    </div>
                   <button
                     type="button"
                     onClick={() => handleImageUpload(index, '')}
