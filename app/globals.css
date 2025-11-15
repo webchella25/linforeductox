@@ -5,16 +5,20 @@
   --font-family-heading: 'Cormorant Garamond', serif;
   --font-family-body: 'Inter', sans-serif;
   
-  --color-primary: #2c5530;
-  --color-primary-light: #3d7045;
-  --color-primary-dark: #1f3d23;
+  /* ✅ COLORES DINÁMICOS - Ya no los definimos aquí, vienen de /api/config/colors/css */
+  /* Las variables --primary-color, --secondary-color, etc. se cargan dinámicamente */
   
-  --color-secondary: #d4af37;
-  --color-secondary-light: #e0c35c;
-  --color-secondary-dark: #b8941f;
+  /* ✅ Mapear a las variables dinámicas para compatibilidad */
+  --color-primary: var(--primary-color, #2C5F2D);
+  --color-primary-light: var(--primary-color, #3d7045);
+  --color-primary-dark: var(--primary-dark, #1f3d23);
+  
+  --color-secondary: var(--secondary-color, #D4AF37);
+  --color-secondary-light: var(--secondary-light, #e0c35c);
+  --color-secondary-dark: var(--secondary-color, #b8941f);
   
   --color-accent: #8b7355;
-  --color-cream: #f5f5f0;
+  --color-cream: var(--cream-color, #f5f5f0);
 }
 
 @layer base {
@@ -23,14 +27,14 @@
     padding: 0;
     box-sizing: border-box;
   }
-
+  
   body {
     font-family: var(--font-family-body);
     background-color: var(--color-cream);
     color: #2c2c2c;
     line-height: 1.6;
   }
-
+  
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-family-heading);
     font-weight: 500;
@@ -44,14 +48,14 @@
     inset: 0;
     background-color: rgba(0, 0, 0, 0.4);
   }
-
+  
   .section-padding {
     padding-top: 4rem;
     padding-bottom: 4rem;
     padding-left: 1.5rem;
     padding-right: 1.5rem;
   }
-
+  
   @media (min-width: 768px) {
     .section-padding {
       padding-top: 6rem;
@@ -60,7 +64,7 @@
       padding-right: 3rem;
     }
   }
-
+  
   .container-custom {
     max-width: 80rem;
     margin-left: auto;
