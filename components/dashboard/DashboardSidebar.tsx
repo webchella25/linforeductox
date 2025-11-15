@@ -57,6 +57,11 @@ const menuItems = [
   icon: Settings,
   subItems: [
     {
+      href: '/dashboard/configuracion/portada',  // ✅ NUEVO
+      label: 'Portada',
+      icon: Home,  // Importar: import { Home } from 'lucide-react';
+    },
+    {
       href: '/dashboard/configuracion/horarios',
       label: 'Horarios',
       icon: Clock,
@@ -67,9 +72,9 @@ const menuItems = [
       icon: Phone,
     },
     {
-      href: '/dashboard/configuracion/colores',  // ✅ NUEVO
+      href: '/dashboard/configuracion/colores',
       label: 'Colores de la Web',
-      icon: Palette,  // ✅ Importar: import { Palette } from 'lucide-react';
+      icon: Palette,
     },
   ],
 },

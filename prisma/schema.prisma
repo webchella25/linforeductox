@@ -265,6 +265,103 @@ model Event {
   @@map("events")
 }
 
+// Configuración del Hero de la Portada
+model HeroConfig {
+  id              String   @id @default(cuid())
+  
+  // Imagen de fondo
+  backgroundImage String?
+  
+  // Textos
+  greeting        String   @default("Bienvenid@")
+  mainTitle       String   @default("LINFOREDUCTOX")
+  description     String   @db.Text
+  
+  // Botones
+  primaryButtonText   String @default("Ver Servicios")
+  primaryButtonLink   String @default("/servicios")
+  secondaryButtonText String @default("Reserva tu Experiencia")
+  secondaryButtonLink String @default("/reservar")
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("hero_config")
+}
+
+// Configuración de la página "Sobre Mí"
+model AboutConfig {
+  id                String   @id @default(cuid())
+  
+  // Hero
+  heroImage         String?
+  heroTitle         String   @default("Aline Vidal")
+  heroSubtitle      String   @default("Especialista en Medicina Ancestral Oriental")
+  
+  // Contenido principal
+  biography         String   @db.Text // HTML del editor rico
+  secondaryImage    String?
+  
+  // Datos destacados
+  yearsExperience   Int      @default(0)
+  certifications    String[] @default([])
+  
+  // Video (opcional)
+  videoUrl          String?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("about_config")
+}
+
+// Configuración de Redes Sociales
+model SocialMediaConfig {
+  id          String   @id @default(cuid())
+  
+  instagram   String?
+  facebook    String?
+  tiktok      String?
+  youtube     String?
+  linkedin    String?
+  
+  // Visibilidad
+  showInstagram Boolean @default(true)
+  showFacebook  Boolean @default(true)
+  showTiktok    Boolean @default(false)
+  showYoutube   Boolean @default(false)
+  showLinkedin  Boolean @default(false)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("social_media_config")
+}
+
+// Secciones destacadas de la portada (gestión de imágenes/contenido)
+model HomeSection {
+  id          String   @id @default(cuid())
+  
+  type        String   // "featured_services", "why_choose_us", "testimonials", "custom"
+  title       String
+  subtitle    String?
+  content     String?  @db.Text
+  image       String?
+  
+  active      Boolean  @default(true)
+  order       Int      @default(0)
+  
+  // Configuración específica (JSON)
+  config      Json?
+  // Ejemplo para "featured_services": { serviceIds: ["id1", "id2", "id3"] }
+  // Ejemplo para "why_choose_us": { points: [{ icon: "✓", text: "..." }] }
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("home_sections")
+}
+
 enum EventStatus {
   DRAFT       // Borrador (no visible)
   UPCOMING    // Próximo
