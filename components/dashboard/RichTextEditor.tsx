@@ -15,6 +15,7 @@ import {
   Undo,
   Redo,
   Link2,
+  Type,  // ✅ NUEVO
 } from 'lucide-react';
 
 interface RichTextEditorProps {
@@ -30,7 +31,18 @@ export default function RichTextEditor({
 }: RichTextEditorProps) {
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        // ✅ Configurar para que Enter cree párrafos nuevos
+        paragraph: {
+          HTMLAttributes: {
+            class: 'mb-4', // Espaciado entre párrafos
+          },
+        },
+        // ✅ Permitir hard breaks (Shift+Enter)
+        hardBreak: {
+          keepMarks: false,
+        },
+      }),
       Placeholder.configure({
         placeholder,
       }),
@@ -44,7 +56,7 @@ export default function RichTextEditor({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none min-h-[200px] px-4 py-3',
+        class: 'prose prose-lg max-w-none focus:outline-none min-h-[200px] px-4 py-3',
       },
     },
   });
@@ -64,6 +76,18 @@ export default function RichTextEditor({
     <div className="border border-gray-300 rounded-lg overflow-hidden bg-white">
       {/* Toolbar */}
       <div className="border-b border-gray-200 bg-gray-50 p-2 flex flex-wrap gap-1">
+        {/* ✅ NUEVO: Botón de Párrafo Normal */}
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().setParagraph().run()}
+          className={`p-2 rounded hover:bg-gray-200 ${
+            editor.isActive('paragraph') ? 'bg-gray-300' : ''
+          }`}
+          title="Párrafo normal"
+        >
+          <Type size={18} />
+        </button>
+
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleBold().run()}
@@ -94,7 +118,7 @@ export default function RichTextEditor({
           className={`p-2 rounded hover:bg-gray-200 ${
             editor.isActive('heading', { level: 2 }) ? 'bg-gray-300' : ''
           }`}
-          title="Título"
+          title="Título (H2)"
         >
           <Heading2 size={18} />
         </button>
@@ -107,7 +131,7 @@ export default function RichTextEditor({
           className={`p-2 rounded hover:bg-gray-200 ${
             editor.isActive('bulletList') ? 'bg-gray-300' : ''
           }`}
-          title="Lista"
+          title="Lista con viñetas"
         >
           <List size={18} />
         </button>
@@ -172,6 +196,11 @@ export default function RichTextEditor({
 
       {/* Editor */}
       <EditorContent editor={editor} />
+
+      {/* ✅ NUEVO: Ayuda de teclado */}
+      <div className="border-t border-gray-200 bg-gray-50 px-4 py-2 text-xs text-gray-600">
+        <strong>Atajos:</strong> Enter = nuevo párrafo | Shift+Enter = salto de línea
+      </div>
     </div>
   );
 }
