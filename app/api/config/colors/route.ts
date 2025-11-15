@@ -44,20 +44,32 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     console.log('📦 Body recibido:', body);
     
+    // ✅ FILTRAR solo campos válidos
+    const validData = {
+      primaryColor: body.primaryColor,
+      primaryDark: body.primaryDark,
+      secondaryColor: body.secondaryColor,
+      secondaryLight: body.secondaryLight,
+      creamColor: body.creamColor,
+      textColor: body.textColor,
+    };
+    
+    console.log('✅ Data filtrada:', validData);
+    
     let config = await prisma.siteConfig.findFirst();
     console.log('📄 Config actual:', config);
     
     if (!config) {
       console.log('⚠️ No existe config, creando nueva...');
       config = await prisma.siteConfig.create({
-        data: body,
+        data: validData,
       });
       console.log('✅ Config creada:', config);
     } else {
       console.log('🔄 Actualizando config existente...');
       config = await prisma.siteConfig.update({
         where: { id: config.id },
-        data: body,
+        data: validData,  // ✅ Usar data filtrada
       });
       console.log('✅ Config actualizada:', config);
     }
