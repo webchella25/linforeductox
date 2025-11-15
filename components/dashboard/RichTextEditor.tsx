@@ -1,4 +1,4 @@
-// components/dashboard/RichTextEditor.tsx
+//components/dashboard/RichTextEditor.tsx
 'use client';
 
 import { useEditor, EditorContent } from '@tiptap/react';
