@@ -73,11 +73,11 @@ const organizationSchema = {
   url: "https://linforeductox.com",
   logo: "https://linforeductox.com/logo.png",
   image: "https://linforeductox.com/og-image.jpg",
-  telephone: "+34-123-456-789", // ✅ Actualizar con número real
+  telephone: "+34-123-456-789",
   email: "info@linforeductox.com",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "Calle Principal, 123", // ✅ Actualizar con dirección real
+    streetAddress: "Calle Principal, 123",
     addressLocality: "Madrid",
     addressRegion: "Madrid",
     postalCode: "28001",
@@ -126,6 +126,8 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
+        {/* ✅ CSS Dinámico de Colores */}
+        <link rel="stylesheet" href="/api/config/colors/css" />
       </head>
       <body className={`${playfair.variable} ${inter.variable} antialiased`}>
         <SessionProvider>
@@ -149,7 +151,6 @@ export default function RootLayout({
             }}
           />
         </SessionProvider>
-        {/* ✅ COOKIE BANNER AL FINAL */}
         <CookieBanner />
       </body>
     </html>

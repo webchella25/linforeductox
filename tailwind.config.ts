@@ -10,21 +10,19 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: "var(--color-primary)",
-          light: "var(--color-primary-light)",
-          dark: "var(--color-primary-dark)",
+          DEFAULT: "var(--primary-color, #2C5F2D)",
+          dark: "var(--primary-dark, #1e3d1f)",
         },
         secondary: {
-          DEFAULT: "var(--color-secondary)",
-          light: "var(--color-secondary-light)",
-          dark: "var(--color-secondary-dark)",
+          DEFAULT: "var(--secondary-color, #A27B5C)",
+          light: "var(--secondary-light, #b89171)",
         },
-        accent: "var(--color-accent)",
-        cream: "var(--color-cream)",
+        cream: "var(--cream-color, #F5F1E8)",
       },
       fontFamily: {
-        heading: ["var(--font-family-heading)"],
-        body: ["var(--font-family-body)"],
+        heading: ["var(--font-playfair)", "serif"],
+        body: ["var(--font-inter)", "sans-serif"],
+        sans: ["var(--font-inter)", "sans-serif"],
       },
     },
   },
