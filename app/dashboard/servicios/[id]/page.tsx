@@ -336,12 +336,13 @@ export default function EditServicePage({ params }: PageProps) {
           {/* Hero Image */}
           <div>
             <ImageUploader
-              value={formData.heroImage}
-              onChange={(url) => setFormData({ ...formData, heroImage: url })}
-              label="Imagen Principal (Hero)"
-              aspectRatio="16/9"
-              maxSizeMB={5}
-            />
+  value={formData.heroImage}
+  onChange={(url) => setFormData({ ...formData, heroImage: url })}
+  onRemove={() => setFormData({ ...formData, heroImage: '' })}  // ✅ AGREGAR esta línea
+  label="Imagen Principal (Hero)"
+  aspectRatio="16/9"
+  maxSizeMB={5}
+/>
             <p className="text-xs text-gray-500 mt-2">
               Esta imagen se mostrará en la cabecera de la página del servicio. Recomendado: 1920x1080px
             </p>
