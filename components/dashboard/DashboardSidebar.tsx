@@ -28,9 +28,14 @@ const menuItems = [
   },
   {
     href: '/dashboard/servicios',
-    label: 'Servicios',
+    label: 'Tratamientos',
     icon: Sparkles,
   },
+  {
+  href: '/dashboard/eventos',
+  label: 'Eventos',
+  icon: Calendar,  // Importar: import { Calendar } from 'lucide-react';
+},
   {
     href: '/dashboard/testimonios',
     label: 'Testimonios',

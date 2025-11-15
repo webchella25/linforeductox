@@ -207,6 +207,72 @@ model SiteConfig {
   @@map("site_config")
 }
 
+model Event {
+  id              String      @id @default(cuid())
+  title           String
+  slug            String      @unique
+  shortDescription String     @db.Text // Para listado
+  description     String      @db.Text // Descripción completa (Markdown/HTML)
+  
+  // Fechas
+  startDate       DateTime
+  endDate         DateTime?
+  
+  // Ubicación
+  location        String      // "Centro", "Online", "Otra ubicación"
+  locationDetails String?     // Dirección completa si es externa
+  
+  // Clasificación
+  eventType       String      // "Taller", "Charla", "Retiro", "Evento Especial", "Colaboración"
+  
+  // Precio
+  price           Float?
+  isFree          Boolean     @default(false)
+  
+  // Plazas
+  maxPlaces       Int?
+  availablePlaces Int?
+  
+  // Imágenes
+  heroImage       String?     // Imagen principal
+  images          Json?       // Galería de imágenes adicionales
+  // Formato: [{ url: "...", alt: "...", publicId: "..." }]
+  
+  // Video
+  videoUrl        String?     // YouTube/Vimeo URL
+  
+  // Contenido adicional
+  includes        String[]    @default([]) // ¿Qué incluye?
+  whatToBring     String[]    @default([]) // ¿Qué llevar?
+  requirements    String?     @db.Text // Requisitos
+  
+  // Inscripción
+  whatsappNumber  String?     // Número de WhatsApp para inscripción
+  whatsappMessage String?     @db.Text // Mensaje pre-rellenado
+  
+  // Estado
+  status          EventStatus @default(UPCOMING)
+  active          Boolean     @default(true)
+  
+  // Orden
+  order           Int         @default(0)
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  @@index([startDate])
+  @@index([status])
+  @@map("events")
+}
+
+enum EventStatus {
+  DRAFT       // Borrador (no visible)
+  UPCOMING    // Próximo
+  ONGOING     // En curso
+  FINISHED    // Finalizado
+  CANCELLED   // Cancelado
+}
+
 enum BookingStatus {
   PENDING
   CONFIRMED

@@ -47,6 +47,7 @@ const Header = () => {
   const navLinks = [
     { href: "/", label: "Inicio" },
     { href: "/aline-vidal", label: "Alin Vidal" },
+	{ href: "/eventos", label: "Eventos" },
     { href: "/testimonios", label: "Testimonios" },
     { href: "/contacto", label: "Contacto" },
   ];

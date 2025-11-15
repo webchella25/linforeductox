@@ -165,7 +165,7 @@ export default async function Footer() {
                   <MapPin size={20} className="text-secondary flex-shrink-0 mt-1" />
                   <div className="text-white/80 text-sm leading-relaxed">
                     {contactInfo.address}<br />
-                    {contactInfo.zipCode} {contactInfo.city}, Gipuzkoa
+                    {contactInfo.zipCode} {contactInfo.city}
                   </div>
                 </li>
               )}
