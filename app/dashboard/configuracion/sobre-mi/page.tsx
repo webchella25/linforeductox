@@ -12,6 +12,7 @@ interface AboutConfig {
   heroTitle: string;
   heroSubtitle: string;
   biography: string;
+  philosophy: string;  // ✅ NUEVO
   secondaryImage: string;
   yearsExperience: number;
   certifications: string[];
@@ -29,6 +30,7 @@ export default function SobreMiConfigPage() {
     heroTitle: 'Aline Vidal',
     heroSubtitle: 'Especialista en Medicina Ancestral Oriental',
     biography: '',
+	philosophy: '',  // ✅ NUEVO
     secondaryImage: '',
     yearsExperience: 0,
     certifications: [],
@@ -40,28 +42,29 @@ export default function SobreMiConfigPage() {
   }, []);
 
   const fetchConfig = async () => {
-    try {
-      const res = await fetch('/api/config/about');
-      if (res.ok) {
-        const data = await res.json();
-        setConfig({
-          heroImage: data.heroImage || '',
-          heroTitle: data.heroTitle || 'Aline Vidal',
-          heroSubtitle: data.heroSubtitle || 'Especialista en Medicina Ancestral Oriental',
-          biography: data.biography || '',
-          secondaryImage: data.secondaryImage || '',
-          yearsExperience: data.yearsExperience || 0,
-          certifications: data.certifications || [],
-          videoUrl: data.videoUrl || '',
-        });
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('Error al cargar configuración');
-    } finally {
-      setLoading(false);
+  try {
+    const res = await fetch('/api/config/about');
+    if (res.ok) {
+      const data = await res.json();
+      setConfig({
+        heroImage: data.heroImage || '',
+        heroTitle: data.heroTitle || 'Aline Vidal',
+        heroSubtitle: data.heroSubtitle || 'Especialista en Medicina Ancestral Oriental',
+        biography: data.biography || '',
+        philosophy: data.philosophy || '',  // ✅ NUEVO
+        secondaryImage: data.secondaryImage || '',
+        yearsExperience: data.yearsExperience || 0,
+        certifications: data.certifications || [],
+        videoUrl: data.videoUrl || '',
+      });
     }
-  };
+  } catch (error) {
+    console.error('Error:', error);
+    toast.error('Error al cargar configuración');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSave = async () => {
     setSaving(true);
@@ -202,7 +205,20 @@ export default function SobreMiConfigPage() {
             <RichTextEditor
               value={config.biography}
               onChange={(value) => setConfig({ ...config, biography: value })}
-              placeholder="Escribe tu historia profesional, experiencia, filosofía de trabajo..."
+              placeholder="Escribe tu historia profesional, experiencia, formación..."
+            />
+          </div>
+
+          {/* ✅ NUEVO: Filosofía */}
+          <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
+            <h2 className="text-xl font-semibold">Mi Filosofía</h2>
+            <p className="text-sm text-gray-600">
+              Comparte tu visión personal, tu enfoque de trabajo y lo que te hace única
+            </p>
+            <RichTextEditor
+              value={config.philosophy}
+              onChange={(value) => setConfig({ ...config, philosophy: value })}
+              placeholder="Escribe tu filosofía de trabajo, tu visión personal..."
             />
           </div>
 
@@ -334,16 +350,27 @@ export default function SobreMiConfigPage() {
                 </div>
 
                 {/* Biografía Preview */}
-                <div className="p-6">
-                  {config.biography ? (
-                    <div 
-                      className="prose prose-sm max-w-none"
-                      dangerouslySetInnerHTML={{ __html: config.biography }}
-                    />
-                  ) : (
-                    <p className="text-gray-400 italic">Escribe tu biografía...</p>
-                  )}
-                </div>
+<div className="p-6">
+  {config.biography ? (
+    <div 
+      className="prose prose-sm max-w-none"
+      dangerouslySetInnerHTML={{ __html: config.biography }}
+    />
+  ) : (
+    <p className="text-gray-400 italic">Escribe tu biografía...</p>
+  )}
+</div>
+
+{/* ✅ NUEVO: Filosofía Preview */}
+{config.philosophy && (
+  <div className="p-6 border-t">
+    <h3 className="font-semibold text-lg mb-3">Mi Filosofía</h3>
+    <div 
+      className="prose prose-sm max-w-none"
+      dangerouslySetInnerHTML={{ __html: config.philosophy }}
+    />
+  </div>
+)}
 
                 {/* Datos Preview */}
                 {(config.yearsExperience > 0 || config.certifications.length > 0) && (

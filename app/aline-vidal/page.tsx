@@ -235,25 +235,43 @@ export default async function AlineVidalPage() {
         </div>
       </section>
 
-      {/* Filosofía */}
-      <section className="section-padding bg-white">
-        <div className="container-custom max-w-4xl">
-          <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-8 text-center">
-            Mi Filosofía
-          </h2>
-          
-          <blockquote className="text-2xl md:text-3xl text-center text-gray-800 italic leading-relaxed mb-8">
-            "Creo en un enfoque holístico que considera cuerpo, mente y espíritu. 
-            Cada persona es única y merece un tratamiento personalizado."
-          </blockquote>
-          
-          <p className="text-lg text-gray-700 text-center leading-relaxed">
-            Mi compromiso es acompañarte en tu camino hacia el bienestar integral, 
-            combinando sabiduría ancestral con técnicas modernas para lograr resultados 
-            duraderos y transformadores.
-          </p>
-        </div>
-      </section>
+      {/* Filosofía - Contenido dinámico */}
+{config.philosophy && (
+  <section className="section-padding bg-white">
+    <div className="container-custom max-w-4xl">
+      <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-8 text-center">
+        Mi Filosofía
+      </h2>
+      
+      <div 
+        className="prose prose-lg max-w-none text-center"
+        dangerouslySetInnerHTML={{ __html: config.philosophy }}
+      />
+    </div>
+  </section>
+)}
+
+{/* Si no hay filosofía, mostrar texto por defecto */}
+{!config.philosophy && (
+  <section className="section-padding bg-white">
+    <div className="container-custom max-w-4xl">
+      <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-8 text-center">
+        Mi Filosofía
+      </h2>
+      
+      <blockquote className="text-2xl md:text-3xl text-center text-gray-800 italic leading-relaxed mb-8">
+        "Creo en un enfoque holístico que considera cuerpo, mente y espíritu. 
+        Cada persona es única y merece un tratamiento personalizado."
+      </blockquote>
+      
+      <p className="text-lg text-gray-700 text-center leading-relaxed">
+        Mi compromiso es acompañarte en tu camino hacia el bienestar integral, 
+        combinando sabiduría ancestral con técnicas modernas para lograr resultados 
+        duraderos y transformadores.
+      </p>
+    </div>
+  </section>
+)}
 
       {/* Formación y Certificaciones dinámicas */}
       {config.certifications.length > 0 && (

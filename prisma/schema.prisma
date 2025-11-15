@@ -302,6 +302,9 @@ model AboutConfig {
   biography         String   @db.Text // HTML del editor rico
   secondaryImage    String?
   
+    // ✅ NUEVO: Filosofía separada
+  philosophy        String   @default("") @db.Text // HTML del editor rico
+  
   // Datos destacados
   yearsExperience   Int      @default(0)
   certifications    String[] @default([])
