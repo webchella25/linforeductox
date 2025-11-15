@@ -13,7 +13,8 @@
     "seed-services": "tsx scripts/seed-services.ts",
     "seed-testimonials": "tsx scripts/seed-testimonials.ts",
     "seed-legal": "tsx scripts/seed-legal-pages.ts",
-    "seed-content": "tsx scripts/seed-content.ts"
+    "seed-content": "tsx scripts/seed-content.ts",
+    "migrate-categories": "tsx scripts/migrate-categories.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
@@ -47,6 +48,7 @@
     "eslint-config-next": "16.0.0",
     "prisma": "^6.19.0",
     "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
     "tsx": "^4.20.6",
     "typescript": "^5"
   }

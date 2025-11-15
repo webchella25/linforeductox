@@ -20,6 +20,25 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  color       String    @default("#2C5F2D")
+  icon        String    @default("💆‍♀️")
+  gradient    String    @default("from-primary/90 via-primary/70 to-primary-dark/90")
+  imageUrl    String?
+  active      Boolean   @default(true)
+  order       Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  services    Service[] @relation("ServiceCategory")  // ✅ Agregar nombre de relación
+  
+  @@map("categories")
+}
+
 model Service {
   id          String    @id @default(cuid())
   name        String
@@ -27,26 +46,27 @@ model Service {
   description String
   duration    Int
   price       Float?
-  category    String
+  
+  // ✅ MANTENER columna vieja Y agregar nueva
+  category    String    // ← Columna vieja (temporal)
+  categoryId  String?   // ← Columna nueva (opcional por ahora)
+  categoryRel Category? @relation("ServiceCategory", fields: [categoryId], references: [id])  // ✅ Mismo nombre
+  
   benefits    String[]
   conditions  String[]
   active      Boolean   @default(true)
   order       Int       @default(0)
   
-  // ✅ NUEVO: Sistema de imágenes
-  heroImage   String?   // URL de Cloudinary para imagen principal del hero
-  images      Json?     // Array de imágenes adicionales (max 3)
-  // Formato: [
-  //   { url: "https://cloudinary...", position: 1, alt: "Descripción", publicId: "..." },
-  //   { url: "https://cloudinary...", position: 2, alt: "Descripción", publicId: "..." },
-  //   { url: "https://cloudinary...", position: 3, alt: "Descripción", publicId: "..." }
-  // ]
+  heroImage   String?
+  images      Json?
   
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   
   bookings    Booking[]
   faqs        FAQ[]
+  
+  @@index([categoryId])
 }
 
 model WorkingHours {
@@ -164,6 +184,27 @@ model LegalPage {
   updatedAt DateTime @updatedAt
   
   @@map("legal_pages")
+}
+
+model SiteConfig {
+  id              String   @id @default(cuid())
+  
+  // Colores
+  primaryColor    String   @default("#2C5F2D")
+  primaryDark     String   @default("#1e3d1f")
+  secondaryColor  String   @default("#A27B5C")
+  secondaryLight  String   @default("#b89171")
+  creamColor      String   @default("#F5F1E8")
+  textColor       String   @default("#1F2937")
+  
+  // Fuentes (opcional futuro)
+  headingFont     String   @default("Playfair Display")
+  bodyFont        String   @default("Inter")
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("site_config")
 }
 
 enum BookingStatus {
