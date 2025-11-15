@@ -160,6 +160,18 @@ const Header = () => {
             </Link>
           </li>
 
+ {/* Eventos */}
+          <li>
+            <Link
+              href="/eventos"
+              className={`font-medium hover:text-secondary transition-colors ${
+                isScrolled ? "text-gray-800" : "text-white"
+              }`}
+            >
+              Eventos
+            </Link>
+          </li>
+
           {/* Testimonios */}
           <li>
             <Link
