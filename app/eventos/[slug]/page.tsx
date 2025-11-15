@@ -262,17 +262,17 @@ export default async function EventPage({ params }: EventPageProps) {
               )}
 
               {/* Botón WhatsApp */}
-              {whatsappLink && event.availablePlaces !== 0 && (
-                
-                  href={whatsappLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-3 bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-xl"
-                >
-                  <MessageCircle size={24} />
-                  Inscribirme por WhatsApp
-                </a>
-              )}
+              {whatsappLink && (
+  <Link
+    href={whatsappLink}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex items-center gap-3 bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-xl"
+  >
+    <MessageCircle size={24} />
+    Inscribirme por WhatsApp
+  </Link>
+)}
 
               {event.availablePlaces === 0 && (
                 <div className="bg-red-500 text-white px-8 py-4 rounded-full font-bold text-lg">
@@ -416,15 +416,15 @@ export default async function EventPage({ params }: EventPageProps) {
             <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
               No te pierdas esta oportunidad única de participar en {event.title}
             </p>
-            
-              href={whatsappLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 bg-green-500 hover:bg-green-600 text-white px-10 py-5 rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-xl"
-            >
-              <MessageCircle size={28} />
-              Inscribirme por WhatsApp
-            </a>
+            <Link
+  href={whatsappLink}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="inline-flex items-center gap-3 bg-green-500 hover:bg-green-600 text-white px-10 py-5 rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-xl"
+>
+  <MessageCircle size={28} />
+  Inscribirme por WhatsApp
+</Link>
           </div>
         </section>
       )}
