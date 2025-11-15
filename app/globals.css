@@ -74,7 +74,7 @@
 
 /* ===== TIPTAP EDITOR STYLES ===== */
 .ProseMirror {
-  min-height: 200px;
+  min-height: 250px;
   padding: 1rem;
 }
 
@@ -90,11 +90,11 @@
   height: 0;
 }
 
-/* ✅ Párrafos con espaciado */
+/* Párrafos */
 .ProseMirror p {
   margin-bottom: 1rem;
   line-height: 1.7;
-  font-size: 1rem;
+  font-size: 1.125rem;
   color: #374151;
 }
 
@@ -102,21 +102,56 @@
   margin-bottom: 0;
 }
 
-/* ✅ Títulos H2 */
-.ProseMirror h2 {
-  font-size: 1.75rem;
+/* Títulos H1 */
+.ProseMirror h1 {
+  font-size: 2.5rem;
   font-weight: 700;
   margin-top: 2rem;
   margin-bottom: 1rem;
   color: #2C5F2D;
+  line-height: 1.2;
+}
+
+/* Títulos H2 */
+.ProseMirror h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #2C5F2D;
   line-height: 1.3;
 }
 
-.ProseMirror h2:first-child {
+/* Títulos H3 */
+.ProseMirror h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #2C5F2D;
+  line-height: 1.4;
+}
+
+.ProseMirror h1:first-child,
+.ProseMirror h2:first-child,
+.ProseMirror h3:first-child {
   margin-top: 0;
 }
 
-/* ✅ Listas */
+/* Alineación de texto */
+.ProseMirror [style*="text-align: center"] {
+  text-align: center;
+}
+
+.ProseMirror [style*="text-align: right"] {
+  text-align: right;
+}
+
+.ProseMirror [style*="text-align: left"] {
+  text-align: left;
+}
+
+/* Listas */
 .ProseMirror ul,
 .ProseMirror ol {
   padding-left: 1.5rem;
@@ -129,17 +164,17 @@
   line-height: 1.7;
 }
 
-/* ✅ Citas */
+/* Citas */
 .ProseMirror blockquote {
   border-left: 4px solid #2C5F2D;
   padding-left: 1.5rem;
   margin: 1.5rem 0;
   font-style: italic;
   color: #4b5563;
-  font-size: 1.125rem;
+  font-size: 1.25rem;
 }
 
-/* ✅ Enlaces */
+/* Enlaces */
 .ProseMirror a {
   color: #2C5F2D;
   text-decoration: underline;
@@ -150,13 +185,18 @@
   color: #1e3d1f;
 }
 
-/* ✅ Negrita */
+/* Negrita */
 .ProseMirror strong {
   font-weight: 700;
   color: #1f2937;
 }
 
-/* ✅ Cursiva */
+/* Cursiva */
 .ProseMirror em {
   font-style: italic;
+}
+
+/* Subrayado */
+.ProseMirror u {
+  text-decoration: underline;
 }
