@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
 
 // GET
 export async function GET() {
@@ -48,6 +49,9 @@ export async function PATCH(request: NextRequest) {
         data: body,
       });
     }
+    
+    // ✅ Revalidar la página de Aline Vidal para que se vean los cambios inmediatamente
+    revalidatePath('/aline-vidal');
     
     return NextResponse.json(config);
   } catch (error) {

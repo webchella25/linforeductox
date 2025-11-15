@@ -48,6 +48,8 @@ export async function PATCH(request: NextRequest) {
         data: body,
       });
     }
+	
+	revalidatePath('/');
     
     return NextResponse.json(config);
   } catch (error) {

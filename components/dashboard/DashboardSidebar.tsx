@@ -17,6 +17,7 @@ import {
   Home,
   Phone,
   Palette,
+  User,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -60,6 +61,11 @@ const menuItems = [
       href: '/dashboard/configuracion/portada',  // ✅ NUEVO
       label: 'Portada',
       icon: Home,  // Importar: import { Home } from 'lucide-react';
+    },
+	{
+      href: '/dashboard/configuracion/sobre-mi',  // ✅ NUEVO
+      label: 'Sobre Mí',
+      icon: User,  // Importar: import { User } from 'lucide-react';
     },
     {
       href: '/dashboard/configuracion/horarios',
