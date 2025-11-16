@@ -4,8 +4,10 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { DayPicker } from 'react-day-picker';
+import 'react-day-picker/dist/style.css';
 import { Calendar, Clock, User, Mail, Phone, MessageSquare, Check, Loader2, ArrowRight } from 'lucide-react';
-import { format, addDays } from 'date-fns';
+import { format, addDays, isBefore, isAfter, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import toast from 'react-hot-toast';
 
@@ -32,7 +34,7 @@ export default function ReservarClient() {
   const [step, setStep] = useState(1);
   const [services, setServices] = useState<Service[]>([]);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [loading, setLoading] = useState(false);
@@ -103,11 +105,11 @@ export default function ReservarClient() {
   const handleServiceSelect = (service: Service) => {
     setSelectedService(service);
     setStep(2);
-    setSelectedDate(null);
+    setSelectedDate(undefined);
     setSelectedSlot(null);
   };
 
-  const handleDateSelect = (date: Date) => {
+  const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
     setSelectedSlot(null);
   };
@@ -175,8 +177,14 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
     }
   };
 
-  const minDate = new Date();
-  const maxDate = addDays(new Date(), 60);
+  const today = startOfDay(new Date());
+  const maxDate = addDays(today, 60);
+
+  // Deshabilitar fechas pasadas
+  const disabledDays = [
+    { before: today },
+    { after: maxDate }
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cream via-white to-cream/50 py-20">
@@ -190,6 +198,7 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
           </p>
         </div>
 
+        {/* Progress Steps */}
         <div className="flex justify-center mb-12 overflow-x-auto">
           <div className="flex items-center gap-2 md:gap-4 min-w-max px-4">
             {[
@@ -227,6 +236,7 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
           </div>
         </div>
 
+        {/* Step 1: Selección de Servicio */}
         {step === 1 && (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {loadingServices ? (
@@ -267,48 +277,79 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
           </div>
         )}
 
+        {/* Step 2: Fecha y Hora con DayPicker */}
         {step === 2 && selectedService && (
-          <div className="bg-white rounded-2xl shadow-lg p-8 max-w-4xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-lg p-8 max-w-5xl mx-auto">
             <h2 className="font-heading text-2xl font-bold text-primary mb-6">
               Selecciona Fecha y Hora - {selectedService.name}
             </h2>
             
-            <div className="grid md:grid-cols-2 gap-8">
-              <div>
-                <h3 className="font-semibold mb-4">Selecciona una fecha</h3>
-                <input
-                  type="date"
-                  min={format(minDate, 'yyyy-MM-dd')}
-                  max={format(maxDate, 'yyyy-MM-dd')}
-                  value={selectedDate ? format(selectedDate, 'yyyy-MM-dd') : ''}
-                  onChange={(e) => handleDateSelect(new Date(e.target.value))}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
+            <div className="grid lg:grid-cols-2 gap-8">
+              {/* Calendario */}
+              <div className="flex flex-col items-center">
+                <h3 className="font-semibold mb-4 text-lg">Selecciona una fecha</h3>
+                <div className="calendar-wrapper">
+                  <DayPicker
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={handleDateSelect}
+                    disabled={disabledDays}
+                    locale={es}
+                    className="border rounded-lg p-4"
+                    modifiersClassNames={{
+                      selected: 'bg-primary text-white hover:bg-primary-dark',
+                      today: 'font-bold text-primary border-primary',
+                    }}
+                    styles={{
+                      caption: { color: '#2C5F2D' },
+                      head_cell: { color: '#2C5F2D', fontWeight: 'bold' },
+                    }}
+                  />
+                </div>
+                {selectedDate && (
+                  <p className="mt-4 text-sm text-gray-600">
+                    Fecha seleccionada:{' '}
+                    <span className="font-semibold text-primary">
+                      {format(selectedDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
+                    </span>
+                  </p>
+                )}
               </div>
 
-              <div>
-                <h3 className="font-semibold mb-4">Horarios disponibles</h3>
+              {/* Horarios disponibles */}
+              <div className="flex flex-col">
+                <h3 className="font-semibold mb-4 text-lg">Horarios disponibles</h3>
                 {!selectedDate ? (
-                  <p className="text-gray-500 text-sm">
-                    Selecciona primero una fecha
-                  </p>
+                  <div className="flex items-center justify-center h-64 text-gray-500 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                    <div className="text-center">
+                      <Calendar className="mx-auto mb-2 text-gray-400" size={40} />
+                      <p>Selecciona primero una fecha en el calendario</p>
+                    </div>
+                  </div>
                 ) : loadingSlots ? (
-                  <div className="flex justify-center py-8">
-                    <Loader2 className="animate-spin text-primary" size={30} />
+                  <div className="flex items-center justify-center h-64">
+                    <Loader2 className="animate-spin text-primary" size={40} />
                   </div>
                 ) : availableSlots.length === 0 ? (
-                  <p className="text-gray-500 text-sm">
-                    No hay horarios disponibles para esta fecha
-                  </p>
+                  <div className="flex items-center justify-center h-64 text-gray-500 bg-red-50 rounded-lg border-2 border-red-200">
+                    <div className="text-center">
+                      <Clock className="mx-auto mb-2 text-red-400" size={40} />
+                      <p className="font-semibold">No hay horarios disponibles</p>
+                      <p className="text-sm mt-1">Prueba con otra fecha</p>
+                    </div>
+                  </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-96 overflow-y-auto pr-2">
                     {availableSlots.map((slot, idx) => (
                       <button
                         key={idx}
                         onClick={() => handleSlotSelect(slot)}
-                        className="p-3 border-2 border-gray-200 rounded-lg hover:border-primary hover:bg-cream transition-all text-sm font-medium"
+                        className="group p-4 border-2 border-gray-200 rounded-lg hover:border-primary hover:bg-cream transition-all text-center"
                       >
-                        {slot.startTime}
+                        <div className="flex items-center justify-center gap-2 font-medium text-gray-700 group-hover:text-primary">
+                          <Clock size={16} />
+                          {slot.startTime}
+                        </div>
                       </button>
                     ))}
                   </div>
@@ -316,21 +357,30 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
               </div>
             </div>
 
-            <button
-              onClick={() => setStep(1)}
-              className="mt-6 text-primary hover:underline"
-            >
-              ← Cambiar servicio
-            </button>
+            <div className="mt-8 flex justify-between items-center pt-6 border-t">
+              <button
+                onClick={() => setStep(1)}
+                className="text-primary hover:underline font-medium"
+              >
+                ← Cambiar servicio
+              </button>
+              {selectedDate && availableSlots.length > 0 && (
+                <p className="text-sm text-gray-600">
+                  {availableSlots.length} horarios disponibles
+                </p>
+              )}
+            </div>
           </div>
         )}
 
+        {/* Step 3: Formulario de Datos + WhatsApp */}
         {step === 3 && selectedService && selectedDate && selectedSlot && (
           <div className="bg-white rounded-2xl shadow-lg p-8 max-w-2xl mx-auto">
             <h2 className="font-heading text-2xl font-bold text-primary mb-6">
               Tus Datos
             </h2>
 
+            {/* Resumen de reserva */}
             <div className="bg-cream/50 rounded-xl p-6 mb-8">
               <h3 className="font-semibold text-lg mb-3">Resumen de tu reserva:</h3>
               <div className="space-y-2 text-gray-700">
@@ -353,6 +403,7 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
               </div>
             </div>
 
+            {/* Formulario */}
             <form onSubmit={handleWhatsAppBooking} className="space-y-6">
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
@@ -421,6 +472,7 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
                 />
               </div>
 
+              {/* Información importante */}
               <div className="bg-green-50 border-l-4 border-primary p-4 rounded">
                 <p className="text-sm text-gray-700">
                   <strong>📱 Confirmación por WhatsApp:</strong> Al hacer clic en reservar, 
@@ -429,6 +481,7 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
                 </p>
               </div>
 
+              {/* Botones */}
               <div className="flex gap-4">
                 <button
                   type="button"
@@ -459,6 +512,7 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
           </div>
         )}
 
+        {/* Step 4: Confirmación */}
         {step === 4 && (
           <div className="bg-white rounded-2xl shadow-lg p-12 max-w-2xl mx-auto text-center">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -511,6 +565,37 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
           </div>
         )}
       </div>
+
+      <style jsx global>{`
+        .rdp {
+          --rdp-cell-size: 45px;
+          --rdp-accent-color: #2C5F2D;
+          --rdp-background-color: #F5F1E8;
+        }
+        
+        .rdp-day_selected {
+          background-color: #2C5F2D !important;
+          color: white !important;
+          font-weight: bold;
+        }
+        
+        .rdp-day_selected:hover {
+          background-color: #1e3d1f !important;
+        }
+        
+        .rdp-day_today {
+          font-weight: bold;
+          color: #2C5F2D;
+        }
+        
+        .rdp-day:hover:not(.rdp-day_selected):not(.rdp-day_disabled) {
+          background-color: #F5F1E8;
+        }
+        
+        .rdp-button:hover:not([disabled]):not(.rdp-day_selected) {
+          background-color: #F5F1E8;
+        }
+      `}</style>
     </div>
   );
 }
