@@ -317,28 +317,30 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
               Selecciona Fecha y Hora - {selectedService.name}
             </h2>
             
-            <div className="grid lg:grid-cols-2 gap-8">
-              <div className="flex flex-col items-center">
-                <h3 className="font-semibold mb-4 text-lg">Selecciona una fecha</h3>
-                <div className="calendar-wrapper">
-                  <DayPicker
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={handleDateSelect}
-                    disabled={disabledDays}
-                    locale={es}
-                    className="border rounded-lg p-4"
-                  />
-                </div>
-                {selectedDate && (
-                  <p className="mt-4 text-sm text-gray-600">
-                    Fecha seleccionada:{' '}
-                    <span className="font-semibold" style={{ color: colors.primaryColor }}>
-                      {format(selectedDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
-                    </span>
-                  </p>
-                )}
-              </div>
+           {/* CALENDARIO MEJORADO - Solo esta sección */}
+<div className="flex flex-col items-center">
+  <h3 className="font-semibold mb-6 text-lg">Selecciona una fecha</h3>
+  <div className="w-full max-w-md">
+    <DayPicker
+      mode="single"
+      selected={selectedDate}
+      onSelect={handleDateSelect}
+      disabled={disabledDays}
+      locale={es}
+      className="border rounded-xl p-6 bg-white shadow-sm w-full"
+    />
+  </div>
+  {selectedDate && (
+    <div className="mt-6 p-4 rounded-lg w-full max-w-md text-center" style={{ backgroundColor: `${colors.creamColor}80` }}>
+      <p className="text-sm text-gray-600">
+        Fecha seleccionada:
+      </p>
+      <p className="font-bold text-lg mt-1" style={{ color: colors.primaryColor }}>
+        {format(selectedDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
+      </p>
+    </div>
+  )}
+</div>
 
               <div className="flex flex-col">
                 <h3 className="font-semibold mb-4 text-lg">Horarios disponibles</h3>
@@ -637,114 +639,156 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
         )}
       </div>
 
-      <style jsx global>{`
-        .rdp {
-          --rdp-cell-size: 45px;
-          --rdp-accent-color: ${colors.primaryColor};
-          --rdp-background-color: ${colors.creamColor};
-          margin: 0;
-        }
-        
-        .rdp-months {
-          display: flex;
-          justify-content: center;
-        }
-        
-        .rdp-month {
-          margin: 0;
-        }
-        
-        .rdp-caption {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          padding: 1rem;
-        }
-        
-        .rdp-caption_label {
-          font-size: 1.1rem;
-          font-weight: bold;
-          color: ${colors.primaryColor};
-        }
-        
-        .rdp-nav {
-          position: absolute;
-          width: 100%;
-          display: flex;
-          justify-content: space-between;
-          padding: 0 0.5rem;
-        }
-        
-        .rdp-nav_button {
-          width: 2rem;
-          height: 2rem;
-          border-radius: 0.5rem;
-          border: none;
-          background: transparent;
-          cursor: pointer;
-        }
-        
-        .rdp-nav_button:hover {
-          background-color: ${colors.creamColor};
-        }
-        
-        .rdp-table {
-          width: 100%;
-          border-collapse: collapse;
-        }
-        
-        .rdp-head_cell {
-          color: ${colors.primaryColor};
-          font-weight: bold;
-          font-size: 0.875rem;
-          padding: 0.5rem;
-          text-transform: uppercase;
-        }
-        
-        .rdp-cell {
-          padding: 0;
-        }
-        
-        .rdp-day {
-          width: var(--rdp-cell-size);
-          height: var(--rdp-cell-size);
-          border: none;
-          background: transparent;
-          cursor: pointer;
-          border-radius: 0.5rem;
-          font-size: 0.9rem;
-          transition: all 0.2s;
-        }
-        
-        .rdp-day:hover:not(.rdp-day_disabled):not(.rdp-day_selected) {
-          background-color: ${colors.creamColor};
-        }
-        
-        .rdp-day_selected {
-          background-color: ${colors.primaryColor} !important;
-          color: white !important;
-          font-weight: bold;
-        }
-        
-        .rdp-day_selected:hover {
-          background-color: ${colors.primaryDark} !important;
-        }
-        
-        .rdp-day_today:not(.rdp-day_selected) {
-          font-weight: bold;
-          color: ${colors.primaryColor};
-          border: 2px solid ${colors.primaryColor};
-        }
-        
-        .rdp-day_disabled {
-          opacity: 0.3;
-          cursor: not-allowed;
-        }
-        
-        .rdp-day_outside {
-			opacity: 0.5;
-        }
-      `}</style>
+{/* Y actualiza los estilos al final del componente */}
+<style jsx global>{`
+  .rdp {
+    --rdp-cell-size: 55px; /* ✅ AUMENTADO de 45px a 55px */
+    --rdp-accent-color: ${colors.primaryColor};
+    --rdp-background-color: ${colors.creamColor};
+    margin: 0;
+    width: 100%;
+  }
+  
+  .rdp-months {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .rdp-month {
+    margin: 0;
+    width: 100%;
+  }
+  
+  .rdp-caption {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem 1rem; /* ✅ AUMENTADO padding */
+  }
+  
+  .rdp-caption_label {
+    font-size: 1.25rem; /* ✅ AUMENTADO de 1.1rem */
+    font-weight: bold;
+    color: ${colors.primaryColor};
+  }
+  
+  .rdp-nav {
+    position: absolute;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 0.5rem;
+  }
+  
+  .rdp-nav_button {
+    width: 2.5rem; /* ✅ AUMENTADO */
+    height: 2.5rem; /* ✅ AUMENTADO */
+    border-radius: 0.5rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .rdp-nav_button:hover {
+    background-color: ${colors.creamColor};
+  }
+  
+  .rdp-nav_button svg {
+    width: 1.25rem; /* ✅ AUMENTADO tamaño de flechas */
+    height: 1.25rem;
+  }
+  
+  .rdp-table {
+    width: 100%;
+    border-collapse: separate; /* ✅ CAMBIADO para mejor espaciado */
+    border-spacing: 4px; /* ✅ NUEVO: espacio entre celdas */
+  }
+  
+  .rdp-head_cell {
+    color: ${colors.primaryColor};
+    font-weight: bold;
+    font-size: 0.95rem; /* ✅ AUMENTADO */
+    padding: 0.75rem; /* ✅ AUMENTADO */
+    text-transform: uppercase;
+  }
+  
+  .rdp-cell {
+    padding: 2px; /* ✅ NUEVO: padding en las celdas */
+  }
+  
+  .rdp-day {
+    width: var(--rdp-cell-size);
+    height: var(--rdp-cell-size);
+    border: 2px solid transparent; /* ✅ NUEVO: borde para estado hover/selected */
+    background: transparent;
+    cursor: pointer;
+    border-radius: 0.75rem; /* ✅ AUMENTADO radio */
+    font-size: 1rem; /* ✅ AUMENTADO de 0.9rem */
+    font-weight: 500; /* ✅ NUEVO: más peso */
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .rdp-day:hover:not(.rdp-day_disabled):not(.rdp-day_selected) {
+    background-color: ${colors.creamColor};
+    border-color: ${colors.primaryColor}40; /* ✅ NUEVO: borde sutil en hover */
+    transform: scale(1.05); /* ✅ NUEVO: efecto de aumento */
+  }
+  
+  .rdp-day_selected {
+    background-color: ${colors.primaryColor} !important;
+    color: white !important;
+    font-weight: bold;
+    border-color: ${colors.primaryColor} !important; /* ✅ NUEVO */
+    transform: scale(1.1); /* ✅ NUEVO: día seleccionado más grande */
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* ✅ NUEVO: sombra */
+  }
+  
+  .rdp-day_selected:hover {
+    background-color: ${colors.primaryDark} !important;
+    transform: scale(1.12); /* ✅ NUEVO */
+  }
+  
+  .rdp-day_today:not(.rdp-day_selected) {
+    font-weight: bold;
+    color: ${colors.primaryColor};
+    background-color: ${colors.creamColor}60; /* ✅ NUEVO: fondo sutil */
+    border: 2px solid ${colors.primaryColor};
+  }
+  
+  .rdp-day_disabled {
+    opacity: 0.25; /* ✅ REDUCIDO para mejor contraste */
+    cursor: not-allowed;
+  }
+  
+  .rdp-day_disabled:hover {
+    transform: none; /* ✅ NUEVO: sin efecto hover en deshabilitados */
+  }
+  
+  .rdp-day_outside {
+    opacity: 0.4; /* ✅ REDUCIDO */
+  }
+  
+  /* ✅ NUEVO: Mejora para móviles */
+  @media (max-width: 640px) {
+    .rdp {
+      --rdp-cell-size: 48px;
+    }
+    
+    .rdp-caption_label {
+      font-size: 1.1rem;
+    }
+    
+    .rdp-day {
+      font-size: 0.95rem;
+    }
+  }
+`}</style>
     </div>
   );
 }
