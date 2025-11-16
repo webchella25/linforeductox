@@ -429,6 +429,33 @@ model HomeServicesSection {
   @@map("home_services_section")
 }
 
+model HomeAboutSection {
+  id              String   @id @default(cuid())
+  
+  // Textos
+  label           String   @default("Creadora del Método")
+  name            String   @default("Aline Vidal")
+  subtitle        String   @default("Coach Corporal y Facialista. Diplomada en Acupuntura Estética, Osteopatía y Sistema Linfático.") @db.Text
+  description     String   @default("Mi pasión es ayudar a las mujeres a reconectar con su cuerpo, liberar bloqueos energéticos y descubrir su belleza más auténtica a través del poder sanador del toque consciente.") @db.Text
+  quote           String?  @db.Text
+  
+  // Botón
+  buttonText      String   @default("Conoce mi historia")
+  buttonLink      String   @default("/aline-vidal")
+  
+  // Imagen
+  image           String   @default("/alin-vidal.jpg")
+  imageAlt        String   @default("Aline Vidal - Fundadora de LINFOREDUCTOX")
+  
+  // Visibilidad
+  active          Boolean  @default(true)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("home_about_section")
+}
+
 enum EventStatus {
   DRAFT       // Borrador (no visible)
   UPCOMING    // Próximo

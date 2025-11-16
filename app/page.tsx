@@ -69,6 +69,27 @@ async function getFeaturedServices() {
   }
 }
 
+async function getHomeAboutConfig() {
+  try {
+    const config = await prisma.homeAboutSection.findFirst();
+    return config || {
+      label: 'Creadora del Método',
+      name: 'Aline Vidal',
+      subtitle: 'Coach Corporal y Facialista. Diplomada en Acupuntura Estética, Osteopatía y Sistema Linfático.',
+      description: 'Mi pasión es ayudar a las mujeres a reconectar con su cuerpo, liberar bloqueos energéticos y descubrir su belleza más auténtica a través del poder sanador del toque consciente.',
+      quote: 'Cuando el sistema linfático fluye con libertad, la belleza y la salud emergen naturalmente. Ese es el corazón del método LINFOREDUCTOX.',
+      buttonText: 'Conoce mi historia',
+      buttonLink: '/aline-vidal',
+      image: '/alin-vidal.jpg',
+      imageAlt: 'Aline Vidal - Fundadora de LINFOREDUCTOX',
+      active: true,
+    };
+  } catch (error) {
+    console.error('Error fetching home about config:', error);
+    return null;
+  }
+}
+
 // ✅ NUEVA FUNCIÓN: Obtener configuración de la sección
 async function getHomeServicesConfig() {
   try {
@@ -116,6 +137,7 @@ export default async function Home() {
   const homeServicesConfig = await getHomeServicesConfig(); // ✅ NUEVO
   const featuredServices = await getFeaturedServices(); // ✅ ACTUALIZADO
   const testimonials = await getRandomTestimonials();
+  const homeAboutConfig = await getHomeAboutConfig(); // ✅ NUEVO
 
   // ✅ Schema.org WebSite
   const websiteSchema = {
@@ -233,15 +255,16 @@ export default async function Home() {
           </section>
         )}
 
-        {/* 4. Sobre Aline Vidal */}
+        {/* ✅ 4. SOBRE ALINE VIDAL - DINÁMICO */}
+      {homeAboutConfig?.active && (
         <section className="section-padding bg-gradient-to-br from-cream to-white">
           <div className="container-custom">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               {/* Imagen */}
               <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl">
                 <Image
-                  src="/alin-vidal.jpg"
-                  alt="Aline Vidal - Fundadora de LINFOREDUCTOX"
+                  src={homeAboutConfig.image}
+                  alt={homeAboutConfig.imageAlt}
                   fill
                   className="object-cover object-top"
                   priority
@@ -250,30 +273,45 @@ export default async function Home() {
 
               {/* Contenido */}
               <div>
-                <p className="text-secondary font-semibold mb-2">Creadora del Método</p>
-                <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-6">
-                  Aline Vidal
-                </h2>
-                <p className="text-xl text-gray-700 mb-6 font-medium">
-                  Coach Corporal y Facialista. Diplomada en Acupuntura Estética, Osteopatía y Sistema Linfático.
-                </p>
-                <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-                  Mi pasión es ayudar a las mujeres a reconectar con su cuerpo, liberar bloqueos energéticos y descubrir su belleza más auténtica a través del poder sanador del toque consciente.
-                </p>
-                <blockquote className="border-l-4 border-secondary pl-6 italic text-lg text-gray-700 mb-8">
-                  "Cuando el sistema linfático fluye con libertad, la belleza y la salud emergen naturalmente. Ese es el corazón del método LINFOREDUCTOX."
-                </blockquote>
-                <Link
-                  href="/aline-vidal"
-                  className="inline-flex items-center gap-2 text-primary hover:text-secondary font-semibold text-lg transition-colors"
-                >
-                  Conoce mi historia
-                  <ArrowRight size={20} />
-                </Link>
+                {homeAboutConfig.label && (
+                  <p className="text-secondary font-semibold mb-2">
+                    {homeAboutConfig.label}
+                  </p>
+                )}
+                {homeAboutConfig.name && (
+                  <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-6">
+                    {homeAboutConfig.name}
+                  </h2>
+                )}
+                {homeAboutConfig.subtitle && (
+                  <p className="text-xl text-gray-700 mb-6 font-medium">
+                    {homeAboutConfig.subtitle}
+                  </p>
+                )}
+                {homeAboutConfig.description && (
+                  <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+                    {homeAboutConfig.description}
+                  </p>
+                )}
+                {homeAboutConfig.quote && (
+                  <blockquote className="border-l-4 border-secondary pl-6 italic text-lg text-gray-700 mb-8">
+                    &ldquo;{homeAboutConfig.quote}&rdquo;
+                  </blockquote>
+                )}
+                {homeAboutConfig.buttonText && homeAboutConfig.buttonLink && (
+                  <Link
+                    href={homeAboutConfig.buttonLink}
+                    className="inline-flex items-center gap-2 text-primary hover:text-secondary font-semibold text-lg transition-colors"
+                  >
+                    {homeAboutConfig.buttonText}
+                    <ArrowRight size={20} />
+                  </Link>
+                )}
               </div>
             </div>
           </div>
         </section>
+      )}
 
         {/* ✅ 5. TESTIMONIOS */}
         {testimonials.length > 0 && (
