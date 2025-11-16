@@ -2,33 +2,62 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, User, Home, Image as ImageIcon, Upload, Eye } from 'lucide-react';
+import { Save, Eye, EyeOff, Loader2, Plus, X, User, Home, Image as ImageIcon, Upload } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
+import ImageUploader from '@/components/dashboard/ImageUploader';
+import RichTextEditor from '@/components/dashboard/RichTextEditor';
 
 type Tab = 'page' | 'home';
 
-export default function SobreMiPage() {
+interface AboutConfig {
+  heroImage: string;
+  heroTitle: string;
+  heroSubtitle: string;
+  biography: string;
+  philosophy: string;
+  secondaryImage: string;
+  yearsExperience: number;
+  certifications: string[];
+  videoUrl: string;
+}
+
+interface HomeAboutConfig {
+  label: string;
+  name: string;
+  subtitle: string;
+  description: string;
+  quote: string;
+  buttonText: string;
+  buttonLink: string;
+  image: string;
+  imageAlt: string;
+  active: boolean;
+}
+
+export default function SobreMiConfigPage() {
   const [activeTab, setActiveTab] = useState<Tab>('page');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showPreview, setShowPreview] = useState(true);
+  const [certificationInput, setCertificationInput] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
-
-  // Configuración de la página completa (existente)
-  const [pageConfig, setPageConfig] = useState({
+  
+  // Config de la página completa
+  const [pageConfig, setPageConfig] = useState<AboutConfig>({
+    heroImage: '',
     heroTitle: 'Aline Vidal',
     heroSubtitle: 'Especialista en Medicina Ancestral Oriental',
-    heroImage: '',
     biography: '',
     philosophy: '',
     secondaryImage: '',
     yearsExperience: 0,
-    certifications: [] as string[],
+    certifications: [],
     videoUrl: '',
   });
 
-  // Configuración de la sección en portada (NUEVO)
-  const [homeConfig, setHomeConfig] = useState({
+  // Config de la sección en portada
+  const [homeConfig, setHomeConfig] = useState<HomeAboutConfig>({
     label: 'Creadora del Método',
     name: 'Aline Vidal',
     subtitle: '',
@@ -47,14 +76,14 @@ export default function SobreMiPage() {
 
   const fetchConfigs = async () => {
     try {
-      // Cargar config de página (existente)
+      // Cargar config de página
       const pageRes = await fetch('/api/config/about');
       if (pageRes.ok) {
         const pageData = await pageRes.json();
         setPageConfig({
+          heroImage: pageData.heroImage || '',
           heroTitle: pageData.heroTitle || 'Aline Vidal',
           heroSubtitle: pageData.heroSubtitle || '',
-          heroImage: pageData.heroImage || '',
           biography: pageData.biography || '',
           philosophy: pageData.philosophy || '',
           secondaryImage: pageData.secondaryImage || '',
@@ -64,7 +93,7 @@ export default function SobreMiPage() {
         });
       }
 
-      // Cargar config de portada (NUEVO)
+      // Cargar config de portada
       const homeRes = await fetch('/api/config/home-about');
       if (homeRes.ok) {
         const homeData = await homeRes.json();
@@ -83,6 +112,7 @@ export default function SobreMiPage() {
       }
     } catch (error) {
       console.error('Error:', error);
+      toast.error('Error al cargar configuración');
     } finally {
       setLoading(false);
     }
@@ -134,13 +164,11 @@ export default function SobreMiPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validar tipo de archivo
     if (!file.type.startsWith('image/')) {
       toast.error('Por favor selecciona una imagen válida');
       return;
     }
 
-    // Validar tamaño (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error('La imagen no puede superar los 5MB');
       return;
@@ -170,6 +198,23 @@ export default function SobreMiPage() {
     }
   };
 
+  const addCertification = () => {
+    if (certificationInput.trim()) {
+      setPageConfig({
+        ...pageConfig,
+        certifications: [...pageConfig.certifications, certificationInput.trim()],
+      });
+      setCertificationInput('');
+    }
+  };
+
+  const removeCertification = (index: number) => {
+    setPageConfig({
+      ...pageConfig,
+      certifications: pageConfig.certifications.filter((_, i) => i !== index),
+    });
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center p-12">
@@ -184,7 +229,7 @@ export default function SobreMiPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Configuración "Sobre Mí"</h1>
           <p className="text-gray-600 mt-2">
@@ -222,24 +267,275 @@ export default function SobreMiPage() {
         </div>
       </div>
 
-      {/* Contenido de Página Completa */}
+      {/* PESTAÑA: PÁGINA COMPLETA */}
       {activeTab === 'page' && (
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-xl font-semibold mb-6">
-            Configuración de la Página /aline-vidal
-          </h2>
-          <p className="text-gray-600 mb-4">
-            Esta sección ya existe. Aquí podrías agregar los campos que ya tienes para el hero, biografía, filosofía, etc.
-          </p>
-          <div className="p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-800">
-              💡 Mantén tu configuración actual de AboutConfig aquí
+        <>
+          <div className="flex justify-end">
+            <button
+              onClick={() => setShowPreview(!showPreview)}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              {showPreview ? <EyeOff size={20} /> : <Eye size={20} />}
+              {showPreview ? 'Ocultar' : 'Mostrar'} Preview
+            </button>
+          </div>
+
+          {/* Hero */}
+          <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
+            <h2 className="text-xl font-semibold">Hero de la Página</h2>
+            
+            <ImageUploader
+              value={pageConfig.heroImage}
+              onChange={(url) => setPageConfig({ ...pageConfig, heroImage: url })}
+              onRemove={() => setPageConfig({ ...pageConfig, heroImage: '' })}
+              label="Imagen Principal"
+              aspectRatio="16/9"
+              maxSizeMB={5}
+            />
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Título Principal
+              </label>
+              <input
+                type="text"
+                value={pageConfig.heroTitle}
+                onChange={(e) => setPageConfig({ ...pageConfig, heroTitle: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="Aline Vidal"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Subtítulo
+              </label>
+              <input
+                type="text"
+                value={pageConfig.heroSubtitle}
+                onChange={(e) => setPageConfig({ ...pageConfig, heroSubtitle: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="Especialista en Medicina Ancestral Oriental"
+              />
+            </div>
+          </div>
+
+          {/* Biografía */}
+          <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
+            <h2 className="text-xl font-semibold">Biografía</h2>
+            <RichTextEditor
+              value={pageConfig.biography}
+              onChange={(value) => setPageConfig({ ...pageConfig, biography: value })}
+              placeholder="Escribe tu historia profesional, experiencia, formación..."
+            />
+          </div>
+
+          {/* Filosofía */}
+          <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
+            <h2 className="text-xl font-semibold">Mi Filosofía</h2>
+            <p className="text-sm text-gray-600">
+              Comparte tu visión personal, tu enfoque de trabajo y lo que te hace única
+            </p>
+            <RichTextEditor
+              value={pageConfig.philosophy}
+              onChange={(value) => setPageConfig({ ...pageConfig, philosophy: value })}
+              placeholder="Escribe tu filosofía de trabajo, tu visión personal..."
+            />
+          </div>
+
+          {/* Imagen Secundaria */}
+          <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
+            <h2 className="text-xl font-semibold">Imagen Secundaria</h2>
+            <ImageUploader
+              value={pageConfig.secondaryImage}
+              onChange={(url) => setPageConfig({ ...pageConfig, secondaryImage: url })}
+              onRemove={() => setPageConfig({ ...pageConfig, secondaryImage: '' })}
+              label="Foto Adicional"
+              aspectRatio="4/3"
+              maxSizeMB={3}
+            />
+            <p className="text-xs text-gray-500">
+              Esta imagen aparecerá al lado del texto biográfico
             </p>
           </div>
-        </div>
+
+          {/* Datos Destacados */}
+          <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
+            <h2 className="text-xl font-semibold">Datos Destacados</h2>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Años de Experiencia
+              </label>
+              <input
+                type="number"
+                value={pageConfig.yearsExperience}
+                onChange={(e) => setPageConfig({ ...pageConfig, yearsExperience: parseInt(e.target.value) || 0 })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                min="0"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Certificaciones
+              </label>
+              <div className="flex gap-2 mb-3">
+                <input
+                  type="text"
+                  value={certificationInput}
+                  onChange={(e) => setCertificationInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCertification())}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="Ej: Diplomada en Acupuntura Estética"
+                />
+                <button
+                  type="button"
+                  onClick={addCertification}
+                  className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark"
+                >
+                  <Plus size={20} />
+                </button>
+              </div>
+
+              {pageConfig.certifications.length > 0 && (
+                <div className="space-y-2">
+                  {pageConfig.certifications.map((cert, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                    >
+                      <span className="text-sm text-gray-700">{cert}</span>
+                      <button
+                        onClick={() => removeCertification(index)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <X size={18} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Video URL (YouTube/Vimeo) - Opcional
+              </label>
+              <input
+                type="url"
+                value={pageConfig.videoUrl}
+                onChange={(e) => setPageConfig({ ...pageConfig, videoUrl: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="https://www.youtube.com/watch?v=..."
+              />
+            </div>
+          </div>
+
+          {/* Preview */}
+          {showPreview && (
+            <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <Eye size={24} />
+                Vista Previa
+              </h2>
+
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 space-y-6">
+                {/* Hero Preview */}
+                {pageConfig.heroImage && (
+                  <div className="relative h-64 rounded-lg overflow-hidden">
+                    <Image
+                      src={pageConfig.heroImage}
+                      alt={pageConfig.heroTitle}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+
+                <div className="text-center">
+                  <h1 className="text-4xl font-bold text-primary mb-2">
+                    {pageConfig.heroTitle || 'Título'}
+                  </h1>
+                  <p className="text-xl text-gray-600">
+                    {pageConfig.heroSubtitle || 'Subtítulo'}
+                  </p>
+                </div>
+
+                {/* Biography Preview */}
+                {pageConfig.biography && (
+                  <div className="p-6 border-t">
+                    <h3 className="font-semibold text-lg mb-3">Biografía</h3>
+                    <div 
+                      className="prose prose-sm max-w-none"
+                      dangerouslySetInnerHTML={{ __html: pageConfig.biography }}
+                    />
+                  </div>
+                )}
+
+                {/* Philosophy Preview */}
+                {pageConfig.philosophy && (
+                  <div className="p-6 border-t">
+                    <h3 className="font-semibold text-lg mb-3">Mi Filosofía</h3>
+                    <div 
+                      className="prose prose-sm max-w-none"
+                      dangerouslySetInnerHTML={{ __html: pageConfig.philosophy }}
+                    />
+                  </div>
+                )}
+
+                {/* Datos Preview */}
+                {(pageConfig.yearsExperience > 0 || pageConfig.certifications.length > 0) && (
+                  <div className="p-6 bg-gray-50 rounded-lg">
+                    {pageConfig.yearsExperience > 0 && (
+                      <div className="mb-4">
+                        <p className="text-3xl font-bold text-primary">{pageConfig.yearsExperience}+</p>
+                        <p className="text-sm text-gray-600">Años de experiencia</p>
+                      </div>
+                    )}
+
+                    {pageConfig.certifications.length > 0 && (
+                      <div>
+                        <h3 className="font-semibold mb-2">Certificaciones:</h3>
+                        <ul className="space-y-1">
+                          {pageConfig.certifications.map((cert, i) => (
+                            <li key={i} className="text-sm text-gray-700">• {cert}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <p className="text-xs text-gray-500 text-center">
+                💡 Vista previa aproximada. Guarda para ver en la web.
+              </p>
+            </div>
+          )}
+
+          {/* Guardar Página */}
+          <div className="flex gap-4 justify-end bg-white rounded-xl shadow-sm p-6">
+            <button
+              onClick={handleSavePage}
+              disabled={saving}
+              className="flex items-center gap-2 px-8 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50"
+            >
+              <Save size={20} />
+              {saving ? 'Guardando...' : 'Guardar Cambios'}
+            </button>
+          </div>
+
+          {/* Aviso */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm text-blue-800">
+              💡 <strong>Tip:</strong> Una buena biografía cuenta tu historia, experiencia y filosofía de trabajo. Sé auténtica y cercana.
+            </p>
+          </div>
+        </>
       )}
 
-      {/* Contenido de Sección en Portada */}
+      {/* PESTAÑA: SECCIÓN EN PORTADA */}
       {activeTab === 'home' && (
         <>
           {/* Imagen */}
@@ -444,7 +740,7 @@ export default function SobreMiPage() {
                     onChange={(e) => setHomeConfig({ ...homeConfig, active: e.target.checked })}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-check bg-primary"></div>
                 </label>
                 <span className="text-sm font-medium text-gray-700">
                   Mostrar esta sección en la portada
