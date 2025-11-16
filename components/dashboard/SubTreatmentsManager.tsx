@@ -239,9 +239,12 @@ export default function SubTreatmentsManager({ serviceId }: SubTreatmentsManager
                 Imagen (opcional)
               </label>
               <ImageUploader
-                currentImage={formData.imageUrl}
-                onImageUploaded={(url) => setFormData({ ...formData, imageUrl: url })}
-                onImageRemoved={() => setFormData({ ...formData, imageUrl: '' })}
+             value={formData.imageUrl}
+onChange={(url) => ...}
+onRemove={() => ...}
+label=""
+aspectRatio="4/3"
+maxSizeMB={3}
               />
             </div>
 
