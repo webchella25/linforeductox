@@ -48,7 +48,6 @@ export default function ReservarClient() {
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [loadingServices, setLoadingServices] = useState(true);
 
-  // ✅ NUEVO: Cargar colores dinámicos
   const [colors, setColors] = useState<SiteConfig>({
     primaryColor: '#2C5F2D',
     primaryDark: '#1e3d1f',
@@ -65,7 +64,6 @@ export default function ReservarClient() {
     clientNotes: '',
   });
 
-  // ✅ Cargar colores al montar
   useEffect(() => {
     fetchColors();
     fetchServices();
@@ -134,14 +132,14 @@ export default function ReservarClient() {
   const handleServiceSelect = (service: Service) => {
     setSelectedService(service);
     setStep(2);
-    setSelectedDate(undefined);
+    setSelectedDate(null);
     setSelectedSlot(null);
   };
 
-const handleDateSelect = (date: Date) => {
-  setSelectedDate(date);
-  setSelectedSlot(null);
-};
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date);
+    setSelectedSlot(null);
+  };
 
   const handleSlotSelect = (slot: TimeSlot) => {
     setSelectedSlot(slot);
@@ -207,12 +205,8 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
   };
 
   const today = startOfDay(new Date());
+  const minDate = today;
   const maxDate = addDays(today, 60);
-
-  const disabledDays = [
-    { before: today },
-    { after: maxDate }
-  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cream via-white to-cream/50 py-20">
@@ -310,65 +304,67 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
           </div>
         )}
 
-{/* Step 2: Fecha y Hora - VERSIÓN ORIGINAL QUE FUNCIONABA */}
-{step === 2 && selectedService && (
-  <div className="bg-white rounded-2xl shadow-lg p-8 max-w-4xl mx-auto">
-    <h2 className="font-heading text-2xl font-bold text-primary mb-6">
-      Selecciona Fecha y Hora - {selectedService.name}
-    </h2>
-    
-    {/* Calendario simple */}
-    <div className="grid md:grid-cols-2 gap-8">
-      <div>
-        <h3 className="font-semibold mb-4">Selecciona una fecha</h3>
-        <input
-          type="date"
-          min={format(minDate, 'yyyy-MM-dd')}
-          max={format(maxDate, 'yyyy-MM-dd')}
-          value={selectedDate ? format(selectedDate, 'yyyy-MM-dd') : ''}
-          onChange={(e) => handleDateSelect(new Date(e.target.value))}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-        />
-      </div>
+        {step === 2 && selectedService && (
+          <div className="bg-white rounded-2xl shadow-lg p-8 max-w-4xl mx-auto">
+            <h2 className="font-heading text-2xl font-bold mb-6" style={{ color: colors.primaryColor }}>
+              Selecciona Fecha y Hora - {selectedService.name}
+            </h2>
+            
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="font-semibold mb-4">Selecciona una fecha</h3>
+                <input
+                  type="date"
+                  min={format(minDate, 'yyyy-MM-dd')}
+                  max={format(maxDate, 'yyyy-MM-dd')}
+                  value={selectedDate ? format(selectedDate, 'yyyy-MM-dd') : ''}
+                  onChange={(e) => handleDateSelect(new Date(e.target.value))}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  style={{
+                    colorScheme: 'light',
+                  }}
+                />
+              </div>
 
-      <div>
-        <h3 className="font-semibold mb-4">Horarios disponibles</h3>
-        {!selectedDate ? (
-          <p className="text-gray-500 text-sm">
-            Selecciona primero una fecha
-          </p>
-        ) : loadingSlots ? (
-          <div className="flex justify-center py-8">
-            <Loader2 className="animate-spin text-primary" size={30} />
-          </div>
-        ) : availableSlots.length === 0 ? (
-          <p className="text-gray-500 text-sm">
-            No hay horarios disponibles para esta fecha
-          </p>
-        ) : (
-          <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
-            {availableSlots.map((slot, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleSlotSelect(slot)}
-                className="p-3 border-2 border-gray-200 rounded-lg hover:border-primary hover:bg-cream transition-all text-sm font-medium"
-              >
-                {slot.startTime}
-              </button>
-            ))}
+              <div>
+                <h3 className="font-semibold mb-4">Horarios disponibles</h3>
+                {!selectedDate ? (
+                  <p className="text-gray-500 text-sm">
+                    Selecciona primero una fecha
+                  </p>
+                ) : loadingSlots ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="animate-spin" style={{ color: colors.primaryColor }} size={30} />
+                  </div>
+                ) : availableSlots.length === 0 ? (
+                  <p className="text-gray-500 text-sm">
+                    No hay horarios disponibles para esta fecha
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
+                    {availableSlots.map((slot, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSlotSelect(slot)}
+                        className="p-3 border-2 border-gray-200 rounded-lg hover:border-primary hover:bg-cream transition-all text-sm font-medium"
+                      >
+                        {slot.startTime}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <button
+              onClick={() => setStep(1)}
+              className="mt-6 hover:underline font-medium"
+              style={{ color: colors.primaryColor }}
+            >
+              ← Cambiar servicio
+            </button>
           </div>
         )}
-      </div>
-    </div>
-
-    <button
-      onClick={() => setStep(1)}
-      className="mt-6 text-primary hover:underline"
-    >
-      ← Cambiar servicio
-    </button>
-  </div>
-)}
 
         {step === 3 && selectedService && selectedDate && selectedSlot && (
           <div className="bg-white rounded-2xl shadow-lg p-8 max-w-2xl mx-auto">
@@ -597,7 +593,6 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
           </div>
         )}
       </div>
-
     </div>
   );
 }
