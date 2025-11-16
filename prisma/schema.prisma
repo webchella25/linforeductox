@@ -387,6 +387,29 @@ model HomeSection {
   @@map("home_sections")
 }
 
+// ✅ AGREGAR ESTE MODELO AL FINAL DEL ARCHIVO, ANTES DE LOS ENUMS
+
+model SeoAnalytics {
+  id                      String   @id @default(cuid())
+  
+  // Google Search Console
+  googleSearchConsole     String?  // Meta tag verification code
+  
+  // Google Analytics 4
+  googleAnalyticsId       String?  // G-XXXXXXXXXX
+  
+  // Meta Pixel (Facebook)
+  metaPixelId             String?  // Número del pixel
+  
+  // Google Tag Manager
+  googleTagManagerId      String?  // GTM-XXXXXXX
+  
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  
+  @@map("seo_analytics")
+}
+
 enum EventStatus {
   DRAFT       // Borrador (no visible)
   UPCOMING    // Próximo

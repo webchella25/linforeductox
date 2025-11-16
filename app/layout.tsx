@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import { Toaster } from "react-hot-toast";
 import { SessionProvider } from "next-auth/react";
 import CookieBanner from '@/components/CookieBanner';
+import SeoAnalyticsScripts from '@/components/SeoAnalyticsScripts';
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -128,6 +129,7 @@ export default function RootLayout({
         />
         {/* ✅ CSS Dinámico de Colores */}
         <link rel="stylesheet" href="/api/config/colors/css" />
+		<SeoAnalyticsScripts /> {/* ✅ AGREGAR ESTA LÍNEA */}
       </head>
       <body className={`${playfair.variable} ${inter.variable} antialiased`}>
         <SessionProvider>

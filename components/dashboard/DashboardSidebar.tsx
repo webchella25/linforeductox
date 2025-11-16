@@ -18,6 +18,7 @@ import {
   Phone,
   Palette,
   User,
+  BarChart3,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -81,6 +82,11 @@ const menuItems = [
       href: '/dashboard/configuracion/colores',
       label: 'Colores de la Web',
       icon: Palette,
+    },
+	{
+      href: '/dashboard/configuracion/seo-analytics',  // ✅ AGREGAR
+      label: 'SEO y Analytics',
+      icon: BarChart3,
     },
   ],
 },
