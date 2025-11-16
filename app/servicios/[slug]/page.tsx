@@ -34,7 +34,7 @@ async function getService(slug: string) {
         faqs: {
           orderBy: { order: 'asc' }
         },
-        subTreatments: {  // ✅ NUEVO
+        subTreatments: {
           where: { active: true },
           orderBy: { order: 'asc' }
         }
@@ -47,7 +47,6 @@ async function getService(slug: string) {
   }
 }
 
-// ✅ SEO dinámico para cada servicio
 export async function generateMetadata({ params }: ServicePageProps): Promise<Metadata> {
   const { slug } = await params;
   const service = await getService(slug);
@@ -61,15 +60,14 @@ export async function generateMetadata({ params }: ServicePageProps): Promise<Me
 
   const title = `${service.name} | LINFOREDUCTOX - Estética y Medicina Ancestral`;
   const description = service.description?.slice(0, 160) || 
-    `Descubre los beneficios del ${service.name}. Tratamiento de ${service.duration} minutos en Madrid.`;
+    `Descubre los beneficios del ${service.name}. Tratamiento de ${service.duration} minutos en Errenteria.`;
 
-  // ✅ Usar heroImage si existe, sino imagen por defecto
   const ogImage = service.heroImage || 'https://linforeductox.com/og-image.jpg';
 
   return {
     title,
     description,
-    keywords: `${service.name}, ${service.category}, estética, medicina ancestral, Madrid, drenaje linfático, ${service.conditions?.join(', ')}`,
+    keywords: `${service.name}, ${service.category}, estética, medicina ancestral, Errenteria, drenaje linfático, ${service.conditions?.join(', ')}`,
     openGraph: {
       title,
       description,
@@ -98,7 +96,6 @@ export async function generateMetadata({ params }: ServicePageProps): Promise<Me
   };
 }
 
-// Mapeo de categorías a colores e imágenes por defecto
 const categoryConfig: Record<string, {
   gradient: string;
   image: string;
@@ -136,7 +133,6 @@ export default async function ServicePage({ params }: ServicePageProps) {
 
   const config = categoryConfig[service.category] || categoryConfig.otro;
   
-  // ✅ Parsear FAQs desde JSON de forma segura
   let faqs: FAQ[] = [];
   
   try {
@@ -151,7 +147,6 @@ export default async function ServicePage({ params }: ServicePageProps) {
     faqs = [];
   }
 
-  // ✅ Parsear imágenes adicionales
   let contentImages: ServiceImage[] = [];
   try {
     if (service.images) {
@@ -168,7 +163,6 @@ export default async function ServicePage({ params }: ServicePageProps) {
     contentImages = [];
   }
 
-  // ✅ Schema.org JSON-LD para FAQ
   const faqSchema = faqs.length > 0 ? {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -182,7 +176,6 @@ export default async function ServicePage({ params }: ServicePageProps) {
     })),
   } : null;
 
-  // ✅ Schema.org JSON-LD para Service
   const serviceSchema = {
     '@context': 'https://schema.org',
     '@type': 'Service',
@@ -194,14 +187,14 @@ export default async function ServicePage({ params }: ServicePageProps) {
       name: 'LINFOREDUCTOX',
       address: {
         '@type': 'PostalAddress',
-        addressLocality: 'Madrid',
-        addressRegion: 'Madrid',
+        addressLocality: 'Errenteria',
+        addressRegion: 'Gipuzkoa',
         addressCountry: 'ES',
       },
     },
     areaServed: {
       '@type': 'City',
-      name: 'Madrid',
+      name: 'Errenteria',
     },
     ...(service.price && {
       offers: {
@@ -212,12 +205,10 @@ export default async function ServicePage({ params }: ServicePageProps) {
     }),
   };
 
-  // ✅ Usar heroImage si existe, sino imagen por defecto
   const heroImageUrl = service.heroImage || config.image;
 
   return (
     <>
-      {/* ✅ Schema.org JSON-LD */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
@@ -229,9 +220,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
         />
       )}
 
-      {/* ✅ Hero Section con imagen dinámica */}
       <section className="relative h-[60vh] min-h-[500px] flex items-center justify-center overflow-hidden">
-        {/* Imagen de fondo */}
         <div className="absolute inset-0">
           <Image
             src={heroImageUrl}
@@ -240,12 +229,11 @@ export default async function ServicePage({ params }: ServicePageProps) {
             className="object-cover"
             priority
             sizes="100vw"
-  unoptimized  // ✅ AGREGAR
-/>
+            unoptimized
+          />
           <div className={`absolute inset-0 bg-gradient-to-r ${config.gradient}`} />
         </div>
 
-        {/* Contenido */}
         <div className="relative z-10 container-custom text-center text-white">
           <div className="inline-block bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
             <span className="text-white font-semibold capitalize">
@@ -269,7 +257,6 @@ export default async function ServicePage({ params }: ServicePageProps) {
         </div>
       </section>
 
-      {/* ✅ Descripción + Primera Imagen (Layout Alternado) */}
       <section className="section-padding bg-white">
         <div className="container-custom max-w-6xl">
           <h2 className="font-heading text-4xl font-bold text-primary mb-12 text-center">
@@ -277,15 +264,12 @@ export default async function ServicePage({ params }: ServicePageProps) {
           </h2>
           
           {contentImages.length > 0 ? (
-            // Layout con imagen
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div 
-  className="prose prose-lg max-w-none text-gray-700 leading-relaxed"
-  dangerouslySetInnerHTML={{ __html: service.description }}
-/>
-              </div>
+                className="prose prose-lg max-w-none text-gray-700 leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: service.description }}
+              />
               
-              {/* Primera imagen */}
               <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-2xl">
                 <Image
                   src={contentImages[0].url}
@@ -293,72 +277,68 @@ export default async function ServicePage({ params }: ServicePageProps) {
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 50vw"
-				    unoptimized  // ✅ AGREGAR
+                  unoptimized
                 />
               </div>
             </div>
           ) : (
-            // Sin imágenes, solo texto centrado
-            <div className="prose prose-lg max-w-4xl mx-auto text-gray-700 leading-relaxed">
-              <p 
-  className="text-gray-600 line-clamp-4"
-  dangerouslySetInnerHTML={{ __html: subTreatment.description }}
-/>>
-            </div>
+            <div 
+              className="prose prose-lg max-w-4xl mx-auto text-gray-700 leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: service.description }}
+            />
           )}
         </div>
       </section>
 
-{/* ✅ SUBTRATAMIENTOS - Cards lado a lado */}
-{service.subTreatments && service.subTreatments.length > 0 && (
-  <section className="py-16 bg-cream/30">
-    <div className="container-custom">
-      <h2 className="font-heading text-3xl md:text-4xl font-bold text-center text-primary mb-4">
-        Tipos de {service.name}
-      </h2>
-      <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-        Descubre las diferentes variantes de este tratamiento
-      </p>
+      {service.subTreatments && service.subTreatments.length > 0 && (
+        <section className="py-16 bg-cream/30">
+          <div className="container-custom">
+            <h2 className="font-heading text-3xl md:text-4xl font-bold text-center text-primary mb-4">
+              Tipos de {service.name}
+            </h2>
+            <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+              Descubre las diferentes variantes de este tratamiento
+            </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {service.subTreatments.map((subTreatment) => (
-          <div
-            key={subTreatment.id}
-            className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
-          >
-            {subTreatment.imageUrl && (
-              <div className="relative h-48 w-full">
-                <Image
-                  src={subTreatment.imageUrl}
-                  alt={subTreatment.name}
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
-              </div>
-            )}
-            <div className="p-6">
-              <h3 className="font-heading text-xl font-bold text-primary mb-3">
-                {subTreatment.name}
-              </h3>
-              <p className="text-gray-600 mb-4">
-                {subTreatment.description}
-              </p>
-              {subTreatment.duration && (
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <Clock size={16} />
-                  <span>{subTreatment.duration} minutos</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {service.subTreatments.map((subTreatment) => (
+                <div
+                  key={subTreatment.id}
+                  className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
+                >
+                  {subTreatment.imageUrl && (
+                    <div className="relative h-48 w-full">
+                      <Image
+                        src={subTreatment.imageUrl}
+                        alt={subTreatment.name}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
+                    </div>
+                  )}
+                  <div className="p-6">
+                    <h3 className="font-heading text-xl font-bold text-primary mb-3">
+                      {subTreatment.name}
+                    </h3>
+                    <div 
+                      className="text-gray-600 mb-4 line-clamp-4"
+                      dangerouslySetInnerHTML={{ __html: subTreatment.description }}
+                    />
+                    {subTreatment.duration && (
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <Clock size={16} />
+                        <span>{subTreatment.duration} minutos</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
+              ))}
             </div>
           </div>
-        ))}
-      </div>
-    </div>
-  </section>
-)}
+        </section>
+      )}
 
-      {/* ✅ Beneficios + Segunda Imagen (si existe) */}
       {service.benefits && service.benefits.length > 0 && (
         <section className="section-padding bg-cream">
           <div className="container-custom max-w-6xl">
@@ -367,9 +347,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
             </h2>
             
             {contentImages.length > 1 ? (
-              // Layout revista: Imagen izquierda + Beneficios derecha
               <div className="grid md:grid-cols-2 gap-12 items-start">
-                {/* Segunda imagen */}
                 <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl order-2 md:order-1">
                   <Image
                     src={contentImages[1].url}
@@ -377,11 +355,10 @@ export default async function ServicePage({ params }: ServicePageProps) {
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 50vw"
-					  unoptimized  // ✅ AGREGAR
+                    unoptimized
                   />
                 </div>
 
-                {/* Beneficios */}
                 <div className="space-y-4 order-1 md:order-2">
                   {service.benefits.map((benefit, index) => (
                     <div
@@ -397,7 +374,6 @@ export default async function ServicePage({ params }: ServicePageProps) {
                 </div>
               </div>
             ) : (
-              // Sin segunda imagen, grid normal
               <div className="grid md:grid-cols-2 gap-4 max-w-4xl mx-auto">
                 {service.benefits.map((benefit, index) => (
                   <div
@@ -416,7 +392,6 @@ export default async function ServicePage({ params }: ServicePageProps) {
         </section>
       )}
 
-      {/* ✅ Indicado para + Tercera Imagen (si existe) */}
       {service.conditions && service.conditions.length > 0 && (
         <section className="section-padding bg-white">
           <div className="container-custom max-w-6xl">
@@ -425,9 +400,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
             </h2>
             
             {contentImages.length > 2 ? (
-              // Layout revista: Condiciones izquierda + Imagen derecha
               <div className="grid md:grid-cols-2 gap-12 items-start">
-                {/* Condiciones */}
                 <div className="space-y-4">
                   {service.conditions.map((condition, index) => (
                     <div
@@ -440,7 +413,6 @@ export default async function ServicePage({ params }: ServicePageProps) {
                   ))}
                 </div>
 
-                {/* Tercera imagen */}
                 <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl">
                   <Image
                     src={contentImages[2].url}
@@ -448,12 +420,11 @@ export default async function ServicePage({ params }: ServicePageProps) {
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 50vw"
-					  unoptimized  // ✅ AGREGAR
+                    unoptimized
                   />
                 </div>
               </div>
             ) : (
-              // Sin tercera imagen, grid normal
               <div className="grid md:grid-cols-2 gap-4 max-w-4xl mx-auto">
                 {service.conditions.map((condition, index) => (
                   <div
@@ -470,7 +441,6 @@ export default async function ServicePage({ params }: ServicePageProps) {
         </section>
       )}
 
-      {/* ✅ SECCIÓN FAQs */}
       {faqs.length > 0 && (
         <section className="section-padding bg-gradient-to-b from-cream to-white">
           <div className="container-custom max-w-4xl">
@@ -488,11 +458,9 @@ export default async function ServicePage({ params }: ServicePageProps) {
         </section>
       )}
 
-      {/* Información adicional */}
       <section className="section-padding bg-white">
         <div className="container-custom max-w-4xl">
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Duración */}
             <div className="bg-white rounded-xl p-8 text-center shadow-md">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Clock size={32} className="text-primary" />
@@ -505,7 +473,6 @@ export default async function ServicePage({ params }: ServicePageProps) {
               </p>
             </div>
 
-            {/* Precio */}
             {service.price && (
               <div className="bg-white rounded-xl p-8 text-center shadow-md">
                 <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
@@ -520,7 +487,6 @@ export default async function ServicePage({ params }: ServicePageProps) {
               </div>
             )}
 
-            {/* Categoría */}
             <div className="bg-white rounded-xl p-8 text-center shadow-md">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">
                 {config.icon}
@@ -536,7 +502,6 @@ export default async function ServicePage({ params }: ServicePageProps) {
         </div>
       </section>
 
-      {/* CTA Final */}
       <section className="section-padding bg-primary text-white">
         <div className="container-custom max-w-4xl text-center">
           <h2 className="font-heading text-4xl md:text-5xl font-bold mb-6">
@@ -556,7 +521,6 @@ export default async function ServicePage({ params }: ServicePageProps) {
         </div>
       </section>
 
-      {/* Servicios Relacionados */}
       <section className="section-padding bg-cream">
         <div className="container-custom">
           <div className="text-center mb-12">
