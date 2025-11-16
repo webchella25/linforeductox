@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Save, X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ImageUploader from './ImageUploader';
+import RichTextEditor from './RichTextEditor';
 
 interface SubTreatment {
   id: string;
@@ -195,13 +196,10 @@ export default function SubTreatmentsManager({ serviceId }: SubTreatmentsManager
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Descripción *
               </label>
-              <textarea
-                required
+              <RichTextEditor
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows={3}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="Descripción breve del subtratamiento..."
+                onChange={(value) => setFormData({ ...formData, description: value })}
+                placeholder="Descripción breve del subtratamiento con formato..."
               />
             </div>
 

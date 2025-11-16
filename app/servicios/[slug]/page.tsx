@@ -279,8 +279,10 @@ export default async function ServicePage({ params }: ServicePageProps) {
           {contentImages.length > 0 ? (
             // Layout con imagen
             <div className="grid md:grid-cols-2 gap-12 items-center">
-              <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
-                <p className="text-xl">{service.description}</p>
+              <div 
+  className="prose prose-lg max-w-none text-gray-700 leading-relaxed"
+  dangerouslySetInnerHTML={{ __html: service.description }}
+/>
               </div>
               
               {/* Primera imagen */}
@@ -298,7 +300,10 @@ export default async function ServicePage({ params }: ServicePageProps) {
           ) : (
             // Sin imágenes, solo texto centrado
             <div className="prose prose-lg max-w-4xl mx-auto text-gray-700 leading-relaxed">
-              <p className="text-xl text-center">{service.description}</p>
+              <p 
+  className="text-gray-600 line-clamp-4"
+  dangerouslySetInnerHTML={{ __html: subTreatment.description }}
+/>>
             </div>
           )}
         </div>

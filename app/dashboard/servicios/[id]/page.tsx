@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import ImageUploader from '@/components/dashboard/ImageUploader';
 import GalleryManager from '@/components/dashboard/GalleryManager';
 import SubTreatmentsManager from '@/components/dashboard/SubTreatmentsManager';
+import RichTextEditor from '@/components/dashboard/RichTextEditor';
 
 interface ServiceFormData {
   name: string;
@@ -355,17 +356,15 @@ export default function EditServicePage({ params }: PageProps) {
             </div>
           </div>
 
+          {/* Descripción */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Descripción *
             </label>
-            <textarea
-              required
-              rows={6}
+            <RichTextEditor
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-              placeholder="Descripción completa del servicio..."
+              onChange={(value) => setFormData({ ...formData, description: value })}
+              placeholder="Descripción completa del servicio con formato rico..."
             />
           </div>
         </div>
@@ -398,13 +397,6 @@ export default function EditServicePage({ params }: PageProps) {
             />
           </div>
         </div>
-
-        {/* ✅ SUBTRATAMIENTOS - Solo mostrar si NO es nuevo */}
-        {!isNew && (
-          <div className="mt-8">
-            <SubTreatmentsManager serviceId={resolvedParams.id} />
-          </div>
-        )}
 
         {/* Beneficios */}
         <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
@@ -512,20 +504,28 @@ export default function EditServicePage({ params }: PageProps) {
                       <X size={18} />
                     </button>
                   </div>
-                  <input
-                    type="text"
-                    value={faq.question}
-                    onChange={(e) => handleFaqChange(index, 'question', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                    placeholder="Pregunta"
-                  />
-                  <textarea
-                    value={faq.answer}
-                    onChange={(e) => handleFaqChange(index, 'answer', e.target.value)}
-                    rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                    placeholder="Respuesta"
-                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Pregunta
+                    </label>
+                    <input
+                      type="text"
+                      value={faq.question}
+                      onChange={(e) => handleFaqChange(index, 'question', e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="¿Cuánto dura el tratamiento?"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Respuesta
+                    </label>
+                    <RichTextEditor
+                      value={faq.answer}
+                      onChange={(value) => handleFaqChange(index, 'answer', value)}
+                      placeholder="Escribe la respuesta con formato..."
+                    />
+                  </div>
                 </div>
               ))}
             </div>
@@ -559,6 +559,12 @@ export default function EditServicePage({ params }: PageProps) {
           </button>
         </div>
       </form>
+	          {/* ✅ SUBTRATAMIENTOS - Solo mostrar si NO es nuevo */}
+        {!isNew && (
+          <div className="mt-8">
+            <SubTreatmentsManager serviceId={resolvedParams.id} />
+          </div>
+        )}
     </div>
   );
 }
