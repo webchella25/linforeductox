@@ -179,7 +179,7 @@ export default function TestimonialsPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-        />
+      />
       
       <div className="min-h-screen bg-cream">
         {/* Hero Section */}
@@ -188,9 +188,18 @@ export default function TestimonialsPage() {
             <div className="text-center">
               <h1 className="text-5xl font-bold mb-4">Lo Que Dicen Nuestros Clientes</h1>
               <p className="text-2xl opacity-90 mb-6">Experiencias Reales de Personas Reales</p>
-              <p className="text-lg opacity-80 max-w-3xl mx-auto">
+              <p className="text-lg opacity-80 max-w-3xl mx-auto mb-8">
                 La satisfacción de nuestros clientes es nuestra mayor recompensa.
               </p>
+              
+              {/* ✅ NUEVO: Botón para dejar testimonio */}
+              <Link
+                href="/testimonios/nuevo"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-white text-primary font-semibold rounded-full hover:bg-cream transition-colors shadow-lg"
+              >
+                <Star size={20} />
+                Comparte tu Experiencia
+              </Link>
             </div>
           </div>
         </section>
@@ -203,9 +212,16 @@ export default function TestimonialsPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {!testimonials || testimonials.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-xl text-gray-600">
+                <p className="text-xl text-gray-600 mb-6">
                   Aún no hay testimonios disponibles.
                 </p>
+                <Link
+                  href="/testimonios/nuevo"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                >
+                  <Star size={18} />
+                  Sé el Primero en Compartir
+                </Link>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
