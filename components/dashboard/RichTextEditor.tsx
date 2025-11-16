@@ -5,11 +5,11 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import Link from '@tiptap/extension-link';
-import TextAlign from '@tiptap/extension-text-align';
-import Underline from '@tiptap/extension-underline';
-import TextStyle from '@tiptap/extension-text-style';
+import { TextAlign } from '@tiptap/extension-text-align';
+import { Underline } from '@tiptap/extension-underline';
+import { TextStyle } from '@tiptap/extension-text-style';  // ✅ Con llaves
 import { Color } from '@tiptap/extension-color';
-import FontFamily from '@tiptap/extension-font-family';
+import { FontFamily } from '@tiptap/extension-font-family';  // ✅ Con llaves
 import { 
   Bold, 
   Italic, 
