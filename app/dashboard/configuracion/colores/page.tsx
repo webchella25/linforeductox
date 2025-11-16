@@ -2,12 +2,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, RotateCcw, Palette } from 'lucide-react';
+import { Save, RotateCcw, Palette, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const PRESETS = {
   verde: {
     name: 'Verde Natural',
+    emoji: '🌿',
     primaryColor: '#2C5F2D',
     primaryDark: '#1e3d1f',
     secondaryColor: '#A27B5C',
@@ -16,6 +17,7 @@ const PRESETS = {
   },
   dorado: {
     name: 'Dorado Elegante',
+    emoji: '✨',
     primaryColor: '#B8860B',
     primaryDark: '#8B6914',
     secondaryColor: '#D4AF37',
@@ -24,6 +26,7 @@ const PRESETS = {
   },
   rosa: {
     name: 'Rosa Suave',
+    emoji: '🌸',
     primaryColor: '#C97D8C',
     primaryDark: '#A35866',
     secondaryColor: '#E8B4BC',
@@ -32,11 +35,66 @@ const PRESETS = {
   },
   azul: {
     name: 'Azul Relajante',
+    emoji: '💙',
     primaryColor: '#4A7C9C',
     primaryDark: '#2D5A75',
     secondaryColor: '#7BA8C0',
     secondaryLight: '#A1C4D9',
     creamColor: '#F0F8FF',
+  },
+  lavanda: {
+    name: 'Lavanda Zen',
+    emoji: '💜',
+    primaryColor: '#8B7FB8',
+    primaryDark: '#6B5D8F',
+    secondaryColor: '#B8A8D8',
+    secondaryLight: '#D4C8E8',
+    creamColor: '#F9F7FC',
+  },
+  tierra: {
+    name: 'Tierra & Bambú',
+    emoji: '🪵',
+    primaryColor: '#5C4033',
+    primaryDark: '#3E2723',
+    secondaryColor: '#8D6E63',
+    secondaryLight: '#A1887F',
+    creamColor: '#EFEBE9',
+  },
+  menta: {
+    name: 'Menta Fresca',
+    emoji: '🍃',
+    primaryColor: '#58A09B',
+    primaryDark: '#3D7873',
+    secondaryColor: '#8BC4BC',
+    secondaryLight: '#B2D8D4',
+    creamColor: '#F0F8F7',
+  },
+  coral: {
+    name: 'Coral Cálido',
+    emoji: '🌺',
+    primaryColor: '#E87461',
+    primaryDark: '#C75A49',
+    secondaryColor: '#F4A79D',
+    secondaryLight: '#FAC8C1',
+    creamColor: '#FFF5F3',
+  },
+  oceano: {
+    name: 'Océano Profundo',
+    emoji: '🌊',
+    primaryColor: '#2E7D8C',
+    primaryDark: '#1F5662',
+    secondaryColor: '#5FA8BA',
+    secondaryLight: '#8AC4D0',
+    creamColor: '#F0F9FB',
+  },
+  jade: {
+    name: 'Jade Imperial',
+    emoji: '💎',
+    primaryColor: '#00A86B',
+    primaryDark: '#007A4D',
+    secondaryColor: '#3FC380',
+    secondaryLight: '#7FD8A3',
+    creamColor: '#F0FBF7',
   },
 };
 
@@ -103,78 +161,101 @@ export default function ColoresPage() {
       ...colors,
       ...PRESETS[preset],
     });
-    toast.success(`Preset "${PRESETS[preset].name}" aplicado`);
+    toast.success(`Paleta "${PRESETS[preset].name}" aplicada`);
   };
 
   if (loading) {
-    return <div className="flex justify-center p-12">Cargando...</div>;
+    return (
+      <div className="flex justify-center items-center p-12">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando colores...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Colores de la Web</h1>
-        <p className="text-gray-600 mt-2">
-          Personaliza los colores principales de tu sitio web
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Colores de la Web</h1>
+          <p className="text-gray-600 mt-2">
+            Elige una paleta predefinida o crea la tuya personalizada
+          </p>
+        </div>
+        <Palette size={40} className="text-primary" />
       </div>
 
-      {/* Presets */}
+      {/* ✅ PALETAS PREDEFINIDAS (10 opciones) */}
       <div className="bg-white rounded-xl shadow-sm p-6">
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <Palette size={24} />
-          Estilos Predefinidos
+        <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+          <Sparkles size={24} className="text-primary" />
+          Paletas Predefinidas
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {Object.entries(PRESETS).map(([key, preset]) => (
             <button
               key={key}
               onClick={() => applyPreset(key as keyof typeof PRESETS)}
-              className="p-4 border-2 border-gray-200 rounded-lg hover:border-primary transition-colors"
+              className="group p-4 border-2 border-gray-200 rounded-xl hover:border-primary hover:shadow-lg transition-all duration-200"
             >
-              <div className="flex gap-2 mb-2">
+              {/* Preview de colores */}
+              <div className="flex gap-1 mb-3">
                 <div
-                  className="w-8 h-8 rounded"
+                  className="w-full h-10 rounded-lg shadow-sm"
                   style={{ backgroundColor: preset.primaryColor }}
                 />
+              </div>
+              <div className="grid grid-cols-2 gap-1 mb-3">
                 <div
-                  className="w-8 h-8 rounded"
+                  className="h-6 rounded shadow-sm"
                   style={{ backgroundColor: preset.secondaryColor }}
                 />
                 <div
-                  className="w-8 h-8 rounded border border-gray-300"
+                  className="h-6 rounded shadow-sm border border-gray-300"
                   style={{ backgroundColor: preset.creamColor }}
                 />
               </div>
-              <p className="font-medium text-sm">{preset.name}</p>
+              
+              {/* Nombre */}
+              <div className="text-center">
+                <p className="text-2xl mb-1">{preset.emoji}</p>
+                <p className="font-semibold text-sm text-gray-800 group-hover:text-primary transition-colors">
+                  {preset.name}
+                </p>
+              </div>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Editor de Colores */}
+      {/* ✅ EDITOR PERSONALIZADO */}
       <div className="bg-white rounded-xl shadow-sm p-6">
-        <h2 className="text-xl font-semibold mb-6">Colores Personalizados</h2>
+        <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+          🎨 Paleta Personalizada
+        </h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Color Primario */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Color Primario
+              Color Primario Principal
             </label>
             <div className="flex gap-3">
               <input
                 type="color"
                 value={colors.primaryColor}
                 onChange={(e) => setColors({ ...colors, primaryColor: e.target.value })}
-                className="w-16 h-12 rounded border border-gray-300 cursor-pointer"
+                className="w-16 h-12 rounded-lg border border-gray-300 cursor-pointer"
               />
               <input
                 type="text"
                 value={colors.primaryColor}
                 onChange={(e) => setColors({ ...colors, primaryColor: e.target.value })}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg font-mono text-sm"
                 placeholder="#2C5F2D"
               />
             </div>
@@ -183,20 +264,20 @@ export default function ColoresPage() {
           {/* Color Primario Oscuro */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Color Primario Oscuro
+              Color Primario Oscuro (Hover)
             </label>
             <div className="flex gap-3">
               <input
                 type="color"
                 value={colors.primaryDark}
                 onChange={(e) => setColors({ ...colors, primaryDark: e.target.value })}
-                className="w-16 h-12 rounded border border-gray-300 cursor-pointer"
+                className="w-16 h-12 rounded-lg border border-gray-300 cursor-pointer"
               />
               <input
                 type="text"
                 value={colors.primaryDark}
                 onChange={(e) => setColors({ ...colors, primaryDark: e.target.value })}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg font-mono text-sm"
               />
             </div>
           </div>
@@ -204,20 +285,20 @@ export default function ColoresPage() {
           {/* Color Secundario */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Color Secundario (Dorado)
+              Color Secundario (Dorado/Acento)
             </label>
             <div className="flex gap-3">
               <input
                 type="color"
                 value={colors.secondaryColor}
                 onChange={(e) => setColors({ ...colors, secondaryColor: e.target.value })}
-                className="w-16 h-12 rounded border border-gray-300 cursor-pointer"
+                className="w-16 h-12 rounded-lg border border-gray-300 cursor-pointer"
               />
               <input
                 type="text"
                 value={colors.secondaryColor}
                 onChange={(e) => setColors({ ...colors, secondaryColor: e.target.value })}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg font-mono text-sm"
               />
             </div>
           </div>
@@ -232,18 +313,18 @@ export default function ColoresPage() {
                 type="color"
                 value={colors.secondaryLight}
                 onChange={(e) => setColors({ ...colors, secondaryLight: e.target.value })}
-                className="w-16 h-12 rounded border border-gray-300 cursor-pointer"
+                className="w-16 h-12 rounded-lg border border-gray-300 cursor-pointer"
               />
               <input
                 type="text"
                 value={colors.secondaryLight}
                 onChange={(e) => setColors({ ...colors, secondaryLight: e.target.value })}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg font-mono text-sm"
               />
             </div>
           </div>
 
-          {/* Color Crema */}
+          {/* Color Crema/Fondo */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Color de Fondo Suave
@@ -253,13 +334,13 @@ export default function ColoresPage() {
                 type="color"
                 value={colors.creamColor}
                 onChange={(e) => setColors({ ...colors, creamColor: e.target.value })}
-                className="w-16 h-12 rounded border border-gray-300 cursor-pointer"
+                className="w-16 h-12 rounded-lg border border-gray-300 cursor-pointer"
               />
               <input
                 type="text"
                 value={colors.creamColor}
                 onChange={(e) => setColors({ ...colors, creamColor: e.target.value })}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg font-mono text-sm"
               />
             </div>
           </div>
@@ -274,56 +355,99 @@ export default function ColoresPage() {
                 type="color"
                 value={colors.textColor}
                 onChange={(e) => setColors({ ...colors, textColor: e.target.value })}
-                className="w-16 h-12 rounded border border-gray-300 cursor-pointer"
+                className="w-16 h-12 rounded-lg border border-gray-300 cursor-pointer"
               />
               <input
                 type="text"
                 value={colors.textColor}
                 onChange={(e) => setColors({ ...colors, textColor: e.target.value })}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg font-mono text-sm"
               />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Preview */}
+      {/* ✅ PREVIEW EN VIVO */}
       <div className="bg-white rounded-xl shadow-sm p-6">
-        <h2 className="text-xl font-semibold mb-4">Vista Previa</h2>
-        <div className="space-y-4">
-          <div className="p-6 rounded-lg" style={{ backgroundColor: colors.creamColor }}>
+        <h2 className="text-xl font-semibold mb-6">👁️ Vista Previa</h2>
+        
+        <div className="space-y-6">
+          {/* Fondo con texto */}
+          <div 
+            className="p-8 rounded-xl shadow-inner"
+            style={{ backgroundColor: colors.creamColor }}
+          >
             <h3
-              className="text-2xl font-bold mb-2"
+              className="text-3xl font-bold mb-3"
               style={{ color: colors.primaryColor }}
             >
               Título Principal
             </h3>
-            <p style={{ color: colors.textColor }}>
+            <p style={{ color: colors.textColor }} className="mb-6 text-lg">
               Este es un texto de ejemplo con el color de texto principal.
+              Así se verán los párrafos en tu web.
             </p>
-            <div className="flex gap-4 mt-4">
+            
+            {/* Botones */}
+            <div className="flex flex-wrap gap-4">
               <button
-                className="px-6 py-3 rounded-lg text-white font-semibold"
+                className="px-6 py-3 rounded-lg text-white font-semibold shadow-md hover:shadow-lg transition-all"
                 style={{ backgroundColor: colors.primaryColor }}
               >
                 Botón Primario
               </button>
               <button
-                className="px-6 py-3 rounded-lg text-white font-semibold"
+                className="px-6 py-3 rounded-lg text-white font-semibold shadow-md hover:shadow-lg transition-all"
                 style={{ backgroundColor: colors.secondaryColor }}
               >
                 Botón Secundario
               </button>
+              <button
+                className="px-6 py-3 rounded-lg border-2 font-semibold transition-all"
+                style={{ 
+                  borderColor: colors.primaryColor,
+                  color: colors.primaryColor 
+                }}
+              >
+                Botón Outline
+              </button>
+            </div>
+          </div>
+
+          {/* Card de ejemplo */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="p-6 rounded-xl border-2" style={{ borderColor: colors.primaryColor }}>
+              <h4 className="font-bold text-lg mb-2" style={{ color: colors.primaryColor }}>
+                Tarjeta de Servicio
+              </h4>
+              <p style={{ color: colors.textColor }}>
+                Así se verá una tarjeta con borde primario.
+              </p>
+            </div>
+            
+            <div 
+              className="p-6 rounded-xl text-white"
+              style={{ 
+                background: `linear-gradient(135deg, ${colors.primaryColor}, ${colors.secondaryColor})`
+              }}
+            >
+              <h4 className="font-bold text-lg mb-2">
+                Gradiente Primario → Secundario
+              </h4>
+              <p className="opacity-90">
+                Combinación de colores primario y secundario.
+              </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Botones de Acción */}
+      {/* ✅ BOTONES DE ACCIÓN */}
       <div className="flex gap-4 justify-end bg-white rounded-xl shadow-sm p-6">
         <button
           onClick={fetchColors}
-          className="flex items-center gap-2 px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50"
+          className="flex items-center gap-2 px-6 py-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
         >
           <RotateCcw size={20} />
           Resetear
@@ -331,18 +455,27 @@ export default function ColoresPage() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50"
+          className="flex items-center gap-2 px-8 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md hover:shadow-lg"
         >
           <Save size={20} />
           {saving ? 'Guardando...' : 'Guardar Cambios'}
         </button>
       </div>
 
-      {/* Aviso */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm text-blue-800">
-          💡 <strong>Tip:</strong> Después de guardar los colores, recarga la página para ver los cambios aplicados en toda la web.
-        </p>
+      {/* ✅ AVISO IMPORTANTE */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 rounded-lg p-6">
+        <div className="flex gap-3">
+          <div className="text-2xl">💡</div>
+          <div>
+            <h3 className="font-bold text-blue-900 mb-2">Instrucciones Importantes</h3>
+            <ul className="text-sm text-blue-800 space-y-1">
+              <li>✅ Elige una paleta predefinida o crea tu propia combinación</li>
+              <li>✅ Puedes modificar cualquier color manualmente</li>
+              <li>✅ Después de guardar, <strong>recarga la página</strong> para ver los cambios</li>
+              <li>✅ Los colores se aplicarán automáticamente en toda la web</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   );
