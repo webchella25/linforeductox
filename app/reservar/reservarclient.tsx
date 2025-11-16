@@ -4,7 +4,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { DayPicker } from 'react-day-picker';
 import { Calendar, Clock, User, Mail, Phone, MessageSquare, Check, Loader2, ArrowRight } from 'lucide-react';
 import { format, addDays, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -42,7 +41,7 @@ export default function ReservarClient() {
   const [step, setStep] = useState(1);
   const [services, setServices] = useState<Service[]>([]);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [loading, setLoading] = useState(false);
@@ -139,10 +138,10 @@ export default function ReservarClient() {
     setSelectedSlot(null);
   };
 
-  const handleDateSelect = (date: Date | undefined) => {
-    setSelectedDate(date);
-    setSelectedSlot(null);
-  };
+const handleDateSelect = (date: Date) => {
+  setSelectedDate(date);
+  setSelectedSlot(null);
+};
 
   const handleSlotSelect = (slot: TimeSlot) => {
     setSelectedSlot(slot);
@@ -311,80 +310,50 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
           </div>
         )}
 
-{/* CALENDARIO - Step 2 completo - VERSIÓN QUE FUNCIONA */}
+{/* Step 2: Fecha y Hora - VERSIÓN ORIGINAL QUE FUNCIONABA */}
 {step === 2 && selectedService && (
-  <div className="bg-white rounded-2xl shadow-lg p-8 max-w-5xl mx-auto">
-    <h2 className="font-heading text-2xl font-bold mb-6" style={{ color: colors.primaryColor }}>
+  <div className="bg-white rounded-2xl shadow-lg p-8 max-w-4xl mx-auto">
+    <h2 className="font-heading text-2xl font-bold text-primary mb-6">
       Selecciona Fecha y Hora - {selectedService.name}
     </h2>
     
-    <div className="grid lg:grid-cols-2 gap-8">
-      {/* CALENDARIO */}
-      <div className="flex flex-col items-center">
-        <h3 className="font-semibold mb-6 text-lg">Selecciona una fecha</h3>
-        <div className="w-full flex justify-center">
-          <DayPicker
-            mode="single"
-            selected={selectedDate}
-            onSelect={handleDateSelect}
-            disabled={disabledDays}
-            locale={es}
-          />
-        </div>
-        {selectedDate && (
-          <div className="mt-6 p-4 rounded-lg w-full max-w-sm text-center" style={{ backgroundColor: `${colors.creamColor}80` }}>
-            <p className="text-sm text-gray-600">
-              Fecha seleccionada:
-            </p>
-            <p className="font-bold text-lg mt-1" style={{ color: colors.primaryColor }}>
-              {format(selectedDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
-            </p>
-          </div>
-        )}
+    {/* Calendario simple */}
+    <div className="grid md:grid-cols-2 gap-8">
+      <div>
+        <h3 className="font-semibold mb-4">Selecciona una fecha</h3>
+        <input
+          type="date"
+          min={format(minDate, 'yyyy-MM-dd')}
+          max={format(maxDate, 'yyyy-MM-dd')}
+          value={selectedDate ? format(selectedDate, 'yyyy-MM-dd') : ''}
+          onChange={(e) => handleDateSelect(new Date(e.target.value))}
+          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+        />
       </div>
 
-      {/* Horarios disponibles */}
-      <div className="flex flex-col">
-        <h3 className="font-semibold mb-4 text-lg">Horarios disponibles</h3>
+      <div>
+        <h3 className="font-semibold mb-4">Horarios disponibles</h3>
         {!selectedDate ? (
-          <div className="flex items-center justify-center h-64 text-gray-500 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-            <div className="text-center">
-              <Calendar className="mx-auto mb-2 text-gray-400" size={40} />
-              <p>Selecciona primero una fecha en el calendario</p>
-            </div>
-          </div>
+          <p className="text-gray-500 text-sm">
+            Selecciona primero una fecha
+          </p>
         ) : loadingSlots ? (
-          <div className="flex items-center justify-center h-64">
-            <Loader2 className="animate-spin" style={{ color: colors.primaryColor }} size={40} />
+          <div className="flex justify-center py-8">
+            <Loader2 className="animate-spin text-primary" size={30} />
           </div>
         ) : availableSlots.length === 0 ? (
-          <div className="flex items-center justify-center h-64 text-gray-500 bg-red-50 rounded-lg border-2 border-red-200">
-            <div className="text-center">
-              <Clock className="mx-auto mb-2 text-red-400" size={40} />
-              <p className="font-semibold">No hay horarios disponibles</p>
-              <p className="text-sm mt-1">Prueba con otra fecha</p>
-            </div>
-          </div>
+          <p className="text-gray-500 text-sm">
+            No hay horarios disponibles para esta fecha
+          </p>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-96 overflow-y-auto pr-2">
+          <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
             {availableSlots.map((slot, idx) => (
               <button
                 key={idx}
                 onClick={() => handleSlotSelect(slot)}
-                className="p-4 border-2 border-gray-200 rounded-lg transition-all text-center hover:shadow-md"
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = colors.primaryColor;
-                  e.currentTarget.style.backgroundColor = colors.creamColor;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#E5E7EB';
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }}
+                className="p-3 border-2 border-gray-200 rounded-lg hover:border-primary hover:bg-cream transition-all text-sm font-medium"
               >
-                <div className="flex items-center justify-center gap-2 font-medium text-gray-700">
-                  <Clock size={16} />
-                  {slot.startTime}
-                </div>
+                {slot.startTime}
               </button>
             ))}
           </div>
@@ -392,20 +361,12 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
       </div>
     </div>
 
-    <div className="mt-8 flex justify-between items-center pt-6 border-t">
-      <button
-        onClick={() => setStep(1)}
-        className="font-medium hover:underline"
-        style={{ color: colors.primaryColor }}
-      >
-        ← Cambiar servicio
-      </button>
-      {selectedDate && availableSlots.length > 0 && (
-        <p className="text-sm text-gray-600">
-          {availableSlots.length} horarios disponibles
-        </p>
-      )}
-    </div>
+    <button
+      onClick={() => setStep(1)}
+      className="mt-6 text-primary hover:underline"
+    >
+      ← Cambiar servicio
+    </button>
   </div>
 )}
 
@@ -637,144 +598,6 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
         )}
       </div>
 
-{/* Y actualiza los estilos al final del componente */}
-<style jsx global>{`
-  /* Estilos del calendario */
-  .rdp {
-    margin: 0;
-  }
-  
-  .rdp-months {
-    display: flex;
-    justify-content: center;
-  }
-  
-  .rdp-month {
-    margin: 0;
-  }
-  
-  .rdp-caption {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 1rem;
-    margin-bottom: 1rem;
-  }
-  
-  .rdp-caption_label {
-    font-size: 1.25rem;
-    font-weight: bold;
-    color: ${colors.primaryColor};
-  }
-  
-  .rdp-nav {
-    position: absolute;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    padding: 0 0.5rem;
-  }
-  
-  .rdp-nav_button {
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 0.5rem;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .rdp-nav_button:hover {
-    background-color: ${colors.creamColor};
-  }
-  
-  .rdp-table {
-    width: 100%;
-    max-width: 350px;
-    margin: 0 auto;
-  }
-  
-  .rdp-head {
-    font-weight: bold;
-  }
-  
-  .rdp-head_cell {
-    color: ${colors.primaryColor};
-    font-weight: 600;
-    font-size: 0.875rem;
-    padding: 0.5rem;
-    text-align: center;
-    text-transform: uppercase;
-  }
-  
-  .rdp-tbody {
-  }
-  
-  .rdp-row {
-  }
-  
-  .rdp-cell {
-    text-align: center;
-    padding: 0.25rem;
-  }
-  
-  .rdp-button {
-    width: 100%;
-    height: 100%;
-    min-width: 2.5rem;
-    min-height: 2.5rem;
-    padding: 0.5rem;
-    border: 2px solid transparent;
-    background: transparent;
-    cursor: pointer;
-    border-radius: 0.5rem;
-    font-size: 1rem;
-    font-weight: 500;
-    transition: all 0.15s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .rdp-button:hover:not(:disabled):not(.rdp-day_selected) {
-    background-color: ${colors.creamColor};
-    border-color: ${colors.primaryColor}40;
-  }
-  
-  .rdp-day_selected .rdp-button {
-    background-color: ${colors.primaryColor} !important;
-    color: white !important;
-    font-weight: bold;
-    border-color: ${colors.primaryColor} !important;
-  }
-  
-  .rdp-day_selected .rdp-button:hover {
-    background-color: ${colors.primaryDark} !important;
-  }
-  
-  .rdp-day_today .rdp-button:not(.rdp-day_selected .rdp-button) {
-    font-weight: bold;
-    color: ${colors.primaryColor};
-    border: 2px solid ${colors.primaryColor};
-  }
-  
-  .rdp-button:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-  }
-  
-  .rdp-button:disabled:hover {
-    background-color: transparent;
-    border-color: transparent;
-  }
-  
-  .rdp-day_outside .rdp-button {
-    opacity: 0.5;
-  }
-`}</style>
     </div>
   );
 }
