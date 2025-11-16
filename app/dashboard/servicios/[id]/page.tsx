@@ -3,11 +3,12 @@
 
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Plus, X } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import ImageUploader from '@/components/dashboard/ImageUploader';
 import GalleryManager from '@/components/dashboard/GalleryManager';
+import SubTreatmentsManager from '@/components/dashboard/SubTreatmentsManager';
 
 interface ServiceFormData {
   name: string;
@@ -25,6 +26,11 @@ interface ServiceFormData {
     position: number;
     alt: string;
     publicId?: string;
+  }>;
+  faqs: Array<{
+    question: string;
+    answer: string;
+    order: number;
   }>;
 }
 
@@ -51,9 +57,9 @@ export default function EditServicePage({ params }: PageProps) {
     active: true,
     heroImage: '',
     images: [],
+    faqs: [],
   });
 
-  // Cargar servicio si estamos editando
   useEffect(() => {
     if (!isNew) {
       fetchService();
@@ -77,6 +83,7 @@ export default function EditServicePage({ params }: PageProps) {
           active: service.active,
           heroImage: service.heroImage || '',
           images: service.images || [],
+          faqs: service.faqs || [],
         });
       }
     } catch (error) {
@@ -87,7 +94,6 @@ export default function EditServicePage({ params }: PageProps) {
     }
   };
 
-  // Generar slug automáticamente desde el nombre
   const handleNameChange = (name: string) => {
     setFormData({
       ...formData,
@@ -101,7 +107,6 @@ export default function EditServicePage({ params }: PageProps) {
     });
   };
 
-  // Manejar cambios en benefits
   const handleBenefitChange = (index: number, value: string) => {
     const newBenefits = [...formData.benefits];
     newBenefits[index] = value;
@@ -117,7 +122,6 @@ export default function EditServicePage({ params }: PageProps) {
     setFormData({ ...formData, benefits: newBenefits });
   };
 
-  // Manejar cambios en conditions
   const handleConditionChange = (index: number, value: string) => {
     const newConditions = [...formData.conditions];
     newConditions[index] = value;
@@ -133,23 +137,42 @@ export default function EditServicePage({ params }: PageProps) {
     setFormData({ ...formData, conditions: newConditions });
   };
 
-  // Guardar servicio
+  // ✅ NUEVO: Gestión de FAQs
+  const addFaq = () => {
+    setFormData({
+      ...formData,
+      faqs: [...formData.faqs, { question: '', answer: '', order: formData.faqs.length }],
+    });
+  };
+
+  const handleFaqChange = (index: number, field: 'question' | 'answer', value: string) => {
+    const newFaqs = [...formData.faqs];
+    newFaqs[index][field] = value;
+    setFormData({ ...formData, faqs: newFaqs });
+  };
+
+  const removeFaq = (index: number) => {
+    const newFaqs = formData.faqs.filter((_, i) => i !== index);
+    setFormData({ ...formData, faqs: newFaqs });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
 
     try {
-      // Limpiar arrays vacíos
       const cleanedBenefits = formData.benefits.filter((b) => b.trim() !== '');
       const cleanedConditions = formData.conditions.filter((c) => c.trim() !== '');
+      const cleanedFaqs = formData.faqs.filter((f) => f.question.trim() !== '' && f.answer.trim() !== '');
 
       const dataToSend = {
-  ...formData,
-  benefits: cleanedBenefits,
-  conditions: cleanedConditions,
-  duration: Number(formData.duration) || 60,  // ✅ AGREGAR
-  price: formData.price ? Number(formData.price) : null,  // ✅ MEJORAR
-};
+        ...formData,
+        benefits: cleanedBenefits,
+        conditions: cleanedConditions,
+        faqs: cleanedFaqs,
+        duration: Number(formData.duration) || 60,
+        price: formData.price ? Number(formData.price) : null,
+      };
 
       const url = isNew ? '/api/services' : `/api/services/${resolvedParams.id}`;
       const method = isNew ? 'POST' : 'PATCH';
@@ -186,7 +209,6 @@ export default function EditServicePage({ params }: PageProps) {
 
   return (
     <div className="max-w-5xl mx-auto">
-      {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           <Link
@@ -201,7 +223,6 @@ export default function EditServicePage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* Formulario */}
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Información básica */}
         <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
@@ -210,7 +231,6 @@ export default function EditServicePage({ params }: PageProps) {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Nombre */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Nombre del Servicio *
@@ -225,7 +245,6 @@ export default function EditServicePage({ params }: PageProps) {
               />
             </div>
 
-            {/* Slug */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Slug (URL amigable) *
@@ -243,7 +262,6 @@ export default function EditServicePage({ params }: PageProps) {
               </p>
             </div>
 
-            {/* Categoría */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Categoría *
@@ -260,43 +278,40 @@ export default function EditServicePage({ params }: PageProps) {
               </select>
             </div>
 
-            {/* Duración */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Duración (minutos) *
               </label>
               <input
-  type="number"
-  required
-  min="15"
-  step="15"
-  value={formData.duration}
-  onChange={(e) =>
-    setFormData({ ...formData, duration: parseInt(e.target.value) || 60 })  // ✅ Agregar || 60
-  }
-  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-/>
+                type="number"
+                required
+                min="15"
+                step="15"
+                value={formData.duration}
+                onChange={(e) =>
+                  setFormData({ ...formData, duration: parseInt(e.target.value) || 60 })
+                }
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
             </div>
 
-            {/* Precio */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Precio (€) - Opcional
               </label>
-             <input
-  type="number"
-  min="0"
-  step="0.01"
-  value={formData.price || ''}  // ✅ CAMBIAR esto
-  onChange={(e) =>
-    setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })  // ✅ Agregar || 0
-  }
-  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-  placeholder="0.00"
-/>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.price || ''}
+                onChange={(e) =>
+                  setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })
+                }
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="0.00"
+              />
             </div>
 
-            {/* Estado */}
             <div className="flex items-center gap-3">
               <input
                 type="checkbox"
@@ -311,7 +326,6 @@ export default function EditServicePage({ params }: PageProps) {
             </div>
           </div>
 
-          {/* Descripción */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Descripción *
@@ -327,28 +341,26 @@ export default function EditServicePage({ params }: PageProps) {
           </div>
         </div>
 
-        {/* ✅ SECCIÓN DE IMÁGENES */}
+        {/* Imágenes */}
         <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
           <h2 className="text-xl font-semibold text-gray-900 border-b pb-3">
             Imágenes
           </h2>
 
-          {/* Hero Image */}
           <div>
             <ImageUploader
-  value={formData.heroImage}
-  onChange={(url) => setFormData({ ...formData, heroImage: url })}
-  onRemove={() => setFormData({ ...formData, heroImage: '' })}  // ✅ AGREGAR esta línea
-  label="Imagen Principal (Hero)"
-  aspectRatio="16/9"
-  maxSizeMB={5}
-/>
+              value={formData.heroImage}
+              onChange={(url) => setFormData({ ...formData, heroImage: url })}
+              onRemove={() => setFormData({ ...formData, heroImage: '' })}
+              label="Imagen Principal (Hero)"
+              aspectRatio="16/9"
+              maxSizeMB={5}
+            />
             <p className="text-xs text-gray-500 mt-2">
               Esta imagen se mostrará en la cabecera de la página del servicio. Recomendado: 1920x1080px
             </p>
           </div>
 
-          {/* Gallery Manager */}
           <div className="pt-6 border-t">
             <GalleryManager
               images={formData.images}
@@ -430,6 +442,60 @@ export default function EditServicePage({ params }: PageProps) {
           ))}
         </div>
 
+        {/* ✅ FAQs */}
+        <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">Preguntas Frecuentes (FAQs)</h2>
+              <p className="text-sm text-gray-600 mt-1">Añade preguntas y respuestas sobre este servicio</p>
+            </div>
+            <button
+              type="button"
+              onClick={addFaq}
+              className="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary-dark"
+            >
+              + Agregar FAQ
+            </button>
+          </div>
+
+          {formData.faqs.length === 0 ? (
+            <p className="text-center text-gray-500 py-8">
+              No hay preguntas frecuentes. Haz clic en "Agregar FAQ" para añadir una.
+            </p>
+          ) : (
+            <div className="space-y-4">
+              {formData.faqs.map((faq, index) => (
+                <div key={index} className="border border-gray-200 rounded-lg p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-600">FAQ #{index + 1}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeFaq(index)}
+                      className="text-red-600 hover:bg-red-50 p-2 rounded-lg"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    value={faq.question}
+                    onChange={(e) => handleFaqChange(index, 'question', e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Pregunta"
+                  />
+                  <textarea
+                    value={faq.answer}
+                    onChange={(e) => handleFaqChange(index, 'answer', e.target.value)}
+                    rows={3}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Respuesta"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Botones de acción */}
         <div className="flex gap-4 justify-end bg-white rounded-xl shadow-sm p-6">
           <Link
@@ -457,6 +523,13 @@ export default function EditServicePage({ params }: PageProps) {
           </button>
         </div>
       </form>
+
+      {/* ✅ SUBTRATAMIENTOS - Solo mostrar si NO es nuevo */}
+      {!isNew && (
+        <div className="mt-8">
+          <SubTreatmentsManager serviceId={resolvedParams.id} />
+        </div>
+      )}
     </div>
   );
 }

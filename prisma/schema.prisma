@@ -65,8 +65,30 @@ model Service {
   
   bookings    Booking[]
   faqs        FAQ[]
+  subTreatments  SubTreatment[]  // ✅ NUEVA RELACIÓN
   
   @@index([categoryId])
+}
+
+// ✅ NUEVO MODELO
+model SubTreatment {
+  id          String   @id @default(cuid())
+  serviceId   String
+  service     Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  
+  name        String
+  description String   @db.Text
+  duration    Int?     // Duración específica (opcional, en minutos)
+  imageUrl    String?  // Imagen del subtratamiento (opcional)
+  
+  active      Boolean  @default(true)
+  order       Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([serviceId])
+  @@map("sub_treatments")
 }
 
 model WorkingHours {
