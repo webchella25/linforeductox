@@ -234,19 +234,19 @@ export default function SubTreatmentsManager({ serviceId }: SubTreatmentsManager
             </div>
 
             {/* Imagen */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Imagen (opcional)
-              </label>
-              <ImageUploader
-             value={formData.imageUrl}
-onChange={(url) => ...}
-onRemove={() => ...}
-label=""
-aspectRatio="4/3"
-maxSizeMB={3}
-              />
-            </div>
+<div className="md:col-span-2">
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    Imagen (opcional)
+  </label>
+  <ImageUploader
+    value={formData.imageUrl}
+    onChange={(url) => setFormData({ ...formData, imageUrl: url })}
+    onRemove={() => setFormData({ ...formData, imageUrl: '' })}
+    label=""
+    aspectRatio="4/3"
+    maxSizeMB={3}
+  />
+</div>
 
             {/* Activo */}
             <div className="md:col-span-2">
