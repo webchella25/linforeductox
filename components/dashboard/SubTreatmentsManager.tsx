@@ -52,38 +52,40 @@ export default function SubTreatmentsManager({ serviceId }: SubTreatmentsManager
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
+  e.preventDefault();
+  setSaving(true);
 
-    try {
-      const url = editingId
-        ? `/api/services/${serviceId}/sub-treatments/${editingId}`
-        : `/api/services/${serviceId}/sub-treatments`;
-      
-      const method = editingId ? 'PATCH' : 'POST';
+  try {
+    const url = editingId
+      ? `/api/services/${serviceId}/sub-treatments/${editingId}`
+      : `/api/services/${serviceId}/sub-treatments`;
+    
+    const method = editingId ? 'PATCH' : 'POST';
 
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          duration: formData.duration ? parseInt(formData.duration) : null,
-        }),
-      });
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...formData,
+        duration: formData.duration ? parseInt(formData.duration) : null,
+      }),
+    });
 
-      if (res.ok) {
-        toast.success(editingId ? 'Subtratamiento actualizado' : 'Subtratamiento creado');
-        fetchSubTreatments();
-        resetForm();
-      } else {
-        toast.error('Error al guardar');
-      }
-    } catch (error) {
-      toast.error('Error al guardar');
-    } finally {
-      setSaving(false);
+    if (res.ok) {
+      toast.success(editingId ? 'Subtratamiento actualizado' : 'Subtratamiento creado');
+      await fetchSubTreatments(); // ✅ ESPERAR a que se recargue
+      resetForm();
+    } else {
+      const errorData = await res.json();
+      toast.error(errorData.error || 'Error al guardar');
     }
-  };
+  } catch (error) {
+    console.error('Error:', error);
+    toast.error('Error al guardar subtratamiento');
+  } finally {
+    setSaving(false);
+  }
+};
 
   const handleEdit = (subTreatment: SubTreatment) => {
     setEditingId(subTreatment.id);

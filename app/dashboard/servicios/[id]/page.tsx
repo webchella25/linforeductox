@@ -174,47 +174,55 @@ export default function EditServicePage({ params }: PageProps) {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
+  e.preventDefault();
+  setSaving(true);
 
-    try {
-      const cleanedBenefits = formData.benefits.filter((b) => b.trim() !== '');
-      const cleanedConditions = formData.conditions.filter((c) => c.trim() !== '');
-      const cleanedFaqs = formData.faqs.filter((f) => f.question.trim() !== '' && f.answer.trim() !== '');
+  try {
+    const cleanedBenefits = formData.benefits.filter((b) => b.trim() !== '');
+    const cleanedConditions = formData.conditions.filter((c) => c.trim() !== '');
+    const cleanedFaqs = formData.faqs.filter((f) => f.question.trim() !== '' && f.answer.trim() !== '');
 
-      const dataToSend = {
-        ...formData,
-        benefits: cleanedBenefits,
-        conditions: cleanedConditions,
-        faqs: cleanedFaqs,
-        duration: Number(formData.duration) || 60,
-        price: formData.price ? Number(formData.price) : null,
-      };
+    const dataToSend = {
+      ...formData,
+      benefits: cleanedBenefits,
+      conditions: cleanedConditions,
+      faqs: cleanedFaqs,
+      duration: Number(formData.duration) || 60,
+      price: formData.price ? Number(formData.price) : null,
+    };
 
-      const url = isNew ? '/api/services' : `/api/services/${resolvedParams.id}`;
-      const method = isNew ? 'POST' : 'PATCH';
+    const url = isNew ? '/api/services' : `/api/services/${resolvedParams.id}`;
+    const method = isNew ? 'POST' : 'PATCH';
 
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dataToSend),
-      });
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dataToSend),
+    });
 
-      if (res.ok) {
-        toast.success(isNew ? 'Servicio creado' : 'Servicio actualizado');
-        router.push('/dashboard/servicios');
-        router.refresh();
+    if (res.ok) {
+      const data = await res.json();
+      
+      if (isNew) {
+        // ✅ NUEVO: Redirigir a editar el servicio recién creado
+        toast.success('Servicio creado. Ahora puedes añadir imágenes, FAQs y subtratamientos');
+        router.push(`/dashboard/servicios/${data.service.id}`);
       } else {
-        const error = await res.json();
-        toast.error(error.error || 'Error al guardar');
+        // ✅ Al editar, quedarse en la misma página y refrescar
+        toast.success('Servicio actualizado correctamente');
+        router.refresh();
       }
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('Error al guardar el servicio');
-    } finally {
-      setSaving(false);
+    } else {
+      const error = await res.json();
+      toast.error(error.error || 'Error al guardar');
     }
-  };
+  } catch (error) {
+    console.error('Error:', error);
+    toast.error('Error al guardar el servicio');
+  } finally {
+    setSaving(false);
+  }
+};
 
   if (loading) {
     return (
