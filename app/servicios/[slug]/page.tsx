@@ -336,7 +336,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
               <h3 className="font-heading text-xl font-bold text-primary mb-3">
                 {subTreatment.name}
               </h3>
-              <p className="text-gray-600 mb-4 line-clamp-4">
+              <p className="text-gray-600 mb-4">
                 {subTreatment.description}
               </p>
               {subTreatment.duration && (
