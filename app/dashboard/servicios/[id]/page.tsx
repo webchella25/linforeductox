@@ -60,6 +60,23 @@ export default function EditServicePage({ params }: PageProps) {
     faqs: [],
   });
 
+  // ✅ Cargar categorías dinámicamente desde la BD
+  const [categories, setCategories] = useState<Array<{id: string, name: string, slug: string}>>([]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch('/api/categories');
+      const data = await res.json();
+      setCategories(data.categories || []);
+    } catch (error) {
+      console.error('Error cargando categorías:', error);
+    }
+  };
+
   useEffect(() => {
     if (!isNew) {
       fetchService();
@@ -262,6 +279,7 @@ export default function EditServicePage({ params }: PageProps) {
               </p>
             </div>
 
+            {/* ✅ Categoría dinámica desde BD */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Categoría *
@@ -272,9 +290,12 @@ export default function EditServicePage({ params }: PageProps) {
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               >
-                <option value="corporal">Corporal</option>
-                <option value="facial">Facial</option>
-                <option value="acupuntura">Acupuntura</option>
+                <option value="">Selecciona una categoría</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.slug}>
+                    {cat.name}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -369,6 +390,13 @@ export default function EditServicePage({ params }: PageProps) {
             />
           </div>
         </div>
+
+        {/* ✅ SUBTRATAMIENTOS - Solo mostrar si NO es nuevo */}
+        {!isNew && (
+          <div className="mt-8">
+            <SubTreatmentsManager serviceId={resolvedParams.id} />
+          </div>
+        )}
 
         {/* Beneficios */}
         <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
@@ -523,13 +551,6 @@ export default function EditServicePage({ params }: PageProps) {
           </button>
         </div>
       </form>
-
-      {/* ✅ SUBTRATAMIENTOS - Solo mostrar si NO es nuevo */}
-      {!isNew && (
-        <div className="mt-8">
-          <SubTreatmentsManager serviceId={resolvedParams.id} />
-        </div>
-      )}
     </div>
   );
 }

@@ -33,6 +33,10 @@ async function getService(slug: string) {
       include: {
         faqs: {
           orderBy: { order: 'asc' }
+        },
+        subTreatments: {  // ✅ NUEVO
+          where: { active: true },
+          orderBy: { order: 'asc' }
         }
       }
     });
@@ -299,6 +303,55 @@ export default async function ServicePage({ params }: ServicePageProps) {
           )}
         </div>
       </section>
+
+{/* ✅ SUBTRATAMIENTOS - Cards lado a lado */}
+{service.subTreatments && service.subTreatments.length > 0 && (
+  <section className="py-16 bg-cream/30">
+    <div className="container-custom">
+      <h2 className="font-heading text-3xl md:text-4xl font-bold text-center text-primary mb-4">
+        Tipos de {service.name}
+      </h2>
+      <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+        Descubre las diferentes variantes de este tratamiento
+      </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {service.subTreatments.map((subTreatment) => (
+          <div
+            key={subTreatment.id}
+            className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
+          >
+            {subTreatment.imageUrl && (
+              <div className="relative h-48 w-full">
+                <Image
+                  src={subTreatment.imageUrl}
+                  alt={subTreatment.name}
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
+            )}
+            <div className="p-6">
+              <h3 className="font-heading text-xl font-bold text-primary mb-3">
+                {subTreatment.name}
+              </h3>
+              <p className="text-gray-600 mb-4 line-clamp-4">
+                {subTreatment.description}
+              </p>
+              {subTreatment.duration && (
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <Clock size={16} />
+                  <span>{subTreatment.duration} minutos</span>
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
 
       {/* ✅ Beneficios + Segunda Imagen (si existe) */}
       {service.benefits && service.benefits.length > 0 && (
