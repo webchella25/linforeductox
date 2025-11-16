@@ -23,9 +23,9 @@ async function getEvents() {
   try {
     const events = await prisma.event.findMany({
       where: {
-        active: true,
+        active: true,  // ✅ Solo eventos activos
         status: {
-          notIn: ['DRAFT', 'CANCELLED'],
+          in: ['UPCOMING', 'ONGOING', 'FINISHED'],  // ✅ CAMBIO AQUÍ
         },
       },
       orderBy: {
