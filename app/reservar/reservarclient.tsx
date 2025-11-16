@@ -312,104 +312,106 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
         )}
 
         {step === 2 && selectedService && (
-          <div className="bg-white rounded-2xl shadow-lg p-8 max-w-5xl mx-auto">
-            <h2 className="font-heading text-2xl font-bold mb-6" style={{ color: colors.primaryColor }}>
-              Selecciona Fecha y Hora - {selectedService.name}
-            </h2>
-            
-           {/* CALENDARIO MEJORADO - Solo esta sección */}
-<div className="flex flex-col items-center">
-  <h3 className="font-semibold mb-6 text-lg">Selecciona una fecha</h3>
-  <div className="w-full max-w-md">
-    <DayPicker
-      mode="single"
-      selected={selectedDate}
-      onSelect={handleDateSelect}
-      disabled={disabledDays}
-      locale={es}
-      className="border rounded-xl p-6 bg-white shadow-sm w-full"
-    />
-  </div>
-  {selectedDate && (
-    <div className="mt-6 p-4 rounded-lg w-full max-w-md text-center" style={{ backgroundColor: `${colors.creamColor}80` }}>
-      <p className="text-sm text-gray-600">
-        Fecha seleccionada:
-      </p>
-      <p className="font-bold text-lg mt-1" style={{ color: colors.primaryColor }}>
-        {format(selectedDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
-      </p>
-    </div>
-  )}
-</div>
-
-              <div className="flex flex-col">
-                <h3 className="font-semibold mb-4 text-lg">Horarios disponibles</h3>
-                {!selectedDate ? (
-                  <div className="flex items-center justify-center h-64 text-gray-500 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                    <div className="text-center">
-                      <Calendar className="mx-auto mb-2 text-gray-400" size={40} />
-                      <p>Selecciona primero una fecha en el calendario</p>
-                    </div>
-                  </div>
-                ) : loadingSlots ? (
-                  <div className="flex items-center justify-center h-64">
-                    <Loader2 className="animate-spin" style={{ color: colors.primaryColor }} size={40} />
-                  </div>
-                ) : availableSlots.length === 0 ? (
-                  <div className="flex items-center justify-center h-64 text-gray-500 bg-red-50 rounded-lg border-2 border-red-200">
-                    <div className="text-center">
-                      <Clock className="mx-auto mb-2 text-red-400" size={40} />
-                      <p className="font-semibold">No hay horarios disponibles</p>
-                      <p className="text-sm mt-1">Prueba con otra fecha</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-96 overflow-y-auto pr-2">
-                    {availableSlots.map((slot, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => handleSlotSelect(slot)}
-                        className="group p-4 border-2 border-gray-200 rounded-lg transition-all text-center"
-                        style={{
-                          '--hover-border-color': colors.primaryColor,
-                          '--hover-bg-color': colors.creamColor,
-                        } as React.CSSProperties}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.borderColor = colors.primaryColor;
-                          e.currentTarget.style.backgroundColor = colors.creamColor;
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.borderColor = '#E5E7EB';
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                        }}
-                      >
-                        <div className="flex items-center justify-center gap-2 font-medium text-gray-700 group-hover:text-primary">
-                          <Clock size={16} />
-                          {slot.startTime}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="mt-8 flex justify-between items-center pt-6 border-t">
-              <button
-                onClick={() => setStep(1)}
-                className="font-medium hover:underline"
-                style={{ color: colors.primaryColor }}
-              >
-                ← Cambiar servicio
-              </button>
-              {selectedDate && availableSlots.length > 0 && (
-                <p className="text-sm text-gray-600">
-                  {availableSlots.length} horarios disponibles
-                </p>
-              )}
-            </div>
+  <div className="bg-white rounded-2xl shadow-lg p-8 max-w-5xl mx-auto">
+    <h2 className="font-heading text-2xl font-bold mb-6" style={{ color: colors.primaryColor }}>
+      Selecciona Fecha y Hora - {selectedService.name}
+    </h2>
+    
+    <div className="grid lg:grid-cols-2 gap-8">
+      {/* CALENDARIO MEJORADO */}
+      <div className="flex flex-col items-center">
+        <h3 className="font-semibold mb-6 text-lg">Selecciona una fecha</h3>
+        <div className="w-full max-w-md">
+          <DayPicker
+            mode="single"
+            selected={selectedDate}
+            onSelect={handleDateSelect}
+            disabled={disabledDays}
+            locale={es}
+            className="border rounded-xl p-6 bg-white shadow-sm w-full"
+          />
+        </div>
+        {selectedDate && (
+          <div className="mt-6 p-4 rounded-lg w-full max-w-md text-center" style={{ backgroundColor: `${colors.creamColor}80` }}>
+            <p className="text-sm text-gray-600">
+              Fecha seleccionada:
+            </p>
+            <p className="font-bold text-lg mt-1" style={{ color: colors.primaryColor }}>
+              {format(selectedDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
+            </p>
           </div>
         )}
+      </div>
+
+      {/* Horarios disponibles */}
+      <div className="flex flex-col">
+        <h3 className="font-semibold mb-4 text-lg">Horarios disponibles</h3>
+        {!selectedDate ? (
+          <div className="flex items-center justify-center h-64 text-gray-500 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+            <div className="text-center">
+              <Calendar className="mx-auto mb-2 text-gray-400" size={40} />
+              <p>Selecciona primero una fecha en el calendario</p>
+            </div>
+          </div>
+        ) : loadingSlots ? (
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="animate-spin" style={{ color: colors.primaryColor }} size={40} />
+          </div>
+        ) : availableSlots.length === 0 ? (
+          <div className="flex items-center justify-center h-64 text-gray-500 bg-red-50 rounded-lg border-2 border-red-200">
+            <div className="text-center">
+              <Clock className="mx-auto mb-2 text-red-400" size={40} />
+              <p className="font-semibold">No hay horarios disponibles</p>
+              <p className="text-sm mt-1">Prueba con otra fecha</p>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-96 overflow-y-auto pr-2">
+            {availableSlots.map((slot, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleSlotSelect(slot)}
+                className="group p-4 border-2 border-gray-200 rounded-lg transition-all text-center"
+                style={{
+                  '--hover-border-color': colors.primaryColor,
+                  '--hover-bg-color': colors.creamColor,
+                } as React.CSSProperties}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = colors.primaryColor;
+                  e.currentTarget.style.backgroundColor = colors.creamColor;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#E5E7EB';
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                <div className="flex items-center justify-center gap-2 font-medium text-gray-700 group-hover:text-primary">
+                  <Clock size={16} />
+                  {slot.startTime}
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+
+    <div className="mt-8 flex justify-between items-center pt-6 border-t">
+      <button
+        onClick={() => setStep(1)}
+        className="font-medium hover:underline"
+        style={{ color: colors.primaryColor }}
+      >
+        ← Cambiar servicio
+      </button>
+      {selectedDate && availableSlots.length > 0 && (
+        <p className="text-sm text-gray-600">
+          {availableSlots.length} horarios disponibles
+        </p>
+      )}
+    </div>
+  </div>
+)}
 
         {step === 3 && selectedService && selectedDate && selectedSlot && (
           <div className="bg-white rounded-2xl shadow-lg p-8 max-w-2xl mx-auto">
