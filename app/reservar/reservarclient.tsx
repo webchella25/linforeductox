@@ -5,9 +5,8 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { DayPicker } from 'react-day-picker';
-import 'react-day-picker/dist/style.css';
 import { Calendar, Clock, User, Mail, Phone, MessageSquare, Check, Loader2, ArrowRight } from 'lucide-react';
-import { format, addDays, isBefore, isAfter, startOfDay } from 'date-fns';
+import { format, addDays, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import toast from 'react-hot-toast';
 
@@ -27,6 +26,15 @@ interface TimeSlot {
   available: boolean;
 }
 
+interface SiteConfig {
+  primaryColor: string;
+  primaryDark: string;
+  secondaryColor: string;
+  secondaryLight: string;
+  creamColor: string;
+  textColor: string;
+}
+
 export default function ReservarClient() {
   const searchParams = useSearchParams();
   const servicioParam = searchParams.get('servicio');
@@ -41,6 +49,16 @@ export default function ReservarClient() {
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [loadingServices, setLoadingServices] = useState(true);
 
+  // ✅ NUEVO: Cargar colores dinámicos
+  const [colors, setColors] = useState<SiteConfig>({
+    primaryColor: '#2C5F2D',
+    primaryDark: '#1e3d1f',
+    secondaryColor: '#A27B5C',
+    secondaryLight: '#b89171',
+    creamColor: '#F5F1E8',
+    textColor: '#1F2937',
+  });
+
   const [formData, setFormData] = useState({
     clientName: '',
     clientEmail: '',
@@ -48,7 +66,9 @@ export default function ReservarClient() {
     clientNotes: '',
   });
 
+  // ✅ Cargar colores al montar
   useEffect(() => {
+    fetchColors();
     fetchServices();
   }, []);
 
@@ -69,6 +89,16 @@ export default function ReservarClient() {
       fetchAvailableSlots();
     }
   }, [selectedDate, selectedService]);
+
+  const fetchColors = async () => {
+    try {
+      const res = await fetch('/api/site-config');
+      const data = await res.json();
+      setColors(data);
+    } catch (error) {
+      console.error('Error cargando colores:', error);
+    }
+  };
 
   const fetchServices = async () => {
     setLoadingServices(true);
@@ -180,7 +210,6 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
   const today = startOfDay(new Date());
   const maxDate = addDays(today, 60);
 
-  // Deshabilitar fechas pasadas
   const disabledDays = [
     { before: today },
     { after: maxDate }
@@ -198,7 +227,6 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
           </p>
         </div>
 
-        {/* Progress Steps */}
         <div className="flex justify-center mb-12 overflow-x-auto">
           <div className="flex items-center gap-2 md:gap-4 min-w-max px-4">
             {[
@@ -209,26 +237,24 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
             ].map((s, idx) => (
               <div key={s.num} className="flex items-center">
                 <div
-                  className={`flex items-center justify-center w-10 h-10 rounded-full font-semibold transition-all ${
-                    step >= s.num
-                      ? 'bg-primary text-white'
-                      : 'bg-gray-200 text-gray-500'
-                  }`}
+                  className={`flex items-center justify-center w-10 h-10 rounded-full font-semibold transition-all`}
+                  style={{
+                    backgroundColor: step >= s.num ? colors.primaryColor : '#E5E7EB',
+                    color: step >= s.num ? 'white' : '#6B7280',
+                  }}
                 >
                   {step > s.num ? <Check size={20} /> : s.num}
                 </div>
                 <span
-                  className={`ml-2 text-sm font-medium ${
-                    step >= s.num ? 'text-primary' : 'text-gray-500'
-                  }`}
+                  className={`ml-2 text-sm font-medium`}
+                  style={{ color: step >= s.num ? colors.primaryColor : '#6B7280' }}
                 >
                   {s.label}
                 </span>
                 {idx < 3 && (
                   <div
-                    className={`w-8 md:w-16 h-0.5 ml-2 ${
-                      step > s.num ? 'bg-primary' : 'bg-gray-200'
-                    }`}
+                    className={`w-8 md:w-16 h-0.5 ml-2`}
+                    style={{ backgroundColor: step > s.num ? colors.primaryColor : '#E5E7EB' }}
                   />
                 )}
               </div>
@@ -236,12 +262,11 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
           </div>
         </div>
 
-        {/* Step 1: Selección de Servicio */}
         {step === 1 && (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {loadingServices ? (
               <div className="col-span-full flex justify-center py-12">
-                <Loader2 className="animate-spin text-primary" size={40} />
+                <Loader2 className="animate-spin" style={{ color: colors.primaryColor }} size={40} />
               </div>
             ) : services.length === 0 ? (
               <div className="col-span-full text-center py-12 text-gray-500">
@@ -252,9 +277,18 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
                 <div
                   key={service.id}
                   onClick={() => handleServiceSelect(service)}
-                  className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-xl hover:scale-105 transition-all border-2 border-transparent hover:border-primary"
+                  className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-xl hover:scale-105 transition-all border-2 border-transparent"
+                  style={{
+                    '--hover-border-color': colors.primaryColor,
+                  } as React.CSSProperties}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = colors.primaryColor;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'transparent';
+                  }}
                 >
-                  <h3 className="font-heading text-xl font-bold text-primary mb-2">
+                  <h3 className="font-heading text-xl font-bold mb-2" style={{ color: colors.primaryColor }}>
                     {service.name}
                   </h3>
                   <p className="text-gray-600 text-sm mb-4 line-clamp-2">
@@ -266,7 +300,7 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
                       <span>{service.duration} min</span>
                     </div>
                     {service.price && (
-                      <span className="font-semibold text-primary text-lg">
+                      <span className="font-semibold text-lg" style={{ color: colors.primaryColor }}>
                         {service.price}€
                       </span>
                     )}
@@ -277,15 +311,13 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
           </div>
         )}
 
-        {/* Step 2: Fecha y Hora con DayPicker */}
         {step === 2 && selectedService && (
           <div className="bg-white rounded-2xl shadow-lg p-8 max-w-5xl mx-auto">
-            <h2 className="font-heading text-2xl font-bold text-primary mb-6">
+            <h2 className="font-heading text-2xl font-bold mb-6" style={{ color: colors.primaryColor }}>
               Selecciona Fecha y Hora - {selectedService.name}
             </h2>
             
             <div className="grid lg:grid-cols-2 gap-8">
-              {/* Calendario */}
               <div className="flex flex-col items-center">
                 <h3 className="font-semibold mb-4 text-lg">Selecciona una fecha</h3>
                 <div className="calendar-wrapper">
@@ -296,27 +328,18 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
                     disabled={disabledDays}
                     locale={es}
                     className="border rounded-lg p-4"
-                    modifiersClassNames={{
-                      selected: 'bg-primary text-white hover:bg-primary-dark',
-                      today: 'font-bold text-primary border-primary',
-                    }}
-                    styles={{
-                      caption: { color: '#2C5F2D' },
-                      head_cell: { color: '#2C5F2D', fontWeight: 'bold' },
-                    }}
                   />
                 </div>
                 {selectedDate && (
                   <p className="mt-4 text-sm text-gray-600">
                     Fecha seleccionada:{' '}
-                    <span className="font-semibold text-primary">
+                    <span className="font-semibold" style={{ color: colors.primaryColor }}>
                       {format(selectedDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
                     </span>
                   </p>
                 )}
               </div>
 
-              {/* Horarios disponibles */}
               <div className="flex flex-col">
                 <h3 className="font-semibold mb-4 text-lg">Horarios disponibles</h3>
                 {!selectedDate ? (
@@ -328,7 +351,7 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
                   </div>
                 ) : loadingSlots ? (
                   <div className="flex items-center justify-center h-64">
-                    <Loader2 className="animate-spin text-primary" size={40} />
+                    <Loader2 className="animate-spin" style={{ color: colors.primaryColor }} size={40} />
                   </div>
                 ) : availableSlots.length === 0 ? (
                   <div className="flex items-center justify-center h-64 text-gray-500 bg-red-50 rounded-lg border-2 border-red-200">
@@ -344,7 +367,19 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
                       <button
                         key={idx}
                         onClick={() => handleSlotSelect(slot)}
-                        className="group p-4 border-2 border-gray-200 rounded-lg hover:border-primary hover:bg-cream transition-all text-center"
+                        className="group p-4 border-2 border-gray-200 rounded-lg transition-all text-center"
+                        style={{
+                          '--hover-border-color': colors.primaryColor,
+                          '--hover-bg-color': colors.creamColor,
+                        } as React.CSSProperties}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.borderColor = colors.primaryColor;
+                          e.currentTarget.style.backgroundColor = colors.creamColor;
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.borderColor = '#E5E7EB';
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
                       >
                         <div className="flex items-center justify-center gap-2 font-medium text-gray-700 group-hover:text-primary">
                           <Clock size={16} />
@@ -360,7 +395,8 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
             <div className="mt-8 flex justify-between items-center pt-6 border-t">
               <button
                 onClick={() => setStep(1)}
-                className="text-primary hover:underline font-medium"
+                className="font-medium hover:underline"
+                style={{ color: colors.primaryColor }}
               >
                 ← Cambiar servicio
               </button>
@@ -373,15 +409,13 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
           </div>
         )}
 
-        {/* Step 3: Formulario de Datos + WhatsApp */}
         {step === 3 && selectedService && selectedDate && selectedSlot && (
           <div className="bg-white rounded-2xl shadow-lg p-8 max-w-2xl mx-auto">
-            <h2 className="font-heading text-2xl font-bold text-primary mb-6">
+            <h2 className="font-heading text-2xl font-bold mb-6" style={{ color: colors.primaryColor }}>
               Tus Datos
             </h2>
 
-            {/* Resumen de reserva */}
-            <div className="bg-cream/50 rounded-xl p-6 mb-8">
+            <div className="rounded-xl p-6 mb-8" style={{ backgroundColor: `${colors.creamColor}80` }}>
               <h3 className="font-semibold text-lg mb-3">Resumen de tu reserva:</h3>
               <div className="space-y-2 text-gray-700">
                 <p>
@@ -403,7 +437,6 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
               </div>
             </div>
 
-            {/* Formulario */}
             <form onSubmit={handleWhatsAppBooking} className="space-y-6">
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
@@ -417,7 +450,14 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
                   onChange={(e) =>
                     setFormData({ ...formData, clientName: e.target.value })
                   }
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                  style={{ '--focus-ring-color': colors.primaryColor } as React.CSSProperties}
+                  onFocus={(e) => {
+                    e.currentTarget.style.outline = `2px solid ${colors.primaryColor}`;
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.outline = 'none';
+                  }}
                   placeholder="Tu nombre completo"
                 />
               </div>
@@ -434,7 +474,13 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
                   onChange={(e) =>
                     setFormData({ ...formData, clientEmail: e.target.value })
                   }
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                  onFocus={(e) => {
+                    e.currentTarget.style.outline = `2px solid ${colors.primaryColor}`;
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.outline = 'none';
+                  }}
                   placeholder="tu@email.com"
                 />
               </div>
@@ -451,7 +497,13 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
                   onChange={(e) =>
                     setFormData({ ...formData, clientPhone: e.target.value })
                   }
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                  onFocus={(e) => {
+                    e.currentTarget.style.outline = `2px solid ${colors.primaryColor}`;
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.outline = 'none';
+                  }}
                   placeholder="612 345 678"
                 />
               </div>
@@ -467,13 +519,18 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
                     setFormData({ ...formData, clientNotes: e.target.value })
                   }
                   rows={4}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                  onFocus={(e) => {
+                    e.currentTarget.style.outline = `2px solid ${colors.primaryColor}`;
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.outline = 'none';
+                  }}
                   placeholder="¿Alguna preferencia o información que debamos saber?"
                 />
               </div>
 
-              {/* Información importante */}
-              <div className="bg-green-50 border-l-4 border-primary p-4 rounded">
+              <div className="bg-green-50 border-l-4 p-4 rounded" style={{ borderColor: colors.primaryColor }}>
                 <p className="text-sm text-gray-700">
                   <strong>📱 Confirmación por WhatsApp:</strong> Al hacer clic en reservar, 
                   se guardará tu cita y se abrirá WhatsApp con un mensaje pre-escrito para 
@@ -481,7 +538,6 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
                 </p>
               </div>
 
-              {/* Botones */}
               <div className="flex gap-4">
                 <button
                   type="button"
@@ -493,7 +549,16 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 flex items-center justify-center gap-3 bg-primary text-white px-6 py-4 rounded-full hover:bg-primary-dark disabled:bg-gray-300 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
+                  className="flex-1 flex items-center justify-center gap-3 text-white px-6 py-4 rounded-full disabled:bg-gray-300 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
+                  style={{
+                    backgroundColor: loading ? '#D1D5DB' : colors.primaryColor,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!loading) e.currentTarget.style.backgroundColor = colors.primaryDark;
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!loading) e.currentTarget.style.backgroundColor = colors.primaryColor;
+                  }}
                 >
                   {loading ? (
                     <>
@@ -512,13 +577,12 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
           </div>
         )}
 
-        {/* Step 4: Confirmación */}
         {step === 4 && (
           <div className="bg-white rounded-2xl shadow-lg p-12 max-w-2xl mx-auto text-center">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <Check className="text-green-600" size={40} />
             </div>
-            <h2 className="font-heading text-3xl font-bold text-primary mb-4">
+            <h2 className="font-heading text-3xl font-bold mb-4" style={{ color: colors.primaryColor }}>
               ¡Reserva Guardada!
             </h2>
             <p className="text-lg text-gray-700 mb-6">
@@ -526,7 +590,7 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
               puedes contactar directamente:
             </p>
             
-            <div className="bg-cream/50 rounded-xl p-6 mb-8 text-left">
+            <div className="rounded-xl p-6 mb-8 text-left" style={{ backgroundColor: `${colors.creamColor}80` }}>
               <h3 className="font-semibold text-lg mb-3">Detalles de tu reserva:</h3>
               <div className="space-y-2 text-gray-700">
                 <p>
@@ -557,7 +621,14 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
               </button>
               <Link
                 href="/"
-                className="inline-flex items-center justify-center bg-primary text-white px-8 py-4 rounded-full hover:bg-primary-dark transition-all"
+                className="inline-flex items-center justify-center text-white px-8 py-4 rounded-full transition-all"
+                style={{ backgroundColor: colors.primaryColor }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = colors.primaryDark;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = colors.primaryColor;
+                }}
               >
                 Volver al Inicio
               </Link>
@@ -569,31 +640,109 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
       <style jsx global>{`
         .rdp {
           --rdp-cell-size: 45px;
-          --rdp-accent-color: #2C5F2D;
-          --rdp-background-color: #F5F1E8;
+          --rdp-accent-color: ${colors.primaryColor};
+          --rdp-background-color: ${colors.creamColor};
+          margin: 0;
+        }
+        
+        .rdp-months {
+          display: flex;
+          justify-content: center;
+        }
+        
+        .rdp-month {
+          margin: 0;
+        }
+        
+        .rdp-caption {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 1rem;
+        }
+        
+        .rdp-caption_label {
+          font-size: 1.1rem;
+          font-weight: bold;
+          color: ${colors.primaryColor};
+        }
+        
+        .rdp-nav {
+          position: absolute;
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
+          padding: 0 0.5rem;
+        }
+        
+        .rdp-nav_button {
+          width: 2rem;
+          height: 2rem;
+          border-radius: 0.5rem;
+          border: none;
+          background: transparent;
+          cursor: pointer;
+        }
+        
+        .rdp-nav_button:hover {
+          background-color: ${colors.creamColor};
+        }
+        
+        .rdp-table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+        
+        .rdp-head_cell {
+          color: ${colors.primaryColor};
+          font-weight: bold;
+          font-size: 0.875rem;
+          padding: 0.5rem;
+          text-transform: uppercase;
+        }
+        
+        .rdp-cell {
+          padding: 0;
+        }
+        
+        .rdp-day {
+          width: var(--rdp-cell-size);
+          height: var(--rdp-cell-size);
+          border: none;
+          background: transparent;
+          cursor: pointer;
+          border-radius: 0.5rem;
+          font-size: 0.9rem;
+          transition: all 0.2s;
+        }
+        
+        .rdp-day:hover:not(.rdp-day_disabled):not(.rdp-day_selected) {
+          background-color: ${colors.creamColor};
         }
         
         .rdp-day_selected {
-          background-color: #2C5F2D !important;
+          background-color: ${colors.primaryColor} !important;
           color: white !important;
           font-weight: bold;
         }
         
         .rdp-day_selected:hover {
-          background-color: #1e3d1f !important;
+          background-color: ${colors.primaryDark} !important;
         }
         
-        .rdp-day_today {
+        .rdp-day_today:not(.rdp-day_selected) {
           font-weight: bold;
-          color: #2C5F2D;
+          color: ${colors.primaryColor};
+          border: 2px solid ${colors.primaryColor};
         }
         
-        .rdp-day:hover:not(.rdp-day_selected):not(.rdp-day_disabled) {
-          background-color: #F5F1E8;
+        .rdp-day_disabled {
+          opacity: 0.3;
+          cursor: not-allowed;
         }
         
-        .rdp-button:hover:not([disabled]):not(.rdp-day_selected) {
-          background-color: #F5F1E8;
+        .rdp-day_outside {
+			opacity: 0.5;
         }
       `}</style>
     </div>
