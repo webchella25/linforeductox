@@ -13,6 +13,7 @@ const bookingSchema = z.object({
   startTime: z.string(),
   endTime: z.string(),
   clientNotes: z.string().optional(),
+  source: z.string().optional(), // ✅ NUEVO: para saber si vino por whatsapp o email
 });
 
 // POST - Crear nueva reserva
