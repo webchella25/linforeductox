@@ -322,7 +322,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
                       {subTreatment.name}
                     </h3>
                     <div 
-                      className="text-gray-600 mb-4 line-clamp-4"
+                      className="text-gray-600 mb-4"
                       dangerouslySetInnerHTML={{ __html: subTreatment.description }}
                     />
                     {subTreatment.duration && (
