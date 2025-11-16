@@ -311,28 +311,62 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
           </div>
         )}
 
-        {step === 2 && selectedService && (
+      {/* CALENDARIO MEJORADO - Step 2 completo */}
+{step === 2 && selectedService && (
   <div className="bg-white rounded-2xl shadow-lg p-8 max-w-5xl mx-auto">
     <h2 className="font-heading text-2xl font-bold mb-6" style={{ color: colors.primaryColor }}>
       Selecciona Fecha y Hora - {selectedService.name}
     </h2>
     
     <div className="grid lg:grid-cols-2 gap-8">
-      {/* CALENDARIO MEJORADO */}
+      {/* CALENDARIO */}
       <div className="flex flex-col items-center">
         <h3 className="font-semibold mb-6 text-lg">Selecciona una fecha</h3>
-        <div className="w-full max-w-md">
+        <div className="w-full">
           <DayPicker
             mode="single"
             selected={selectedDate}
             onSelect={handleDateSelect}
             disabled={disabledDays}
             locale={es}
-            className="border rounded-xl p-6 bg-white shadow-sm w-full"
+            className="mx-auto"
+            classNames={{
+              months: "flex flex-col",
+              month: "space-y-4",
+              caption: "flex justify-center pt-1 relative items-center mb-4",
+              caption_label: "text-lg font-bold",
+              nav: "flex items-center justify-between absolute w-full px-2",
+              nav_button: "h-10 w-10 bg-transparent hover:bg-gray-100 rounded-lg inline-flex items-center justify-center transition-colors",
+              nav_button_previous: "absolute left-1",
+              nav_button_next: "absolute right-1",
+              table: "w-full border-collapse",
+              head_row: "flex w-full",
+              head_cell: "text-gray-600 rounded-md w-12 font-semibold text-sm uppercase flex-1 text-center",
+              row: "flex w-full mt-2",
+              cell: "text-gray-600 rounded-md w-12 h-12 text-center text-sm p-0 relative flex-1 flex items-center justify-center",
+              day: "h-12 w-12 p-0 font-normal rounded-lg hover:bg-gray-100 transition-all inline-flex items-center justify-center cursor-pointer",
+              day_selected: "font-bold text-white hover:bg-primary-dark",
+              day_today: "font-bold",
+              day_outside: "text-gray-400 opacity-50",
+              day_disabled: "text-gray-300 cursor-not-allowed hover:bg-transparent",
+              day_hidden: "invisible",
+            }}
+            styles={{
+              caption_label: { color: colors.primaryColor },
+              day_selected: { 
+                backgroundColor: colors.primaryColor,
+                color: 'white',
+              },
+              day_today: { 
+                color: colors.primaryColor,
+                fontWeight: 'bold',
+                border: `2px solid ${colors.primaryColor}`,
+              },
+            }}
           />
         </div>
         {selectedDate && (
-          <div className="mt-6 p-4 rounded-lg w-full max-w-md text-center" style={{ backgroundColor: `${colors.creamColor}80` }}>
+          <div className="mt-6 p-4 rounded-lg w-full text-center" style={{ backgroundColor: `${colors.creamColor}80` }}>
             <p className="text-sm text-gray-600">
               Fecha seleccionada:
             </p>
@@ -371,11 +405,10 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
               <button
                 key={idx}
                 onClick={() => handleSlotSelect(slot)}
-                className="group p-4 border-2 border-gray-200 rounded-lg transition-all text-center"
+                className="group p-4 border-2 border-gray-200 rounded-lg transition-all text-center hover:shadow-md"
                 style={{
-                  '--hover-border-color': colors.primaryColor,
-                  '--hover-bg-color': colors.creamColor,
-                } as React.CSSProperties}
+                  borderColor: '#E5E7EB',
+                }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = colors.primaryColor;
                   e.currentTarget.style.backgroundColor = colors.creamColor;
@@ -385,7 +418,7 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
                   e.currentTarget.style.backgroundColor = 'transparent';
                 }}
               >
-                <div className="flex items-center justify-center gap-2 font-medium text-gray-700 group-hover:text-primary">
+                <div className="flex items-center justify-center gap-2 font-medium text-gray-700">
                   <Clock size={16} />
                   {slot.startTime}
                 </div>
@@ -643,152 +676,15 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
 
 {/* Y actualiza los estilos al final del componente */}
 <style jsx global>{`
-  .rdp {
-    --rdp-cell-size: 55px; /* ✅ AUMENTADO de 45px a 55px */
-    --rdp-accent-color: ${colors.primaryColor};
-    --rdp-background-color: ${colors.creamColor};
-    margin: 0;
-    width: 100%;
-  }
-  
-  .rdp-months {
-    display: flex;
-    justify-content: center;
-  }
-  
-  .rdp-month {
-    margin: 0;
-    width: 100%;
-  }
-  
-  .rdp-caption {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 1.5rem 1rem; /* ✅ AUMENTADO padding */
-  }
-  
-  .rdp-caption_label {
-    font-size: 1.25rem; /* ✅ AUMENTADO de 1.1rem */
-    font-weight: bold;
-    color: ${colors.primaryColor};
-  }
-  
-  .rdp-nav {
-    position: absolute;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    padding: 0 0.5rem;
-  }
-  
-  .rdp-nav_button {
-    width: 2.5rem; /* ✅ AUMENTADO */
-    height: 2.5rem; /* ✅ AUMENTADO */
-    border-radius: 0.5rem;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .rdp-nav_button:hover {
-    background-color: ${colors.creamColor};
-  }
-  
-  .rdp-nav_button svg {
-    width: 1.25rem; /* ✅ AUMENTADO tamaño de flechas */
-    height: 1.25rem;
-  }
-  
-  .rdp-table {
-    width: 100%;
-    border-collapse: separate; /* ✅ CAMBIADO para mejor espaciado */
-    border-spacing: 4px; /* ✅ NUEVO: espacio entre celdas */
-  }
-  
-  .rdp-head_cell {
-    color: ${colors.primaryColor};
-    font-weight: bold;
-    font-size: 0.95rem; /* ✅ AUMENTADO */
-    padding: 0.75rem; /* ✅ AUMENTADO */
-    text-transform: uppercase;
-  }
-  
-  .rdp-cell {
-    padding: 2px; /* ✅ NUEVO: padding en las celdas */
-  }
-  
-  .rdp-day {
-    width: var(--rdp-cell-size);
-    height: var(--rdp-cell-size);
-    border: 2px solid transparent; /* ✅ NUEVO: borde para estado hover/selected */
-    background: transparent;
-    cursor: pointer;
-    border-radius: 0.75rem; /* ✅ AUMENTADO radio */
-    font-size: 1rem; /* ✅ AUMENTADO de 0.9rem */
-    font-weight: 500; /* ✅ NUEVO: más peso */
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+  /* Ya no necesitamos estilos globales para .rdp porque usamos classNames inline */
   
   .rdp-day:hover:not(.rdp-day_disabled):not(.rdp-day_selected) {
-    background-color: ${colors.creamColor};
-    border-color: ${colors.primaryColor}40; /* ✅ NUEVO: borde sutil en hover */
-    transform: scale(1.05); /* ✅ NUEVO: efecto de aumento */
-  }
-  
-  .rdp-day_selected {
-    background-color: ${colors.primaryColor} !important;
-    color: white !important;
-    font-weight: bold;
-    border-color: ${colors.primaryColor} !important; /* ✅ NUEVO */
-    transform: scale(1.1); /* ✅ NUEVO: día seleccionado más grande */
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* ✅ NUEVO: sombra */
+    background-color: ${colors.creamColor} !important;
+    transform: scale(1.05);
   }
   
   .rdp-day_selected:hover {
     background-color: ${colors.primaryDark} !important;
-    transform: scale(1.12); /* ✅ NUEVO */
-  }
-  
-  .rdp-day_today:not(.rdp-day_selected) {
-    font-weight: bold;
-    color: ${colors.primaryColor};
-    background-color: ${colors.creamColor}60; /* ✅ NUEVO: fondo sutil */
-    border: 2px solid ${colors.primaryColor};
-  }
-  
-  .rdp-day_disabled {
-    opacity: 0.25; /* ✅ REDUCIDO para mejor contraste */
-    cursor: not-allowed;
-  }
-  
-  .rdp-day_disabled:hover {
-    transform: none; /* ✅ NUEVO: sin efecto hover en deshabilitados */
-  }
-  
-  .rdp-day_outside {
-    opacity: 0.4; /* ✅ REDUCIDO */
-  }
-  
-  /* ✅ NUEVO: Mejora para móviles */
-  @media (max-width: 640px) {
-    .rdp {
-      --rdp-cell-size: 48px;
-    }
-    
-    .rdp-caption_label {
-      font-size: 1.1rem;
-    }
-    
-    .rdp-day {
-      font-size: 0.95rem;
-    }
   }
 `}</style>
     </div>
