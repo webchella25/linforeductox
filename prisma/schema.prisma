@@ -410,6 +410,25 @@ model SeoAnalytics {
   @@map("seo_analytics")
 }
 
+model HomeServicesSection {
+  id                String   @id @default(cuid())
+  
+  // Textos
+  title             String   @default("Nuestros Servicios")
+  subtitle          String?  @db.Text
+  
+  // Visibilidad
+  active            Boolean  @default(true)
+  
+  // Servicios seleccionados (array de IDs en orden)
+  selectedServices  String[] @default([])
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("home_services_section")
+}
+
 enum EventStatus {
   DRAFT       // Borrador (no visible)
   UPCOMING    // Próximo

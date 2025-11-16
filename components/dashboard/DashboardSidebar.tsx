@@ -88,6 +88,11 @@ const menuItems = [
       label: 'SEO y Analytics',
       icon: BarChart3,
     },
+	{
+  href: '/dashboard/configuracion/servicios-destacados',
+  label: 'Servicios Destacados',
+  icon: Sparkles,  // Ya debería estar importado
+},
   ],
 },
 ];

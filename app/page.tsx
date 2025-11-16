@@ -12,8 +12,8 @@ export const revalidate = 60;
 // ✅ METADATA PARA SEO
 export const metadata: Metadata = {
   title: "LINFOREDUCTOX - Estética Avanzada y Medicina Ancestral Oriental",
-  description: "Centro especializado en drenaje linfático, tratamientos corporales, faciales y acupuntura. Descubre el método LINFOREDUCTOX en Errenteria, Gipuzkoa.",
-  keywords: "drenaje linfático, masaje linfático, tratamiento facial, acupuntura estética, medicina oriental, estética natural, Errenteria, Gipuzkoa",
+  description: "Centro especializado en drenaje linfático, tratamientos corporales, faciales y acupuntura. Descubre el método LINFOREDUCTOX en Madrid.",
+  keywords: "drenaje linfático, masaje linfático, tratamiento facial, acupuntura estética, medicina oriental, estética natural, Madrid.",
   alternates: {
     canonical: "https://linforeductox.com",
   },
@@ -31,20 +31,64 @@ async function getHomeContent() {
   }
 }
 
+// ✅ NUEVA FUNCIÓN: Obtener servicios destacados configurables
 async function getFeaturedServices() {
   try {
+    // Obtener configuración de servicios destacados
+    const homeServicesConfig = await prisma.homeServicesSection.findFirst();
+
+    if (!homeServicesConfig || !homeServicesConfig.selectedServices || homeServicesConfig.selectedServices.length === 0) {
+      // Si no hay configuración, mostrar los primeros 3 servicios activos
+      return await prisma.service.findMany({
+        where: { active: true },
+        take: 3,
+        orderBy: { order: 'asc' },
+      });
+    }
+
+    // Obtener servicios según la configuración
+    const services = await prisma.service.findMany({
+      where: {
+        id: { in: homeServicesConfig.selectedServices },
+        active: true,
+      },
+    });
+
+    // Ordenar según el array de IDs configurado
+    return homeServicesConfig.selectedServices
+      .map((id: string) => services.find(s => s.id === id))
+      .filter(Boolean);
+  } catch (error) {
+    console.error('Error fetching featured services:', error);
+    // Fallback a servicios por defecto
     return await prisma.service.findMany({
       where: { active: true },
       take: 3,
       orderBy: { order: 'asc' },
-    });
-  } catch (error) {
-    console.error('Error fetching featured services:', error);
-    return [];
+    }).catch(() => []);
   }
 }
 
-// ✅ NUEVA FUNCIÓN: 3 Testimonios Aleatorios
+// ✅ NUEVA FUNCIÓN: Obtener configuración de la sección
+async function getHomeServicesConfig() {
+  try {
+    const config = await prisma.homeServicesSection.findFirst();
+    return config || {
+      title: 'Nuestros Servicios',
+      subtitle: null,
+      active: true,
+    };
+  } catch (error) {
+    console.error('Error fetching home services config:', error);
+    return {
+      title: 'Nuestros Servicios',
+      subtitle: null,
+      active: true,
+    };
+  }
+}
+
+// ✅ FUNCIÓN EXISTENTE: 3 Testimonios Aleatorios
 async function getRandomTestimonials() {
   try {
     const allTestimonials = await prisma.testimonial.findMany({
@@ -69,8 +113,9 @@ async function getRandomTestimonials() {
 
 export default async function Home() {
   const { heroQuote } = await getHomeContent();
-  const featuredServices = await getFeaturedServices();
-  const testimonials = await getRandomTestimonials(); // ✅ NUEVO
+  const homeServicesConfig = await getHomeServicesConfig(); // ✅ NUEVO
+  const featuredServices = await getFeaturedServices(); // ✅ ACTUALIZADO
+  const testimonials = await getRandomTestimonials();
 
   // ✅ Schema.org WebSite
   const websiteSchema = {
@@ -78,7 +123,7 @@ export default async function Home() {
     "@type": "WebSite",
     name: "LINFOREDUCTOX",
     url: "https://linforeductox.com",
-    description: "Centro de estética avanzada y medicina ancestral oriental en Errenteria",
+    description: "Centro de estética avanzada y medicina ancestral oriental en Madrid",
     potentialAction: {
       "@type": "SearchAction",
       target: "https://linforeductox.com/servicios?q={search_term_string}",
@@ -134,49 +179,59 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* 3. Servicios */}
-        <section className="section-padding bg-white">
-          <div className="container-custom">
-            <div className="text-center mb-16">
-              <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-4">
-                Nuestros Servicios
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <ServiceCard
-  title="Tratamientos Corporales"
-  description="Masajes especializados que combinan técnicas ancestrales para eliminar celulitis, grasa localizada y flacidez. Activa tu circulación y recupera la vitalidad de tu cuerpo."
-  iconName="sparkles"  // ✅ CORRECTO
-  href="/servicios/corporal"  // ✅ CORRECTO
-  delay={0}
-/>
-<ServiceCard
-  title="Tratamientos Faciales"
-  description="Rejuvenece tu rostro con técnicas naturales que restauran la luminosidad, elasticidad y juventud de tu piel, desde el interior."
-  iconName="heart"  // ✅ CORRECTO
-  href="/servicios/facial"  // ✅ CORRECTO
-  delay={0.2}
-/>
-<ServiceCard
-  title="Acupuntura"
-  description="Tecnicas Tradiciones para equilibrar tu energía vital, aliviar dolores y restaurar el bienestar integral."
-  iconName="zap"  // ✅ CORRECTO
-  href="/servicios/acupuntura"  // ✅ CORRECTO
-  delay={0.4}
-/>
-            </div>
+        {/* ✅ 3. SERVICIOS DESTACADOS DINÁMICOS */}
+        {homeServicesConfig.active && featuredServices.length > 0 && (
+          <section className="section-padding bg-white">
+            <div className="container-custom">
+              <div className="text-center mb-16">
+                <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-4">
+                  {homeServicesConfig.title || 'Nuestros Servicios'}
+                </h2>
+                {homeServicesConfig.subtitle && (
+                  <p className="text-xl text-gray-700 max-w-3xl mx-auto">
+                    {homeServicesConfig.subtitle}
+                  </p>
+                )}
+              </div>
 
-            <div className="text-center mt-12">
-              <Link
-                href="/servicios"
-                className="inline-flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-full font-medium text-lg hover:bg-primary-dark transition-all shadow-lg hover:shadow-xl"
-              >
-                Ver Todos los Servicios
-                <ArrowRight size={20} />
-              </Link>
+              <div className={`grid gap-8 ${
+                featuredServices.length === 3 ? 'grid-cols-1 md:grid-cols-3' :
+                featuredServices.length === 4 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4' :
+                featuredServices.length === 5 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' :
+                'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+              }`}>
+                {featuredServices.map((service: any, index: number) => (
+                  <Link
+                    key={service.id}
+                    href={`/servicios/${service.slug}`}
+                    className="group p-8 bg-cream rounded-2xl hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-primary"
+                  >
+                    <h3 className="text-2xl font-bold text-primary mb-4 group-hover:text-secondary transition-colors">
+                      {service.name}
+                    </h3>
+                    <p className="text-gray-700 mb-6 line-clamp-4 leading-relaxed">
+                      {service.description}
+                    </p>
+                    <span className="inline-flex items-center gap-2 text-secondary font-semibold group-hover:gap-4 transition-all">
+                      Más información
+                      <ArrowRight size={20} />
+                    </span>
+                  </Link>
+                ))}
+              </div>
+
+              <div className="text-center mt-12">
+                <Link
+                  href="/servicios"
+                  className="inline-flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-full font-medium text-lg hover:bg-primary-dark transition-all shadow-lg hover:shadow-xl"
+                >
+                  Ver Todos los Servicios
+                  <ArrowRight size={20} />
+                </Link>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* 4. Sobre Aline Vidal */}
         <section className="section-padding bg-gradient-to-br from-cream to-white">
@@ -185,12 +240,12 @@ export default async function Home() {
               {/* Imagen */}
               <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl">
                 <Image
-  src="/alin-vidal.jpg"  // ✅ LA FOTO REAL DE ALINE
-  alt="Aline Vidal - Fundadora de LINFOREDUCTOX"
-  fill
-  className="object-cover object-top"  // ✅ object-top para centrar la cara
-  priority  // ✅ Para que cargue rápido
-/>
+                  src="/alin-vidal.jpg"
+                  alt="Aline Vidal - Fundadora de LINFOREDUCTOX"
+                  fill
+                  className="object-cover object-top"
+                  priority
+                />
               </div>
 
               {/* Contenido */}
@@ -220,7 +275,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* ✅ 5. TESTIMONIOS (NUEVO) */}
+        {/* ✅ 5. TESTIMONIOS */}
         {testimonials.length > 0 && (
           <section className="section-padding bg-white">
             <div className="container-custom">
@@ -228,12 +283,21 @@ export default async function Home() {
                 <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-4">
                   Lo Que Dicen Nuestros Clientes
                 </h2>
-                <p className="text-xl text-gray-700">
+                <p className="text-xl text-gray-700 mb-6">
                   Experiencias reales de personas reales
                 </p>
+                
+                {/* ✅ Botón para dejar testimonio */}
+                <Link
+                  href="/testimonios/nuevo"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-secondary text-white rounded-full hover:bg-secondary-light transition-colors"
+                >
+                  <Star size={18} />
+                  Comparte tu Experiencia
+                </Link>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
                 {testimonials.map((testimonial) => (
                   <div
                     key={testimonial.id}
@@ -277,7 +341,7 @@ export default async function Home() {
               </div>
 
               {/* Botón Ver Más */}
-              <div className="text-center mt-12">
+              <div className="text-center">
                 <Link
                   href="/testimonios"
                   className="inline-flex items-center gap-2 text-primary hover:text-secondary font-semibold text-lg transition-colors"
