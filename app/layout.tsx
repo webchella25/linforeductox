@@ -118,7 +118,7 @@ const organizationSchema = {
 // ✅ NUEVA FUNCIÓN: Cargar config de SEO en el servidor
 async function getSeoConfig() {
   try {
-    const config = await prisma.seoAnalyticsConfig.findFirst();
+    const config = await prisma.seoAnalytics.findFirst();
     return config;
   } catch (error) {
     console.error('Error loading SEO config:', error);
