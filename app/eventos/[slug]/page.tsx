@@ -180,7 +180,7 @@ export default async function EventPage({ params }: EventPageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }}
       />
 
-      {/* Hero */}
+      {/* Hero - ✅ CAMBIO: Overlay más oscuro para que las letras blancas se vean */}
       <section className="relative h-[70vh] min-h-[500px] flex items-center justify-center overflow-hidden">
         {event.heroImage && (
           <div className="absolute inset-0">
@@ -193,7 +193,8 @@ export default async function EventPage({ params }: EventPageProps) {
               sizes="100vw"
               unoptimized
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/70" />
+            {/* ✅ CAMBIO: Overlay más oscuro (de 50% a 75%) */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/60 to-black/75" />
           </div>
         )}
 
@@ -204,12 +205,12 @@ export default async function EventPage({ params }: EventPageProps) {
           </div>
 
           {/* Título */}
-          <h1 className="font-heading text-4xl md:text-6xl font-bold mb-6">
+          <h1 className="font-heading text-4xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">
             {event.title}
           </h1>
 
           {/* Meta Info */}
-          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8 text-lg mb-8">
+          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8 text-lg mb-8 text-white">
             <div className="flex items-center gap-2">
               <Calendar size={24} />
               <span>{format(startDate, "d 'de' MMMM, yyyy", { locale: es })}</span>
@@ -226,11 +227,11 @@ export default async function EventPage({ params }: EventPageProps) {
 
           {/* Precio */}
           {event.isFree ? (
-            <div className="inline-block bg-green-500 text-white px-6 py-3 rounded-full text-xl font-bold">
+            <div className="inline-block bg-green-500 text-white px-6 py-3 rounded-full text-xl font-bold shadow-lg">
               EVENTO GRATUITO
             </div>
           ) : event.price && (
-            <div className="inline-flex items-center gap-2 bg-secondary text-white px-8 py-4 rounded-full text-2xl font-bold">
+            <div className="inline-flex items-center gap-2 bg-secondary text-white px-8 py-4 rounded-full text-2xl font-bold shadow-lg">
               <Euro size={28} />
               {event.price}€
             </div>
@@ -238,36 +239,36 @@ export default async function EventPage({ params }: EventPageProps) {
         </div>
       </section>
 
-     {/* Contador y CTA */}
+      {/* Contador y CTA - ✅ CAMBIO: bg-secondary (dorado) con texto blanco */}
       {daysUntil >= 0 && (
-        <section className="bg-secondary text-white py-8">  {/* ✅ CAMBIO: bg-secondary (dorado) */}
+        <section className="bg-secondary text-white py-8 shadow-lg">
           <div className="container-custom max-w-4xl">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               {/* Contador */}
               <div className="text-center md:text-left">
-                <p className="text-white/90 mb-1">El evento comienza en:</p>
-                <p className="text-4xl md:text-5xl font-bold text-white">  {/* ✅ AGREGADO: text-white */}
-                  {daysUntil === 0 ? '¡HOY!' : daysUntil === 1 ? 'MAÑANA' : `${daysUntil} DÍAS`}
+                <p className="text-white/90 mb-1 text-sm uppercase tracking-wide">El evento comienza en:</p>
+                <p className="text-5xl md:text-6xl font-bold text-white drop-shadow-md">
+                  {daysUntil === 0 ? '¡HOY!' : daysUntil === 1 ? '1 DÍA' : `${daysUntil} DÍAS`}
                 </p>
               </div>
 
               {/* Plazas */}
               {event.maxPlaces && event.availablePlaces !== null && (
                 <div className="text-center">
-                  <p className="text-white/90 mb-1">Plazas disponibles:</p>
-                  <p className="text-3xl font-bold text-white">  {/* ✅ AGREGADO: text-white */}
+                  <p className="text-white/90 mb-1 text-sm uppercase tracking-wide">Plazas disponibles:</p>
+                  <p className="text-3xl font-bold text-white drop-shadow-md">
                     {event.availablePlaces} / {event.maxPlaces}
                   </p>
                 </div>
               )}
 
               {/* Botón WhatsApp */}
-              {whatsappLink && (
+              {whatsappLink && event.availablePlaces !== 0 && (
                 <Link
                   href={whatsappLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-3 bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-xl"
+                  className="inline-flex items-center gap-3 bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-xl hover:scale-105"
                 >
                   <MessageCircle size={24} />
                   Inscribirme
@@ -275,7 +276,7 @@ export default async function EventPage({ params }: EventPageProps) {
               )}
 
               {event.availablePlaces === 0 && (
-                <div className="bg-red-500 text-white px-8 py-4 rounded-full font-bold text-lg">
+                <div className="bg-red-500 text-white px-8 py-4 rounded-full font-bold text-lg shadow-lg">
                   ¡Plazas Agotadas!
                 </div>
               )}
@@ -417,14 +418,14 @@ export default async function EventPage({ params }: EventPageProps) {
               No te pierdas esta oportunidad única de participar en {event.title}
             </p>
             <Link
-  href={whatsappLink}
-  target="_blank"
-  rel="noopener noreferrer"
-  className="inline-flex items-center gap-3 bg-green-500 hover:bg-green-600 text-white px-10 py-5 rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-xl"
->
-  <MessageCircle size={28} />
-  Inscribirme por WhatsApp
-</Link>
+              href={whatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 bg-green-500 hover:bg-green-600 text-white px-10 py-5 rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-xl hover:scale-105"
+            >
+              <MessageCircle size={28} />
+              Inscribirme por WhatsApp
+            </Link>
           </div>
         </section>
       )}
