@@ -6,7 +6,6 @@ import Script from 'next/script';
 
 export default function SeoAnalyticsScripts() {
   const [config, setConfig] = useState<{
-    googleSearchConsole?: string;
     googleAnalyticsId?: string;
     metaPixelId?: string;
     googleTagManagerId?: string;
@@ -18,7 +17,11 @@ export default function SeoAnalyticsScripts() {
         const res = await fetch('/api/config/seo-analytics');
         if (res.ok) {
           const data = await res.json();
-          setConfig(data);
+          setConfig({
+            googleAnalyticsId: data.googleAnalyticsId,
+            metaPixelId: data.metaPixelId,
+            googleTagManagerId: data.googleTagManagerId,
+          });
         }
       } catch (error) {
         console.error('Error loading SEO config:', error);
@@ -29,10 +32,7 @@ export default function SeoAnalyticsScripts() {
 
   return (
     <>
-      {/* Google Search Console Verification */}
-      {config.googleSearchConsole && (
-        <meta name="google-site-verification" content={config.googleSearchConsole} />
-      )}
+      {/* ✅ QUITADO: Google Search Console (ahora está en layout.tsx) */}
 
       {/* Google Tag Manager */}
       {config.googleTagManagerId && (
@@ -50,6 +50,15 @@ export default function SeoAnalyticsScripts() {
               `,
             }}
           />
+          {/* GTM noscript */}
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${config.googleTagManagerId}`}
+              height="0"
+              width="0"
+              style={{ display: 'none', visibility: 'hidden' }}
+            />
+          </noscript>
         </>
       )}
 
@@ -77,24 +86,34 @@ export default function SeoAnalyticsScripts() {
 
       {/* Meta Pixel (solo si NO hay GTM) */}
       {config.metaPixelId && !config.googleTagManagerId && (
-        <Script
-          id="meta-pixel"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              !function(f,b,e,v,n,t,s)
-              {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-              n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-              if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-              n.queue=[];t=b.createElement(e);t.async=!0;
-              t.src=v;s=b.getElementsByTagName(e)[0];
-              s.parentNode.insertBefore(t,s)}(window, document,'script',
-              'https://connect.facebook.net/en_US/fbevents.js');
-              fbq('init', '${config.metaPixelId}');
-              fbq('track', 'PageView');
-            `,
-          }}
-        />
+        <>
+          <Script
+            id="meta-pixel"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                !function(f,b,e,v,n,t,s)
+                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                n.queue=[];t=b.createElement(e);t.async=!0;
+                t.src=v;s=b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t,s)}(window, document,'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+                fbq('init', '${config.metaPixelId}');
+                fbq('track', 'PageView');
+              `,
+            }}
+          />
+          <noscript>
+            <img
+              height="1"
+              width="1"
+              style={{ display: 'none' }}
+              src={`https://www.facebook.com/tr?id=${config.metaPixelId}&ev=PageView&noscript=1`}
+            />
+          </noscript>
+        </>
       )}
     </>
   );

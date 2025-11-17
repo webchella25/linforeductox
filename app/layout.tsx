@@ -8,6 +8,7 @@ import { Toaster } from "react-hot-toast";
 import { SessionProvider } from "next-auth/react";
 import CookieBanner from '@/components/CookieBanner';
 import SeoAnalyticsScripts from '@/components/SeoAnalyticsScripts';
+import { prisma } from '@/lib/prisma';
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -114,22 +115,40 @@ const organizationSchema = {
   },
 };
 
-export default function RootLayout({
+// ✅ NUEVA FUNCIÓN: Cargar config de SEO en el servidor
+async function getSeoConfig() {
+  try {
+    const config = await prisma.seoAnalyticsConfig.findFirst();
+    return config;
+  } catch (error) {
+    console.error('Error loading SEO config:', error);
+    return null;
+  }
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const seoConfig = await getSeoConfig(); // ✅ Cargar en el servidor
+
   return (
     <html lang="es">
       <head>
+        {/* ✅ Google Search Console - SERVER SIDE */}
+        {seoConfig?.googleSearchConsole && (
+          <meta name="google-site-verification" content={seoConfig.googleSearchConsole} />
+        )}
+
         {/* ✅ Schema.org Organization */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
+
         {/* ✅ CSS Dinámico de Colores */}
         <link rel="stylesheet" href="/api/config/colors/css" />
-		<SeoAnalyticsScripts /> {/* ✅ AGREGAR ESTA LÍNEA */}
       </head>
       <body className={`${playfair.variable} ${inter.variable} antialiased`}>
         <SessionProvider>
@@ -154,6 +173,8 @@ export default function RootLayout({
           />
         </SessionProvider>
         <CookieBanner />
+        {/* ✅ Scripts dinámicos (Analytics, GTM, Meta Pixel) */}
+        <SeoAnalyticsScripts />
       </body>
     </html>
   );
