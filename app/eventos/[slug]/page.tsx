@@ -180,61 +180,36 @@ export default async function EventPage({ params }: EventPageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }}
       />
 
-      {/* Hero - ✅ CAMBIO: Overlay más oscuro para que las letras blancas se vean */}
-      <section className="relative h-[70vh] min-h-[500px] flex items-center justify-center overflow-hidden">
-        {event.heroImage && (
-          <div className="absolute inset-0">
-            <Image
-              src={event.heroImage}
-              alt={event.title}
-              fill
-              className="object-cover"
-              priority
-              sizes="100vw"
-              unoptimized
-            />
-            {/* ✅ CAMBIO: Overlay más oscuro (de 50% a 75%) */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/60 to-black/75" />
-          </div>
-        )}
+      {/* Hero - ✅ CAMBIO: Igual que la página de listado */}
+      <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: event.heroImage 
+              ? `url(${event.heroImage})`
+              : "url('https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=2070')",
+          }}
+        >
+          {/* ✅ Solo overlay oscuro suave para legibilidad, sin color */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-black/60" />
+        </div>
 
-        <div className="relative z-10 container-custom text-center text-white px-6 max-w-4xl">
+        <div className="relative z-10 text-center text-white px-6 max-w-4xl">
           {/* Tipo de evento */}
           <div className="inline-block bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-4">
             <span className="text-white font-semibold">{event.eventType}</span>
           </div>
 
           {/* Título */}
-          <h1 className="font-heading text-4xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">
+          <h1 className="font-heading text-5xl md:text-6xl font-bold mb-4 text-white drop-shadow-lg">
             {event.title}
           </h1>
 
-          {/* Meta Info */}
-          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8 text-lg mb-8 text-white">
-            <div className="flex items-center gap-2">
-              <Calendar size={24} />
-              <span>{format(startDate, "d 'de' MMMM, yyyy", { locale: es })}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock size={24} />
-              <span>{format(startDate, 'HH:mm')}h</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <MapPin size={24} />
-              <span>{event.location}</span>
-            </div>
-          </div>
-
-          {/* Precio */}
-          {event.isFree ? (
-            <div className="inline-block bg-green-500 text-white px-6 py-3 rounded-full text-xl font-bold shadow-lg">
-              EVENTO GRATUITO
-            </div>
-          ) : event.price && (
-            <div className="inline-flex items-center gap-2 bg-secondary text-white px-8 py-4 rounded-full text-2xl font-bold shadow-lg">
-              <Euro size={28} />
-              {event.price}€
-            </div>
+          {/* Descripción corta */}
+          {event.shortDescription && (
+            <p className="text-xl md:text-2xl text-white/90 mb-6 max-w-3xl mx-auto">
+              {event.shortDescription}
+            </p>
           )}
         </div>
       </section>
