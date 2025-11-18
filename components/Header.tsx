@@ -49,7 +49,7 @@ const Header = () => {
     { href: "/aline-vidal", label: "Alin Vidal" },
 	{ href: "/eventos", label: "Eventos" },
     { href: "/testimonios", label: "Testimonios" },
-    { href: "/contacto", label: "Contacto" },
+    { href: "/tienda", label: "Tienda" }, // ✅ CAMBIADO A TIENDA
   ];
 
   // Links del menú de servicios (dinámicos)
@@ -184,17 +184,17 @@ const Header = () => {
             </Link>
           </li>
 
-          {/* Contacto */}
-          <li>
-            <Link
-              href="/contacto"
-              className={`font-medium hover:text-secondary transition-colors ${
-                isScrolled ? "text-gray-800" : "text-white"
-              }`}
-            >
-              Contacto
-            </Link>
-          </li>
+          {/* Tienda */}
+<li>
+  <Link
+    href="/tienda"
+    className={`font-medium hover:text-secondary transition-colors ${
+      isScrolled ? "text-gray-800" : "text-white"
+    }`}
+  >
+    Tienda
+  </Link>
+</li>
 
           {/* Botón Reservar */}
           <li>
@@ -295,16 +295,16 @@ const Header = () => {
                 </Link>
               </li>
 
-              {/* Contacto */}
-              <li>
-                <Link
-                  href="/contacto"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block px-6 py-3 text-gray-800 hover:bg-cream hover:text-primary transition-colors"
-                >
-                  Contacto
-                </Link>
-              </li>
+              {/* Tienda */}
+<li>
+  <Link
+    href="/tienda"
+    onClick={() => setIsMobileMenuOpen(false)}
+    className="block px-6 py-3 text-gray-800 hover:bg-cream hover:text-primary transition-colors"
+  >
+    Tienda
+  </Link>
+</li>
 
               <li className="px-6 pt-2">
                 <Link
