@@ -15,17 +15,8 @@ async function getProducts() {
       ],
     });
 
-    // ✅ Serializar para evitar problemas con Date
-    return products.map(product => ({
-      ...product,
-      createdAt: product.createdAt.toISOString(),
-      updatedAt: product.updatedAt.toISOString(),
-      category: {
-        ...product.category,
-        createdAt: product.category.createdAt.toISOString(),
-        updatedAt: product.category.updatedAt.toISOString(),
-      },
-    }));
+    // ✅ Mapear y serializar correctamente
+    return JSON.parse(JSON.stringify(products));
   } catch (error) {
     console.error('Error fetching products:', error);
     return [];
@@ -48,12 +39,8 @@ async function getCategories() {
       },
     });
 
-    // ✅ Serializar para evitar problemas con Date
-    return categories.map(category => ({
-      ...category,
-      createdAt: category.createdAt.toISOString(),
-      updatedAt: category.updatedAt.toISOString(),
-    }));
+    // ✅ Serializar con JSON.parse(JSON.stringify())
+    return JSON.parse(JSON.stringify(categories));
   } catch (error) {
     console.error('Error fetching categories:', error);
     return [];
@@ -103,5 +90,5 @@ export default async function TiendaPage() {
     getColors(),
   ]);
 
-  return <TiendaClient products={products as any} categories={categories as any} colors={colors} />;
+  return <TiendaClient products={products} categories={categories} colors={colors} />;
 }
