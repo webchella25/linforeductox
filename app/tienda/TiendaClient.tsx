@@ -10,7 +10,7 @@ interface Product {
   id: string;
   name: string;
   slug: string;
-  shortDescription?: string | null; // ✅ CAMBIAR AQUÍ
+  shortDescription?: string | null;
   basePrice: number;
   featured: boolean;
   images: any;
@@ -18,7 +18,15 @@ interface Product {
     id: string;
     name: string;
     icon: string;
+    slug: string;
+    description?: string | null;
+    active: boolean;
+    order: number;
+    createdAt: string; // ✅ CAMBIAR A string (serializado)
+    updatedAt: string; // ✅ CAMBIAR A string (serializado)
   };
+  createdAt: string; // ✅ AGREGAR
+  updatedAt: string; // ✅ AGREGAR
 }
 
 interface Category {
@@ -26,6 +34,11 @@ interface Category {
   name: string;
   slug: string;
   icon: string;
+  description?: string | null; // ✅ AGREGAR | null
+  active: boolean;
+  order: number;
+  createdAt: string; // ✅ AGREGAR
+  updatedAt: string; // ✅ AGREGAR
   _count: {
     products: number;
   };

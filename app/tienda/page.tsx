@@ -15,7 +15,17 @@ async function getProducts() {
       ],
     });
 
-    return products;
+    // ✅ Serializar para evitar problemas con Date
+    return products.map(product => ({
+      ...product,
+      createdAt: product.createdAt.toISOString(),
+      updatedAt: product.updatedAt.toISOString(),
+      category: {
+        ...product.category,
+        createdAt: product.category.createdAt.toISOString(),
+        updatedAt: product.category.updatedAt.toISOString(),
+      },
+    }));
   } catch (error) {
     console.error('Error fetching products:', error);
     return [];
@@ -38,7 +48,12 @@ async function getCategories() {
       },
     });
 
-    return categories;
+    // ✅ Serializar para evitar problemas con Date
+    return categories.map(category => ({
+      ...category,
+      createdAt: category.createdAt.toISOString(),
+      updatedAt: category.updatedAt.toISOString(),
+    }));
   } catch (error) {
     console.error('Error fetching categories:', error);
     return [];
@@ -88,5 +103,5 @@ export default async function TiendaPage() {
     getColors(),
   ]);
 
-  return <TiendaClient products={products} categories={categories} colors={colors} />;
+  return <TiendaClient products={products as any} categories={categories as any} colors={colors} />;
 }
