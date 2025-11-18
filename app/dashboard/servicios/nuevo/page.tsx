@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import RichTextEditor from '@/components/dashboard/RichTextEditor'; // ✅ AGREGAR
 
 interface Category {
   id: string;
@@ -36,8 +37,8 @@ export default function NuevoServicioPage() {
     conditions: [''],
     order: 0,
     active: true,
-    isSubService: false, // ✅ NUEVO
-    parentServiceId: '', // ✅ NUEVO
+    isSubService: false,
+    parentServiceId: '',
   });
 
   useEffect(() => {
@@ -138,7 +139,7 @@ export default function NuevoServicioPage() {
           active: formData.active,
           parentServiceId: formData.isSubService && formData.parentServiceId 
             ? formData.parentServiceId 
-            : null, // ✅ NUEVO
+            : null,
         }),
       });
 
@@ -278,19 +279,21 @@ export default function NuevoServicioPage() {
           </select>
         </div>
 
-        {/* Descripción */}
+        {/* Descripción con RichTextEditor */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Descripción *
           </label>
-          <textarea
-            required
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            rows={6}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-            placeholder="Describe el servicio en detalle..."
-          />
+          <div className="border border-gray-300 rounded-lg overflow-hidden">
+            <RichTextEditor
+              value={formData.description}
+              onChange={(value) => setFormData({ ...formData, description: value })}
+              placeholder="Describe el servicio en detalle... Puedes usar formato de texto enriquecido."
+            />
+          </div>
+          <p className="text-xs text-gray-500 mt-1">
+            Usa las herramientas de formato para destacar información importante
+          </p>
         </div>
 
         {/* Duración y Precio */}

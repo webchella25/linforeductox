@@ -40,47 +40,53 @@ export default function RichTextEditor({
   onChange, 
   placeholder = 'Escribe aquí...' 
 }: RichTextEditorProps) {
-  const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        paragraph: {
-          HTMLAttributes: {
-            class: 'mb-4',
-          },
-        },
-        heading: {
-          levels: [1, 2, 3],
-        },
-      }),
-      Placeholder.configure({
-        placeholder,
-      }),
-      Link.configure({
-        openOnClick: false,
+const editor = useEditor({
+  immediatelyRender: false, // ✅ AGREGAR ESTA LÍNEA
+  extensions: [
+    StarterKit.configure({
+      paragraph: {
         HTMLAttributes: {
-          class: 'text-primary underline hover:text-primary-dark',
+          class: 'mb-4',
         },
-      }),
-      TextAlign.configure({
-        types: ['heading', 'paragraph'],
-      }),
-      Underline,
-      TextStyle,
-      Color,
-      FontFamily.configure({
-        types: ['textStyle'],
-      }),
-    ],
-    content: value,
-    onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
-    },
-    editorProps: {
-      attributes: {
-        class: 'prose prose-lg max-w-none focus:outline-none min-h-[250px] px-4 py-3',
       },
+      heading: {
+        HTMLAttributes: {
+          class: 'font-bold mb-4',
+        },
+        levels: [1, 2, 3],
+      },
+      bulletList: {
+        HTMLAttributes: {
+          class: 'list-disc ml-6 mb-4',
+        },
+      },
+      orderedList: {
+        HTMLAttributes: {
+          class: 'list-decimal ml-6 mb-4',
+        },
+      },
+    }),
+    Underline,
+    Link.configure({
+      openOnClick: false,
+      HTMLAttributes: {
+        class: 'text-primary underline',
+      },
+    }),
+    TextAlign.configure({
+      types: ['heading', 'paragraph'],
+    }),
+  ],
+  content: value,
+  onUpdate: ({ editor }) => {
+    onChange(editor.getHTML());
+  },
+  editorProps: {
+    attributes: {
+      class: 'prose max-w-none focus:outline-none min-h-[200px] p-4',
     },
-  });
+  },
+});
 
   if (!editor) {
     return null;

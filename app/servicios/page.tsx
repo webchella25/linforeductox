@@ -1,40 +1,32 @@
 // app/servicios/page.tsx
-
 import Link from 'next/link';
-import { Sparkles, Heart, Zap, ArrowRight, Clock } from 'lucide-react';
+import { ArrowRight, Clock, ChevronDown } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
-
-// Mapa de iconos por categoría
-const iconMap = {
-  corporal: Sparkles,
-  facial: Heart,
-  acupuntura: Zap,
-  default: Sparkles,
-};
-
-// Mapa de imágenes por categoría
-const imageMap: Record<string, string> = {
-  corporal: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=2070',
-  facial: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=2070',
-  acupuntura: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=2070',
-  default: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=2070',
-};
 
 async function getServices() {
   try {
-    const services = await prisma.service.findMany({
-      where: {
-        active: true,
-      },
-      orderBy: {
-        order: 'asc',
-      },
+    const allServices = await prisma.service.findMany({
+      where: { active: true },
+      orderBy: { order: 'asc' },
     });
-    return services;
+
+    // Organizar en jerarquía
+    const parents = allServices.filter(s => !s.parentServiceId);
+    const children = allServices.filter(s => s.parentServiceId);
+
+    return parents.map(parent => ({
+      ...parent,
+      childServices: children.filter(child => child.parentServiceId === parent.id),
+    }));
   } catch (error) {
     console.error('Error obteniendo servicios:', error);
     return [];
   }
+}
+
+// Función helper para limpiar HTML
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, '').substring(0, 200);
 }
 
 export default async function ServiciosPage() {
@@ -55,7 +47,7 @@ export default async function ServiciosPage() {
         </div>
         <div className="relative z-10 text-center text-white px-6">
           <h1 className="font-heading text-5xl md:text-6xl font-bold mb-4">
-            Nuestros Servicios
+            Nuestros Tratamientos
           </h1>
           <p className="text-xl md:text-2xl text-white/90">
             Experiencias personalizadas para tu bienestar
@@ -63,99 +55,97 @@ export default async function ServiciosPage() {
         </div>
       </section>
 
-      {/* Servicios Detallados */}
+      {/* Tratamientos Organizados por Jerarquía */}
       <section className="section-padding bg-white">
-        <div className="container-custom">
+        <div className="container-custom max-w-6xl">
           {services.length === 0 ? (
             <div className="text-center py-20">
               <p className="text-xl text-gray-600">
-                No hay servicios disponibles en este momento
+                No hay tratamientos disponibles en este momento
               </p>
             </div>
           ) : (
-            <div className="space-y-24">
-              {services.map((servicio, index) => {
-                const Icon = iconMap[servicio.category as keyof typeof iconMap] || iconMap.default;
-                const image = imageMap[servicio.category] || imageMap.default;
-                const isEven = index % 2 === 0;
-
-                return (
-                  <div
-                    key={servicio.id}
-                    className={`grid grid-cols-1 lg:grid-cols-2 gap-12 items-center ${
-                      isEven ? '' : 'lg:grid-flow-dense'
-                    }`}
-                  >
-                    {/* Imagen */}
-                    <div
-                      className={`relative h-96 rounded-2xl overflow-hidden shadow-xl ${
-                        isEven ? '' : 'lg:col-start-2'
-                      }`}
-                    >
-                      <div
-                        className="absolute inset-0 bg-cover bg-center hover:scale-105 transition-transform duration-500"
-                        style={{ backgroundImage: `url('${image}')` }}
-                      />
-                    </div>
-
-                    {/* Contenido */}
-                    <div className={isEven ? '' : 'lg:col-start-1 lg:row-start-1'}>
-                      <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mb-6">
-                        <Icon size={32} className="text-primary" />
-                      </div>
-
-                      <h2 className="font-heading text-4xl font-bold text-primary mb-4">
-                        {servicio.name}
+            <div className="space-y-16">
+              {services.map((parent) => (
+                <div key={parent.id} className="space-y-8">
+                  {/* Servicio Padre */}
+                  <div className="bg-gradient-to-br from-cream to-white rounded-3xl shadow-lg overflow-hidden border-2 border-primary/20">
+                    <div className="p-8 md:p-12">
+                      <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-4">
+                        {parent.name}
                       </h2>
+                      
+                      <div 
+                        className="prose prose-lg max-w-none text-gray-700 mb-6"
+                        dangerouslySetInnerHTML={{ __html: parent.description }}
+                      />
 
-                      <div className="flex items-center gap-4 mb-6">
-                        <div className="flex items-center gap-2 text-gray-600">
-                          <Clock size={20} />
-                          <span>{servicio.duration} min</span>
+                      <div className="flex items-center gap-6 text-gray-600 mb-8">
+                        <div className="flex items-center gap-2">
+                          <Clock size={20} className="text-primary" />
+                          <span>{parent.duration} minutos</span>
                         </div>
-                        {servicio.price && (
-                          <div className="text-secondary font-bold text-xl">
-                            {servicio.price}€
+                        {parent.price && (
+                          <div className="text-2xl font-bold text-secondary">
+                            {parent.price}€
                           </div>
                         )}
                       </div>
 
-                      <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-                        {servicio.description.length > 200
-                          ? servicio.description.substring(0, 200) + '...'
-                          : servicio.description}
-                      </p>
-
-                      {servicio.benefits && servicio.benefits.length > 0 && (
-                        <>
-                          <h3 className="font-heading text-2xl font-semibold text-primary mb-4">
-                            Beneficios:
-                          </h3>
-                          <ul className="space-y-3 mb-8">
-                            {servicio.benefits.slice(0, 5).map((benefit, idx) => (
-                              <li
-                                key={idx}
-                                className="flex items-start gap-3 text-gray-700"
-                              >
-                                <span className="text-secondary mt-1">✦</span>
-                                <span>{benefit}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </>
+                      {parent.childServices && parent.childServices.length > 0 && (
+                        <div className="flex items-center gap-2 text-sm text-gray-600 bg-primary/5 px-4 py-2 rounded-lg inline-flex">
+                          <ChevronDown size={18} className="text-primary" />
+                          <span className="font-medium">
+                            {parent.childServices.length} opciones disponibles
+                          </span>
+                        </div>
                       )}
-
-                      <Link
-                        href={`/servicios/${servicio.slug}`}
-                        className="inline-flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-full font-medium hover:bg-primary-dark transition-all shadow-lg hover:shadow-xl"
-                      >
-                        Ver Detalles
-                        <ArrowRight size={20} />
-                      </Link>
                     </div>
                   </div>
-                );
-              })}
+
+                  {/* Subtratamientos (Hijos) */}
+                  {parent.childServices && parent.childServices.length > 0 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pl-0 md:pl-8">
+                      {parent.childServices.map((child: any) => (
+                        <Link
+                          key={child.id}
+                          href={`/servicios/${child.slug}`}
+                          className="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-primary"
+                        >
+                          <div className="p-6">
+                            <div className="flex items-start justify-between mb-3">
+                              <h3 className="font-bold text-xl text-gray-900 group-hover:text-primary transition-colors flex-1">
+                                {child.name}
+                              </h3>
+                              <ArrowRight 
+                                className="text-gray-400 group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0 ml-2" 
+                                size={20} 
+                              />
+                            </div>
+
+                            <div 
+                              className="prose prose-sm max-w-none text-gray-600 mb-4 line-clamp-3"
+                              dangerouslySetInnerHTML={{ __html: child.description }}
+                            />
+
+                            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                              <div className="flex items-center gap-2 text-sm text-gray-600">
+                                <Clock size={16} />
+                                <span>{child.duration} min</span>
+                              </div>
+                              {child.price && (
+                                <div className="text-lg font-bold text-secondary">
+                                  {child.price}€
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -168,7 +158,7 @@ export default async function ServiciosPage() {
             ¿Lista para tu transformación?
           </h2>
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-            Cada masaje es una fusión que combina Ciencia, Arte y Energía
+            Cada tratamiento es una fusión que combina Ciencia, Arte y Energía
           </p>
           <Link
             href="/reservar"

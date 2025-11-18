@@ -1,11 +1,10 @@
 // components/Header.tsx
-
 "use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Service {
@@ -13,6 +12,8 @@ interface Service {
   name: string;
   slug: string;
   active: boolean;
+  parentServiceId?: string | null;
+  childServices?: Service[];
 }
 
 const Header = () => {
@@ -20,6 +21,7 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isServicesOpen, setIsServicesOpen] = useState(false);
   const [services, setServices] = useState<Service[]>([]);
+  const [hoveredParent, setHoveredParent] = useState<string | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -29,7 +31,6 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Cargar servicios activos
   useEffect(() => {
     fetchServices();
   }, []);
@@ -38,27 +39,29 @@ const Header = () => {
     try {
       const res = await fetch('/api/services?active=true');
       const data = await res.json();
-      setServices(data.services || []);
+      
+      // Organizar en jerarquía
+      const allServices = data.services || [];
+      const parents = allServices.filter((s: Service) => !s.parentServiceId);
+      const children = allServices.filter((s: Service) => s.parentServiceId);
+      
+      const servicesWithChildren = parents.map((parent: Service) => ({
+        ...parent,
+        childServices: children.filter((child: Service) => child.parentServiceId === parent.id),
+      }));
+      
+      setServices(servicesWithChildren);
     } catch (error) {
       console.error('Error cargando servicios:', error);
     }
   };
 
   const navLinks = [
-    { href: "/", label: "Inicio" },
-    { href: "/aline-vidal", label: "Alin Vidal" },
-	{ href: "/eventos", label: "Eventos" },
+   
+    { href: "/aline-vidal", label: "Aline Vidal" },
+    { href: "/eventos", label: "Eventos" },
     { href: "/testimonios", label: "Testimonios" },
-    { href: "/tienda", label: "Tienda" }, // ✅ CAMBIADO A TIENDA
-  ];
-
-  // Links del menú de servicios (dinámicos)
-  const serviciosLinks = [
-    { href: "/servicios", label: "Todos los Servicios" },
-    ...services.map(service => ({
-      href: `/servicios/${service.slug}`,
-      label: service.name,
-    })),
+    { href: "/tienda", label: "Tienda" },
   ];
 
   return (
@@ -104,18 +107,21 @@ const Header = () => {
             </Link>
           </li>
 
-          {/* Dropdown Servicios */}
+          {/* Dropdown Tratamientos con Jerarquía */}
           <li
-            className="relative"
+            className="relative group"
             onMouseEnter={() => setIsServicesOpen(true)}
-            onMouseLeave={() => setIsServicesOpen(false)}
+            onMouseLeave={() => {
+              setIsServicesOpen(false);
+              setHoveredParent(null);
+            }}
           >
             <button
               className={`font-medium hover:text-secondary transition-colors flex items-center gap-1 ${
                 isScrolled ? "text-gray-800" : "text-white"
               }`}
             >
-              Servicios
+              Tratamientos
               <ChevronDown
                 size={16}
                 className={`transition-transform ${
@@ -124,7 +130,7 @@ const Header = () => {
               />
             </button>
 
-            {/* Dropdown Menu */}
+            {/* Dropdown Menu Principal */}
             <AnimatePresence>
               {isServicesOpen && (
                 <motion.div
@@ -132,69 +138,67 @@ const Header = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[250px] border border-gray-100"
+                  className="absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[280px] border border-gray-100"
                 >
-                  {serviciosLinks.map((servicio) => (
-                    <Link
-                      key={servicio.href}
-                      href={servicio.href}
-                      className="block px-6 py-3 text-gray-800 hover:bg-cream hover:text-primary transition-colors"
+                  {/* Ver Todos */}
+                  <Link
+                    href="/servicios"
+                    className="block px-6 py-3 text-gray-800 hover:bg-cream hover:text-primary transition-colors font-medium border-b border-gray-100"
+                  >
+                    📋 Ver Todos los Tratamientos
+                  </Link>
+
+                  {/* Servicios Padres */}
+                  {services.map((parent) => (
+                    <div
+                      key={parent.id}
+                      className="relative"
+                      onMouseEnter={() => setHoveredParent(parent.id)}
                     >
-                      {servicio.label}
-                    </Link>
+                      <Link
+                        href={`/servicios/${parent.slug}`}
+                        className="flex items-center justify-between px-6 py-3 text-gray-800 hover:bg-cream hover:text-primary transition-colors"
+                      >
+                        <span className="font-medium">{parent.name}</span>
+                        {parent.childServices && parent.childServices.length > 0 && (
+                          <ChevronRight size={16} className="text-gray-400" />
+                        )}
+                      </Link>
+
+                      {/* Submenu de Hijos */}
+                      {hoveredParent === parent.id && parent.childServices && parent.childServices.length > 0 && (
+                        <div className="absolute left-full top-0 ml-1 bg-white rounded-lg shadow-xl py-2 min-w-[260px] border border-gray-100">
+                          {parent.childServices.map((child) => (
+                            <Link
+                              key={child.id}
+                              href={`/servicios/${child.slug}`}
+                              className="block px-6 py-3 text-gray-700 hover:bg-cream hover:text-primary transition-colors text-sm"
+                            >
+                              {child.name}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </motion.div>
               )}
             </AnimatePresence>
           </li>
 
-          {/* Alin Vidal */}
-          <li>
-            <Link
-              href="/aline-vidal"
-              className={`font-medium hover:text-secondary transition-colors ${
-                isScrolled ? "text-gray-800" : "text-white"
-              }`}
-            >
-              Aline Vidal
-            </Link>
-          </li>
-
- {/* Eventos */}
-          <li>
-            <Link
-              href="/eventos"
-              className={`font-medium hover:text-secondary transition-colors ${
-                isScrolled ? "text-gray-800" : "text-white"
-              }`}
-            >
-              Eventos
-            </Link>
-          </li>
-
-          {/* Testimonios */}
-          <li>
-            <Link
-              href="/testimonios"
-              className={`font-medium hover:text-secondary transition-colors ${
-                isScrolled ? "text-gray-800" : "text-white"
-              }`}
-            >
-              Testimonios
-            </Link>
-          </li>
-
-          {/* Tienda */}
-<li>
-  <Link
-    href="/tienda"
-    className={`font-medium hover:text-secondary transition-colors ${
-      isScrolled ? "text-gray-800" : "text-white"
-    }`}
-  >
-    Tienda
-  </Link>
-</li>
+          {/* Resto de Links */}
+          {navLinks.map((link) => (
+            <li key={link.href}>
+              <Link
+                href={link.href}
+                className={`font-medium hover:text-secondary transition-colors ${
+                  isScrolled ? "text-gray-800" : "text-white"
+                }`}
+              >
+                {link.label}
+              </Link>
+            </li>
+          ))}
 
           {/* Botón Reservar */}
           <li>
@@ -232,24 +236,13 @@ const Header = () => {
             className="md:hidden bg-white border-t"
           >
             <ul className="flex flex-col py-4">
-              {/* Inicio */}
-              <li>
-                <Link
-                  href="/"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block px-6 py-3 text-gray-800 hover:bg-cream hover:text-primary transition-colors"
-                >
-                  Inicio
-                </Link>
-              </li>
-
-              {/* Servicios Mobile */}
+              {/* Tratamientos Mobile */}
               <li>
                 <button
                   onClick={() => setIsServicesOpen(!isServicesOpen)}
                   className="w-full text-left px-6 py-3 text-gray-800 hover:bg-cream hover:text-primary transition-colors flex items-center justify-between"
                 >
-                  Servicios
+                  Tratamientos
                   <ChevronDown
                     size={16}
                     className={`transition-transform ${
@@ -259,52 +252,50 @@ const Header = () => {
                 </button>
                 {isServicesOpen && (
                   <div className="bg-cream/50">
-                    {serviciosLinks.map((servicio) => (
-                      <Link
-                        key={servicio.href}
-                        href={servicio.href}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="block px-12 py-2 text-gray-700 hover:text-primary transition-colors"
-                      >
-                        {servicio.label}
-                      </Link>
+                    <Link
+                      href="/servicios"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="block px-12 py-2 text-gray-700 hover:text-primary transition-colors font-medium"
+                    >
+                      📋 Ver Todos
+                    </Link>
+                    {services.map((parent) => (
+                      <div key={parent.id}>
+                        <Link
+                          href={`/servicios/${parent.slug}`}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="block px-12 py-2 text-gray-700 hover:text-primary transition-colors font-medium"
+                        >
+                          {parent.name}
+                        </Link>
+                        {parent.childServices?.map((child) => (
+                          <Link
+                            key={child.id}
+                            href={`/servicios/${child.slug}`}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="block px-16 py-2 text-sm text-gray-600 hover:text-primary transition-colors"
+                          >
+                            • {child.name}
+                          </Link>
+                        ))}
+                      </div>
                     ))}
                   </div>
                 )}
               </li>
 
-              {/* Alin Vidal */}
-              <li>
-                <Link
-                  href="/aline-vidal"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block px-6 py-3 text-gray-800 hover:bg-cream hover:text-primary transition-colors"
-                >
-                  Aline Vidal
-                </Link>
-              </li>
-
-              {/* Testimonios */}
-              <li>
-                <Link
-                  href="/testimonios"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block px-6 py-3 text-gray-800 hover:bg-cream hover:text-primary transition-colors"
-                >
-                  Testimonios
-                </Link>
-              </li>
-
-              {/* Tienda */}
-<li>
-  <Link
-    href="/tienda"
-    onClick={() => setIsMobileMenuOpen(false)}
-    className="block px-6 py-3 text-gray-800 hover:bg-cream hover:text-primary transition-colors"
-  >
-    Tienda
-  </Link>
-</li>
+              {/* Resto de Links Mobile */}
+              {navLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-6 py-3 text-gray-800 hover:bg-cream hover:text-primary transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
 
               <li className="px-6 pt-2">
                 <Link

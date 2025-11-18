@@ -3,8 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { Calendar, Clock, User, Mail, Phone, MessageSquare, Check, Loader2, ArrowRight } from 'lucide-react';
+import { Calendar, Clock, User, Mail, Phone, MessageSquare, Check, Loader2, ArrowRight, ChevronDown, ChevronUp, Search } from 'lucide-react';
 import { format, addDays, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import toast from 'react-hot-toast';
@@ -17,6 +16,8 @@ interface Service {
   description: string;
   price?: number;
   category: string;
+  parentServiceId?: string | null;
+  childServices?: Service[];
 }
 
 interface TimeSlot {
@@ -47,6 +48,8 @@ export default function ReservarClient() {
   const [loading, setLoading] = useState(false);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [loadingServices, setLoadingServices] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [expandedParents, setExpandedParents] = useState<Set<string>>(new Set());
 
   const [colors, setColors] = useState<SiteConfig>({
     primaryColor: '#2C5F2D',
@@ -72,7 +75,7 @@ export default function ReservarClient() {
   useEffect(() => {
     if (servicioParam && services.length > 0 && !selectedService) {
       const service = services.find(
-        (s) => s.category.toLowerCase() === servicioParam.toLowerCase()
+        (s) => s.slug === servicioParam || s.category.toLowerCase() === servicioParam.toLowerCase()
       );
       if (service) {
         setSelectedService(service);
@@ -100,9 +103,22 @@ export default function ReservarClient() {
   const fetchServices = async () => {
     setLoadingServices(true);
     try {
-      const res = await fetch('/api/services');
+      const res = await fetch('/api/services?active=true');
       const data = await res.json();
-      setServices(data.services || []);
+      
+      // Organizar en jerarquía
+      const allServices = data.services || [];
+      const parents = allServices.filter((s: Service) => !s.parentServiceId);
+      const children = allServices.filter((s: Service) => s.parentServiceId);
+      
+      const servicesWithChildren = parents.map((parent: Service) => ({
+        ...parent,
+        childServices: children.filter((child: Service) => child.parentServiceId === parent.id),
+      }));
+      
+      setServices(servicesWithChildren);
+      // Expandir todos por defecto
+      setExpandedParents(new Set(parents.map((p: Service) => p.id)));
     } catch (error) {
       toast.error('Error al cargar los servicios');
     } finally {
@@ -144,6 +160,16 @@ export default function ReservarClient() {
   const handleSlotSelect = (slot: TimeSlot) => {
     setSelectedSlot(slot);
     setStep(3);
+  };
+
+  const toggleParent = (parentId: string) => {
+    const newExpanded = new Set(expandedParents);
+    if (newExpanded.has(parentId)) {
+      newExpanded.delete(parentId);
+    } else {
+      newExpanded.add(parentId);
+    }
+    setExpandedParents(newExpanded);
   };
 
   const handleWhatsAppBooking = async (e: React.FormEvent) => {
@@ -190,29 +216,48 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
         const encodedMessage = encodeURIComponent(message);
         const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
 
-        toast.success('¡Reserva guardada! Completa el envío en WhatsApp');
-        setStep(4);
-        window.open(whatsappUrl, '_blank');
+        toast.success('¡Reserva guardada! Abriendo WhatsApp...');
+        
+        setTimeout(() => {
+          window.open(whatsappUrl, '_blank');
+          setStep(4);
+        }, 1000);
       } else {
         toast.error(data.error || 'Error al crear la reserva');
       }
     } catch (error) {
+      console.error('Error:', error);
       toast.error('Error al procesar la reserva');
-      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
-  const today = startOfDay(new Date());
-  const minDate = today;
-  const maxDate = addDays(today, 60);
+  // Filtrar servicios por búsqueda
+  const filteredServices = services.filter((parent) => {
+    const parentMatches = parent.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const childrenMatch = parent.childServices?.some((child) =>
+      child.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    return parentMatches || childrenMatch;
+  });
+
+  const stripHtml = (html: string) => {
+    const tmp = document.createElement('DIV');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+  };
+  
+    // ✅ AGREGAR ESTAS LÍNEAS AQUÍ
+  const minDate = startOfDay(new Date());
+  const maxDate = addDays(minDate, 60);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cream via-white to-cream/50 py-20">
-      <div className="container-custom max-w-6xl">
+    <div className="min-h-screen bg-gradient-to-br from-cream via-white to-cream/50 py-12 px-4">
+      <div className="container-custom max-w-5xl mx-auto">
+        {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-4">
+          <h1 className="font-heading text-4xl md:text-5xl font-bold mb-4" style={{ color: colors.primaryColor }}>
             Reserva tu Cita
           </h1>
           <p className="text-xl text-gray-600">
@@ -220,8 +265,9 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
           </p>
         </div>
 
-        <div className="flex justify-center mb-12 overflow-x-auto">
-          <div className="flex items-center gap-2 md:gap-4 min-w-max px-4">
+        {/* Stepper */}
+        <div className="mb-12">
+          <div className="flex items-center justify-center gap-4">
             {[
               { num: 1, label: 'Servicio' },
               { num: 2, label: 'Fecha y Hora' },
@@ -230,24 +276,27 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
             ].map((s, idx) => (
               <div key={s.num} className="flex items-center">
                 <div
-                  className={`flex items-center justify-center w-10 h-10 rounded-full font-semibold transition-all`}
+                  className={`flex items-center justify-center w-12 h-12 rounded-full font-bold text-lg transition-all ${
+                    step >= s.num
+                      ? 'text-white shadow-lg'
+                      : 'bg-gray-200 text-gray-500'
+                  }`}
                   style={{
-                    backgroundColor: step >= s.num ? colors.primaryColor : '#E5E7EB',
-                    color: step >= s.num ? 'white' : '#6B7280',
+                    backgroundColor: step >= s.num ? colors.primaryColor : undefined,
                   }}
                 >
-                  {step > s.num ? <Check size={20} /> : s.num}
+                  {step > s.num ? <Check size={24} /> : s.num}
                 </div>
-                <span
-                  className={`ml-2 text-sm font-medium`}
-                  style={{ color: step >= s.num ? colors.primaryColor : '#6B7280' }}
-                >
-                  {s.label}
-                </span>
+                <div className="ml-3 hidden md:block">
+                  <p className={`font-medium ${step >= s.num ? 'text-gray-900' : 'text-gray-400'}`}>
+                    {s.label}
+                  </p>
+                </div>
                 {idx < 3 && (
                   <div
-                    className={`w-8 md:w-16 h-0.5 ml-2`}
-                    style={{ backgroundColor: step > s.num ? colors.primaryColor : '#E5E7EB' }}
+                    className={`hidden md:block w-16 h-1 mx-4 ${
+                      step > s.num ? 'bg-primary' : 'bg-gray-200'
+                    }`}
                   />
                 )}
               </div>
@@ -255,51 +304,126 @@ ${formData.clientNotes ? `📝 Notas: ${formData.clientNotes}\n` : ''}ID de rese
           </div>
         </div>
 
+        {/* PASO 1: Seleccionar Servicio */}
         {step === 1 && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            <h2 className="text-2xl font-bold mb-6" style={{ color: colors.primaryColor }}>
+              Selecciona tu Tratamiento
+            </h2>
+
+            {/* Buscador */}
+            <div className="mb-6 relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Buscar tratamiento..."
+                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                style={{ '--tw-ring-color': colors.primaryColor } as React.CSSProperties}
+              />
+            </div>
+
             {loadingServices ? (
-              <div className="col-span-full flex justify-center py-12">
-                <Loader2 className="animate-spin" style={{ color: colors.primaryColor }} size={40} />
-              </div>
-            ) : services.length === 0 ? (
-              <div className="col-span-full text-center py-12 text-gray-500">
-                No hay servicios disponibles
+              <div className="text-center py-12">
+                <Loader2 className="animate-spin mx-auto mb-4" size={40} style={{ color: colors.primaryColor }} />
+                <p className="text-gray-500">Cargando tratamientos...</p>
               </div>
             ) : (
-              services.map((service) => (
-                <div
-                  key={service.id}
-                  onClick={() => handleServiceSelect(service)}
-                  className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-xl hover:scale-105 transition-all border-2 border-transparent"
-                  style={{
-                    '--hover-border-color': colors.primaryColor,
-                  } as React.CSSProperties}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = colors.primaryColor;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = 'transparent';
-                  }}
-                >
-                  <h3 className="font-heading text-xl font-bold mb-2" style={{ color: colors.primaryColor }}>
-                    {service.name}
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                    {service.description}
-                  </p>
-                  <div className="flex items-center justify-between text-sm text-gray-500">
-                    <div className="flex items-center gap-2">
-                      <Clock size={16} />
-                      <span>{service.duration} min</span>
+              <div className="space-y-4">
+                {filteredServices.map((parent) => (
+                  <div key={parent.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                    {/* Servicio Padre */}
+                    <div
+                      className="p-6 cursor-pointer hover:bg-gray-50 transition-colors"
+                      style={{ backgroundColor: colors.creamColor }}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="text-xl font-bold mb-2" style={{ color: colors.primaryColor }}>
+                            {parent.name}
+                          </h3>
+                          <p className="text-gray-600 mb-3 line-clamp-2">
+                            {stripHtml(parent.description).substring(0, 150)}...
+                          </p>
+                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                            <span className="flex items-center gap-1">
+                              <Clock size={16} />
+                              {parent.duration} min
+                            </span>
+                            <span className="capitalize px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: colors.secondaryLight, color: 'white' }}>
+                              {parent.category}
+                            </span>
+                            {parent.childServices && parent.childServices.length > 0 && (
+                              <span className="text-xs font-medium" style={{ color: colors.secondaryColor }}>
+                                {parent.childServices.length} opciones disponibles
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        {parent.childServices && parent.childServices.length > 0 && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleParent(parent.id);
+                            }}
+                            className="ml-4 p-2 hover:bg-white rounded-lg transition-colors"
+                          >
+                            {expandedParents.has(parent.id) ? (
+                              <ChevronUp size={24} style={{ color: colors.primaryColor }} />
+                            ) : (
+                              <ChevronDown size={24} style={{ color: colors.primaryColor }} />
+                            )}
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    {service.price && (
-                      <span className="font-semibold text-lg" style={{ color: colors.primaryColor }}>
-                        {service.price}€
-                      </span>
+
+                    {/* Subtratamientos */}
+                    {expandedParents.has(parent.id) && parent.childServices && parent.childServices.length > 0 && (
+                      <div className="border-t border-gray-200 bg-white">
+                        {parent.childServices.map((child) => (
+                          <button
+                            key={child.id}
+                            onClick={() => handleServiceSelect(child)}
+                            className="w-full p-6 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1 pl-6 border-l-4" style={{ borderColor: colors.secondaryLight }}>
+                                <h4 className="font-bold text-lg mb-2" style={{ color: colors.textColor }}>
+                                  {child.name}
+                                </h4>
+                                <div
+                                  className="text-gray-600 mb-3 line-clamp-3 prose prose-sm max-w-none"
+                                  dangerouslySetInnerHTML={{ __html: child.description }}
+                                />
+                                <div className="flex items-center gap-4 text-sm">
+                                  <span className="flex items-center gap-1 text-gray-600">
+                                    <Clock size={16} />
+                                    {child.duration} min
+                                  </span>
+                                  {child.price && (
+                                    <span className="font-bold" style={{ color: colors.secondaryColor }}>
+                                      {child.price}€
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <ArrowRight className="flex-shrink-0 ml-4" size={24} style={{ color: colors.primaryColor }} />
+                            </div>
+                          </button>
+                        ))}
+                      </div>
                     )}
                   </div>
-                </div>
-              ))
+                ))}
+
+                {filteredServices.length === 0 && (
+                  <div className="text-center py-12 text-gray-500">
+                    <p>No se encontraron tratamientos que coincidan con "{searchTerm}"</p>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         )}

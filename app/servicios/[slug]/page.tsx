@@ -34,7 +34,7 @@ async function getService(slug: string) {
         faqs: {
           orderBy: { order: 'asc' }
         },
-        subTreatments: {
+        childServices: {  // ✅ NUEVO
           where: { active: true },
           orderBy: { order: 'asc' }
         }
@@ -290,54 +290,82 @@ export default async function ServicePage({ params }: ServicePageProps) {
         </div>
       </section>
 
-      {service.subTreatments && service.subTreatments.length > 0 && (
-        <section className="py-16 bg-cream/30">
-          <div className="container-custom">
-            <h2 className="font-heading text-3xl md:text-4xl font-bold text-center text-primary mb-4">
-              Tipos de {service.name}
-            </h2>
-            <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-              Descubre las diferentes variantes de este tratamiento
-            </p>
+      {/* ✅ NUEVO: Subtratamientos desde childServices */}
+{service.childServices && service.childServices.length > 0 && (
+  <section className="section-padding bg-gradient-to-br from-cream/30 to-white">
+    <div className="container-custom">
+      <div className="text-center mb-12">
+        <h2 className="font-heading text-3xl md:text-4xl font-bold text-primary mb-4">
+          Opciones de {service.name}
+        </h2>
+        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          Elige el tratamiento que mejor se adapte a tus necesidades
+        </p>
+      </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {service.subTreatments.map((subTreatment) => (
-                <div
-                  key={subTreatment.id}
-                  className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
-                >
-                  {subTreatment.imageUrl && (
-                    <div className="relative h-48 w-full">
-                      <Image
-                        src={subTreatment.imageUrl}
-                        alt={subTreatment.name}
-                        fill
-                        className="object-cover"
-                        unoptimized
-                      />
-                    </div>
-                  )}
-                  <div className="p-6">
-                    <h3 className="font-heading text-xl font-bold text-primary mb-3">
-                      {subTreatment.name}
-                    </h3>
-                    <div 
-                      className="text-gray-600 mb-4"
-                      dangerouslySetInnerHTML={{ __html: subTreatment.description }}
-                    />
-                    {subTreatment.duration && (
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <Clock size={16} />
-                        <span>{subTreatment.duration} minutos</span>
-                      </div>
-                    )}
-                  </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {service.childServices.map((child) => (
+          <Link
+            key={child.id}
+            href={`/servicios/${child.slug}`}
+            className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-primary transform hover:-translate-y-2"
+          >
+            {/* Imagen (si existe) */}
+            {child.imageUrl && (
+              <div className="relative h-48 w-full">
+                <Image
+                  src={child.imageUrl}
+                  alt={child.name}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  unoptimized
+                />
+              </div>
+            )}
+
+            {/* Header con gradiente */}
+            <div className="bg-gradient-to-br from-primary to-primary-dark p-6 text-white">
+              <h3 className="font-heading text-2xl font-bold mb-2 group-hover:scale-105 transition-transform">
+                {child.name}
+              </h3>
+              <div className="flex items-center gap-4 text-white/90">
+                <div className="flex items-center gap-1">
+                  <Clock size={18} />
+                  <span className="font-medium">{child.duration} min</span>
                 </div>
-              ))}
+                {child.price && (
+                  <div className="text-2xl font-bold text-secondary-light">
+                    {child.price}€
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        </section>
-      )}
+
+            {/* Contenido */}
+            <div className="p-6">
+              <div 
+                className="prose prose-sm max-w-none text-gray-600 mb-6 line-clamp-4"
+                dangerouslySetInnerHTML={{ __html: child.description }}
+              />
+
+              {/* Botón */}
+              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                <span className="text-sm font-medium text-gray-500 group-hover:text-primary transition-colors">
+                  Ver detalles
+                </span>
+                <ArrowRight 
+                  className="text-primary group-hover:translate-x-2 transition-transform" 
+                  size={20} 
+                />
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
 
       {service.benefits && service.benefits.length > 0 && (
         <section className="section-padding bg-cream">
