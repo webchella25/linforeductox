@@ -1,28 +1,33 @@
 // app/dashboard/servicios/page.tsx
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Plus, Edit, Trash2, Eye, EyeOff, Loader2, ArrowUpDown } from 'lucide-react';
+import { Plus, Edit, Trash2, Power, Loader2, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface Service {
   id: string;
   name: string;
   slug: string;
-  description: string;
+  category: string;
   duration: number;
   price: number | null;
-  category: string;
   active: boolean;
   order: number;
+  parentServiceId: string | null; // ✅ NUEVO
+  childServices?: Service[]; // ✅ NUEVO
+  categoryRel?: {
+    id: string;
+    name: string;
+  };
 }
 
 export default function ServiciosPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [expandedParents, setExpandedParents] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchServices();
@@ -32,7 +37,23 @@ export default function ServiciosPage() {
     try {
       const res = await fetch('/api/services');
       const data = await res.json();
-      setServices(data.services || []);
+      
+      // ✅ Organizar servicios en jerarquía
+      const parentServices = data.services.filter((s: Service) => !s.parentServiceId);
+      const childServices = data.services.filter((s: Service) => s.parentServiceId);
+      
+      // Asignar hijos a sus padres
+      const servicesWithChildren = parentServices.map((parent: Service) => ({
+        ...parent,
+        childServices: childServices.filter((child: Service) => 
+          child.parentServiceId === parent.id
+        ),
+      }));
+      
+      // Expandir todos por defecto
+      setExpandedParents(new Set(parentServices.map((s: Service) => s.id)));
+      
+      setServices(servicesWithChildren);
     } catch (error) {
       toast.error('Error al cargar servicios');
     } finally {
@@ -40,17 +61,17 @@ export default function ServiciosPage() {
     }
   };
 
-  const toggleActive = async (id: string, currentActive: boolean) => {
+  const toggleActive = async (id: string, currentStatus: boolean) => {
     try {
-      const res = await fetch(`/api/services/${id}`, {
+      const res = await fetch(`/api/services/${id}/toggle`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ active: !currentActive }),
+        body: JSON.stringify({ active: !currentStatus }),
       });
 
       if (res.ok) {
         toast.success(
-          !currentActive ? 'Servicio activado' : 'Servicio desactivado'
+          !currentStatus ? 'Servicio activado' : 'Servicio desactivado'
         );
         fetchServices();
       } else {
@@ -61,7 +82,12 @@ export default function ServiciosPage() {
     }
   };
 
-  const deleteService = async (id: string) => {
+  const deleteService = async (id: string, hasChildren: boolean) => {
+    if (hasChildren) {
+      toast.error('No puedes eliminar un servicio que tiene subtratamientos. Elimina primero los subtratamientos.');
+      return;
+    }
+
     if (!confirm('¿Estás segura de eliminar este servicio? Esta acción no se puede deshacer.')) {
       return;
     }
@@ -85,18 +111,30 @@ export default function ServiciosPage() {
     }
   };
 
-  const getCategoryBadge = (category: string) => {
+  const toggleParent = (parentId: string) => {
+    const newExpanded = new Set(expandedParents);
+    if (newExpanded.has(parentId)) {
+      newExpanded.delete(parentId);
+    } else {
+      newExpanded.add(parentId);
+    }
+    setExpandedParents(newExpanded);
+  };
+
+  const getCategoryBadge = (service: Service) => {
+    const categoryName = service.categoryRel?.name || service.category;
+    
     const badges: Record<string, { bg: string; text: string }> = {
       corporal: { bg: 'bg-blue-100', text: 'text-blue-800' },
       facial: { bg: 'bg-pink-100', text: 'text-pink-800' },
       acupuntura: { bg: 'bg-purple-100', text: 'text-purple-800' },
     };
 
-    const badge = badges[category] || { bg: 'bg-gray-100', text: 'text-gray-800' };
+    const badge = badges[service.category?.toLowerCase()] || { bg: 'bg-gray-100', text: 'text-gray-800' };
 
     return (
       <span className={`${badge.bg} ${badge.text} px-3 py-1 rounded-full text-xs font-medium`}>
-        {category.charAt(0).toUpperCase() + category.slice(1)}
+        {categoryName}
       </span>
     );
   };
@@ -148,12 +186,7 @@ export default function ServiciosPage() {
             <table className="w-full">
               <thead className="bg-gray-50 border-b">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                    <div className="flex items-center gap-2">
-                      <ArrowUpDown size={16} />
-                      Orden
-                    </div>
-                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 w-12"></th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
                     Servicio
                   </th>
@@ -176,97 +209,155 @@ export default function ServiciosPage() {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {services.map((service) => (
-                  <tr key={service.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <span className="text-gray-900 font-medium">
-                        {service.order}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div>
-                        <p className="font-semibold text-gray-900">
-                          {service.name}
-                        </p>
-                        <p className="text-sm text-gray-500">/{service.slug}</p>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      {getCategoryBadge(service.category)}
-                    </td>
-                    <td className="px-6 py-4 text-gray-900">
-                      {service.duration} min
-                    </td>
-                    <td className="px-6 py-4 text-gray-900">
-                      {service.price ? `${service.price}€` : '-'}
-                    </td>
-                    <td className="px-6 py-4">
-                      <button
-                        onClick={() => toggleActive(service.id, service.active)}
-                        className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${
-                          service.active
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}
-                      >
-                        {service.active ? (
-                          <>
-                            <Eye size={14} />
-                            Activo
-                          </>
-                        ) : (
-                          <>
-                            <EyeOff size={14} />
-                            Inactivo
-                          </>
+                  <>
+                    {/* ✅ SERVICIO PADRE */}
+                    <tr key={service.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4">
+                        {service.childServices && service.childServices.length > 0 && (
+                          <button
+                            onClick={() => toggleParent(service.id)}
+                            className="p-1 hover:bg-gray-200 rounded transition-colors"
+                          >
+                            <ChevronRight
+                              size={20}
+                              className={`transition-transform ${
+                                expandedParents.has(service.id) ? 'rotate-90' : ''
+                              }`}
+                            />
+                          </button>
                         )}
-                      </button>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link
-                          href={`/servicios/${service.slug}`}
-                          target="_blank"
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="Ver en la web"
-                        >
-                          <Eye size={18} />
-                        </Link>
-                        <Link
-                          href={`/dashboard/servicios/${service.id}`}
-                          className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors"
-                          title="Editar"
-                        >
-                          <Edit size={18} />
-                        </Link>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div>
+                            <div className="font-semibold text-gray-900 flex items-center gap-2">
+                              {service.name}
+                              {service.childServices && service.childServices.length > 0 && (
+                                <span className="text-xs bg-primary text-white px-2 py-0.5 rounded-full">
+                                  {service.childServices.length} subtratamientos
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-sm text-gray-500">/{service.slug}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">{getCategoryBadge(service)}</td>
+                      <td className="px-6 py-4 text-gray-700">{service.duration} min</td>
+                      <td className="px-6 py-4 text-gray-700 font-semibold">
+                        {service.price ? `${service.price}€` : '-'}
+                      </td>
+                      <td className="px-6 py-4">
                         <button
-                          onClick={() => deleteService(service.id)}
-                          disabled={deletingId === service.id}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                          title="Eliminar"
+                          onClick={() => toggleActive(service.id, service.active)}
+                          className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                            service.active
+                              ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                              : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                          }`}
                         >
-                          {deletingId === service.id ? (
-                            <Loader2 className="animate-spin" size={18} />
-                          ) : (
-                            <Trash2 size={18} />
-                          )}
+                          <Power size={14} />
+                          {service.active ? 'Activo' : 'Inactivo'}
                         </button>
-                      </div>
-                    </td>
-                  </tr>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Link
+                            href={`/dashboard/servicios/${service.id}`}
+                            className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                            title="Editar"
+                          >
+                            <Edit size={18} />
+                          </Link>
+                          <button
+                            onClick={() => deleteService(service.id, (service.childServices?.length || 0) > 0)}
+                            disabled={deletingId === service.id}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                            title="Eliminar"
+                          >
+                            {deletingId === service.id ? (
+                              <Loader2 className="animate-spin" size={18} />
+                            ) : (
+                              <Trash2 size={18} />
+                            )}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+
+                    {/* ✅ SUBTRATAMIENTOS (HIJOS) */}
+                    {expandedParents.has(service.id) &&
+                      service.childServices &&
+                      service.childServices.map((child) => (
+                        <tr
+                          key={child.id}
+                          className="hover:bg-gray-50 transition-colors bg-blue-50/30"
+                        >
+                          <td className="px-6 py-4"></td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 border-l-2 border-b-2 border-gray-300 h-8 -mb-4"></div>
+                              <div>
+                                <div className="font-medium text-gray-700 flex items-center gap-2">
+                                  {child.name}
+                                  <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full">
+                                    Subtratamiento
+                                  </span>
+                                </div>
+                                <div className="text-sm text-gray-500">/{child.slug}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">{getCategoryBadge(child)}</td>
+                          <td className="px-6 py-4 text-gray-700">{child.duration} min</td>
+                          <td className="px-6 py-4 text-gray-700 font-semibold">
+                            {child.price ? `${child.price}€` : '-'}
+                          </td>
+                          <td className="px-6 py-4">
+                            <button
+                              onClick={() => toggleActive(child.id, child.active)}
+                              className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                                child.active
+                                  ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                                  : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                              }`}
+                            >
+                              <Power size={14} />
+                              {child.active ? 'Activo' : 'Inactivo'}
+                            </button>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <Link
+                                href={`/dashboard/servicios/${child.id}`}
+                                className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                                title="Editar"
+                              >
+                                <Edit size={18} />
+                              </Link>
+                              <button
+                                onClick={() => deleteService(child.id, false)}
+                                disabled={deletingId === child.id}
+                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                                title="Eliminar"
+                              >
+                                {deletingId === child.id ? (
+                                  <Loader2 className="animate-spin" size={18} />
+                                ) : (
+                                  <Trash2 size={18} />
+                                )}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                  </>
                 ))}
               </tbody>
             </table>
           </div>
         </div>
       )}
-
-      {/* Info */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm text-blue-800">
-          <strong>💡 Tip:</strong> Los servicios inactivos no aparecerán en la web ni en el menú.
-          El orden determina cómo se muestran en la página de servicios.
-        </p>
-      </div>
     </div>
   );
 }

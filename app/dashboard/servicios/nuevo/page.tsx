@@ -1,60 +1,87 @@
 // app/dashboard/servicios/nuevo/page.tsx
-
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, Save, Plus, X } from 'lucide-react';
+import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-interface FAQ {
-  question: string;
-  answer: string;
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+interface ParentService {
+  id: string;
+  name: string;
+  slug: string;
 }
 
 export default function NuevoServicioPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [parentServices, setParentServices] = useState<ParentService[]>([]);
+  
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
     description: '',
-    duration: 60,
+    duration: '',
     price: '',
-    category: 'corporal',
+    categoryId: '',
     benefits: [''],
     conditions: [''],
-    active: true,
     order: 0,
+    active: true,
+    isSubService: false, // ✅ NUEVO
+    parentServiceId: '', // ✅ NUEVO
   });
 
-  const [faqs, setFaqs] = useState<FAQ[]>([
-    { question: '', answer: '' }
-  ]);
+  useEffect(() => {
+    fetchCategories();
+    fetchParentServices();
+  }, []);
 
-  const generateSlug = (name: string) => {
-    return name
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch('/api/categories');
+      if (res.ok) {
+        const data = await res.json();
+        setCategories(data.categories || []);
+      }
+    } catch (error) {
+      console.error('Error cargando categorías:', error);
+    }
+  };
+
+  const fetchParentServices = async () => {
+    try {
+      const res = await fetch('/api/services?parentOnly=true');
+      if (res.ok) {
+        const data = await res.json();
+        setParentServices(data.services || []);
+      }
+    } catch (error) {
+      console.error('Error cargando servicios padre:', error);
+    }
+  };
+
+  const handleNameChange = (name: string) => {
+    const slug = name
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
-  };
 
-  const handleNameChange = (name: string) => {
-    setFormData({
-      ...formData,
-      name,
-      slug: generateSlug(name),
-    });
+    setFormData({ ...formData, name, slug });
   };
 
   const addBenefit = () => {
-    setFormData({
-      ...formData,
-      benefits: [...formData.benefits, ''],
-    });
+    setFormData({ ...formData, benefits: [...formData.benefits, ''] });
   };
 
   const removeBenefit = (index: number) => {
@@ -71,10 +98,7 @@ export default function NuevoServicioPage() {
   };
 
   const addCondition = () => {
-    setFormData({
-      ...formData,
-      conditions: [...formData.conditions, ''],
-    });
+    setFormData({ ...formData, conditions: [...formData.conditions, ''] });
   };
 
   const removeCondition = (index: number) => {
@@ -90,43 +114,31 @@ export default function NuevoServicioPage() {
     setFormData({ ...formData, conditions: newConditions });
   };
 
-  // ✅ FUNCIONES PARA FAQS
-  const addFAQ = () => {
-    setFaqs([...faqs, { question: '', answer: '' }]);
-  };
-
-  const removeFAQ = (index: number) => {
-    setFaqs(faqs.filter((_, i) => i !== index));
-  };
-
-  const updateFAQ = (index: number, field: 'question' | 'answer', value: string) => {
-    const newFaqs = [...faqs];
-    newFaqs[index][field] = value;
-    setFaqs(newFaqs);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const benefits = formData.benefits.filter((b) => b.trim() !== '');
-      const conditions = formData.conditions.filter((c) => c.trim() !== '');
-      
-      // ✅ Filtrar FAQs vacías
-      const validFaqs = faqs.filter(
-        (faq) => faq.question.trim() !== '' && faq.answer.trim() !== ''
-      );
+      const benefits = formData.benefits.filter((b) => b.trim());
+      const conditions = formData.conditions.filter((c) => c.trim());
 
       const res = await fetch('/api/services', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...formData,
+          name: formData.name,
+          slug: formData.slug,
+          description: formData.description,
+          duration: parseInt(formData.duration),
+          categoryId: formData.categoryId,
           price: formData.price ? parseFloat(formData.price) : null,
           benefits,
           conditions,
-          faqs: validFaqs.length > 0 ? validFaqs : null, // ✅ ENVIAR FAQS
+          order: formData.order,
+          active: formData.active,
+          parentServiceId: formData.isSubService && formData.parentServiceId 
+            ? formData.parentServiceId 
+            : null, // ✅ NUEVO
         }),
       });
 
@@ -164,6 +176,55 @@ export default function NuevoServicioPage() {
 
       {/* Formulario */}
       <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-md p-8 space-y-6">
+        {/* ✅ NUEVO: Tipo de servicio */}
+        <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.isSubService}
+              onChange={(e) => setFormData({ 
+                ...formData, 
+                isSubService: e.target.checked,
+                parentServiceId: e.target.checked ? formData.parentServiceId : '',
+              })}
+              className="w-5 h-5 text-primary focus:ring-2 focus:ring-primary rounded"
+            />
+            <div>
+              <span className="text-gray-900 font-medium">
+                Este es un subtratamiento (servicio hijo)
+              </span>
+              <p className="text-sm text-gray-600 mt-1">
+                Los subtratamientos aparecen dentro de un servicio principal y tienen su propia página individual
+              </p>
+            </div>
+          </label>
+        </div>
+
+        {/* ✅ NUEVO: Selector de servicio padre (solo si es subtratamiento) */}
+        {formData.isSubService && (
+          <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Servicio Padre *
+            </label>
+            <select
+              required={formData.isSubService}
+              value={formData.parentServiceId}
+              onChange={(e) => setFormData({ ...formData, parentServiceId: e.target.value })}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+            >
+              <option value="">Selecciona el servicio padre</option>
+              {parentServices.map((service) => (
+                <option key={service.id} value={service.id}>
+                  {service.name}
+                </option>
+              ))}
+            </select>
+            <p className="text-sm text-gray-600 mt-2">
+              Este subtratamiento aparecerá en la página de "{parentServices.find(s => s.id === formData.parentServiceId)?.name || 'servicio padre'}"
+            </p>
+          </div>
+        )}
+
         {/* Nombre */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -175,7 +236,7 @@ export default function NuevoServicioPage() {
             value={formData.name}
             onChange={(e) => handleNameChange(e.target.value)}
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-            placeholder="Ej: Masaje Ayurvédico"
+            placeholder="Ej: Masaje Relajante 60min"
           />
         </div>
 
@@ -189,12 +250,32 @@ export default function NuevoServicioPage() {
             required
             value={formData.slug}
             onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-            placeholder="masaje-ayurvedico"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-50"
+            placeholder="masaje-relajante-60min"
           />
-          <p className="text-sm text-gray-500 mt-1">
-            La URL será: /servicios/{formData.slug || 'slug-del-servicio'}
+          <p className="text-xs text-gray-500 mt-1">
+            URL: /servicios/{formData.slug || 'slug-del-servicio'}
           </p>
+        </div>
+
+        {/* Categoría */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Categoría *
+          </label>
+          <select
+            required
+            value={formData.categoryId}
+            onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+          >
+            <option value="">Selecciona una categoría</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Descripción */}
@@ -206,14 +287,14 @@ export default function NuevoServicioPage() {
             required
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            rows={5}
+            rows={6}
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-            placeholder="Describe en qué consiste este tratamiento..."
+            placeholder="Describe el servicio en detalle..."
           />
         </div>
 
         {/* Duración y Precio */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Duración (minutos) *
@@ -221,11 +302,11 @@ export default function NuevoServicioPage() {
             <input
               type="number"
               required
-              min="15"
-              step="15"
+              min="1"
               value={formData.duration}
-              onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) })}
+              onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              placeholder="60"
             />
           </div>
           <div>
@@ -241,28 +322,7 @@ export default function NuevoServicioPage() {
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="45.00"
             />
-            <p className="text-sm text-gray-500 mt-1">
-              Deja vacío si no quieres mostrar precio
-            </p>
           </div>
-        </div>
-
-        {/* Categoría */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Categoría *
-          </label>
-          <select
-            required
-            value={formData.category}
-            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-          >
-            <option value="corporal">Corporal</option>
-            <option value="facial">Facial</option>
-            <option value="acupuntura">Acupuntura</option>
-            <option value="otro">Otro</option>
-          </select>
         </div>
 
         {/* Beneficios */}
@@ -270,137 +330,62 @@ export default function NuevoServicioPage() {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Beneficios
           </label>
-          <div className="space-y-2">
-            {formData.benefits.map((benefit, index) => (
-              <div key={index} className="flex gap-2">
-                <input
-                  type="text"
-                  value={benefit}
-                  onChange={(e) => updateBenefit(index, e.target.value)}
-                  placeholder="Ej: Mejora la circulación linfática"
-                  className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeBenefit(index)}
-                  className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-            ))}
-          </div>
+          {formData.benefits.map((benefit, index) => (
+            <div key={index} className="flex gap-2 mb-2">
+              <input
+                type="text"
+                value={benefit}
+                onChange={(e) => updateBenefit(index, e.target.value)}
+                className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="Ej: Reduce el estrés"
+              />
+              <button
+                type="button"
+                onClick={() => removeBenefit(index)}
+                className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              >
+                Eliminar
+              </button>
+            </div>
+          ))}
           <button
             type="button"
             onClick={addBenefit}
-            className="mt-2 flex items-center gap-2 text-primary hover:text-primary-dark transition-colors"
+            className="text-primary hover:underline text-sm"
           >
-            <Plus size={18} />
-            Añadir beneficio
+            + Añadir beneficio
           </button>
         </div>
 
-        {/* Indicado para */}
+        {/* Condiciones */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Indicado para
+            Condiciones / Contraindicaciones
           </label>
-          <div className="space-y-2">
-            {formData.conditions.map((condition, index) => (
-              <div key={index} className="flex gap-2">
-                <input
-                  type="text"
-                  value={condition}
-                  onChange={(e) => updateCondition(index, e.target.value)}
-                  placeholder="Ej: Personas con retención de líquidos"
-                  className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeCondition(index)}
-                  className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-            ))}
-          </div>
+          {formData.conditions.map((condition, index) => (
+            <div key={index} className="flex gap-2 mb-2">
+              <input
+                type="text"
+                value={condition}
+                onChange={(e) => updateCondition(index, e.target.value)}
+                className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="Ej: No recomendado en embarazo"
+              />
+              <button
+                type="button"
+                onClick={() => removeCondition(index)}
+                className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              >
+                Eliminar
+              </button>
+            </div>
+          ))}
           <button
             type="button"
             onClick={addCondition}
-            className="mt-2 flex items-center gap-2 text-primary hover:text-primary-dark transition-colors"
+            className="text-primary hover:underline text-sm"
           >
-            <Plus size={18} />
-            Añadir indicación
-          </button>
-        </div>
-
-        {/* ✅ SECCIÓN FAQs */}
-        <div className="border-t pt-6">
-          <div className="mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">
-              Preguntas Frecuentes (FAQ) 💡
-            </h3>
-            <p className="text-sm text-gray-600">
-              Las FAQs mejoran el SEO y ayudan a los clientes a resolver dudas antes de contactar
-            </p>
-          </div>
-          
-          <div className="space-y-4">
-            {faqs.map((faq, index) => (
-              <div key={index} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <div className="flex items-start justify-between mb-3">
-                  <h4 className="font-medium text-gray-700">Pregunta {index + 1}</h4>
-                  {faqs.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeFAQ(index)}
-                      className="text-red-600 hover:bg-red-100 p-1 rounded transition-colors"
-                      title="Eliminar pregunta"
-                    >
-                      <X size={18} />
-                    </button>
-                  )}
-                </div>
-                
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Pregunta
-                    </label>
-                    <input
-                      type="text"
-                      value={faq.question}
-                      onChange={(e) => updateFAQ(index, 'question', e.target.value)}
-                      placeholder="Ej: ¿Cuántas sesiones necesito?"
-                      className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Respuesta
-                    </label>
-                    <textarea
-                      value={faq.answer}
-                      onChange={(e) => updateFAQ(index, 'answer', e.target.value)}
-                      placeholder="Ej: Se recomienda un mínimo de 6-8 sesiones para ver resultados óptimos..."
-                      rows={3}
-                      className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <button
-            type="button"
-            onClick={addFAQ}
-            className="mt-4 flex items-center gap-2 text-primary hover:text-primary-dark transition-colors"
-          >
-            <Plus size={18} />
-            Añadir otra pregunta
+            + Añadir condición
           </button>
         </div>
 
@@ -411,14 +396,9 @@ export default function NuevoServicioPage() {
           </label>
           <input
             type="number"
+            min="0"
             value={formData.order}
-            onChange={(e) => {
-              const value = e.target.value;
-              setFormData({
-                ...formData,
-                order: value === '' ? 0 : parseInt(value) || 0
-              });
-            }}
+            onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
           />
           <p className="text-sm text-gray-500 mt-1">

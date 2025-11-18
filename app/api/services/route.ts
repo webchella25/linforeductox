@@ -1,124 +1,47 @@
-// app/api/services/route.ts
+// app/api/services/route.ts (actualizar el GET)
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 
-// GET - Obtener servicios (público si active=true, admin para todos)
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const activeOnly = searchParams.get('active');
-    const category = searchParams.get('category');
+    const active = searchParams.get('active');
+    const parentOnly = searchParams.get('parentOnly'); // ✅ NUEVO
 
     const where: any = {};
-
-    if (activeOnly === 'true') {
+    
+    if (active === 'true') {
       where.active = true;
     }
 
-    if (category) {
-      where.category = category;
+    // ✅ NUEVO: Filtrar solo servicios padre
+    if (parentOnly === 'true') {
+      where.parentServiceId = null;
     }
 
     const services = await prisma.service.findMany({
       where,
-      orderBy: { order: 'asc' },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        description: true,
-        duration: true,
-        price: true,
-        category: true,
-        benefits: true,
-        conditions: true,
-        faqs: true,
-        active: true,
-        order: true,
-        heroImage: true, // ✅ AGREGAR
-        images: true,    // ✅ AGREGAR
+      include: {
+        categoryRel: true,
       },
+      orderBy: [
+        { order: 'asc' },
+        { name: 'asc' },
+      ],
     });
 
     return NextResponse.json({ services });
   } catch (error) {
-    console.error('Error obteniendo servicios:', error);
+    console.error('Error:', error);
     return NextResponse.json(
-      { error: 'Error al obtener los servicios' },
+      { error: 'Error al obtener servicios' },
       { status: 500 }
     );
   }
 }
 
-// POST - Crear servicio (solo admin)
+// POST ya existe, no lo toques
 export async function POST(request: NextRequest) {
-  try {
-    const session = await auth();
-    if (!session?.user?.role || session.user.role !== 'admin') {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-    }
-
-    const body = await request.json();
-    const {
-      name,
-      slug,
-      description,
-      duration,
-      price,
-      category,
-      benefits,
-      conditions,
-      faqs,
-      active,
-      order,
-      heroImage,  // ✅ AGREGAR
-      images,     // ✅ AGREGAR
-    } = body;
-
-    if (!name || !slug || !description || !duration || !category) {
-      return NextResponse.json(
-        { error: 'Campos requeridos: name, slug, description, duration, category' },
-        { status: 400 }
-      );
-    }
-
-    const existingService = await prisma.service.findUnique({ where: { slug } });
-    if (existingService) {
-      return NextResponse.json(
-        { error: 'Ya existe un servicio con ese slug' },
-        { status: 409 }
-      );
-    }
-
-    const service = await prisma.service.create({
-      data: {
-        name,
-        slug,
-        description,
-        duration: parseInt(duration),
-        price: price ? parseFloat(price) : null,
-        category,
-        benefits: benefits || [],
-        conditions: conditions || [],
-        faqs: faqs || null,
-        active: active !== undefined ? active : true,
-        order: order || 0,
-        heroImage: heroImage || null,  // ✅ AGREGAR
-        images: images || [],          // ✅ AGREGAR
-      },
-    });
-
-    return NextResponse.json({
-      success: true,
-      service,
-      message: 'Servicio creado exitosamente',
-    });
-  } catch (error) {
-    console.error('Error creando servicio:', error);
-    return NextResponse.json(
-      { error: 'Error al crear el servicio' },
-      { status: 500 }
-    );
-  }
+  // ... código existente
 }

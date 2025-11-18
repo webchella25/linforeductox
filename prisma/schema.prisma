@@ -47,9 +47,15 @@ model Service {
   duration    Int
   price       Float?
   
+  // Categoría (mantener ambas por compatibilidad)
   category    String
   categoryId  String?
   categoryRel Category? @relation("ServiceCategory", fields: [categoryId], references: [id])
+  
+  // ✅ NUEVO: Jerarquía de servicios (padre-hijo)
+  parentServiceId  String?
+  parentService    Service?   @relation("ServiceHierarchy", fields: [parentServiceId], references: [id], onDelete: SetNull)
+  childServices    Service[]  @relation("ServiceHierarchy")
   
   benefits    String[]
   conditions  String[]
@@ -62,11 +68,13 @@ model Service {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   
-  bookings    Booking[]
-  faqs        FAQ[]
-  subTreatments  SubTreatment[]
+  // Relaciones existentes
+  bookings       Booking[]
+  faqs           FAQ[]
+  subTreatments  SubTreatment[]  // Mantener por ahora
   
   @@index([categoryId])
+  @@index([parentServiceId])  // ✅ NUEVO índice
 }
 
 model SubTreatment {
