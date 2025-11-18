@@ -14,7 +14,8 @@
     "seed-testimonials": "tsx scripts/seed-testimonials.ts",
     "seed-legal": "tsx scripts/seed-legal-pages.ts",
     "seed-content": "tsx scripts/seed-content.ts",
-    "migrate-categories": "tsx scripts/migrate-categories.ts"
+    "migrate-categories": "tsx scripts/migrate-categories.ts",
+	"seed-products": "tsx scripts/seed-products.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

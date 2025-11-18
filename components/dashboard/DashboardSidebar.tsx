@@ -9,7 +9,6 @@ import {
   Calendar,
   MessageSquare,
   Sparkles,
-  FileText,
   Settings,
   Clock,
   X,
@@ -19,6 +18,11 @@ import {
   Palette,
   User,
   BarChart3,
+  Store,
+  ShoppingBag,
+  Tag,
+  ShoppingCart,
+  Mail,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -34,10 +38,10 @@ const menuItems = [
     icon: Sparkles,
   },
   {
-  href: '/dashboard/eventos',
-  label: 'Eventos',
-  icon: Calendar,  // Importar: import { Calendar } from 'lucide-react';
-},
+    href: '/dashboard/eventos',
+    label: 'Eventos',
+    icon: Calendar,
+  },
   {
     href: '/dashboard/testimonios',
     label: 'Testimonios',
@@ -48,59 +52,85 @@ const menuItems = [
     label: 'Reservas',
     icon: Calendar,
   },
+  // ✅ NUEVA SECCIÓN DE TIENDA
   {
-    href: '/dashboard/contenido',
-    label: 'Contenido Web',
-    icon: FileText,
+    href: '/dashboard/tienda',
+    label: 'Tienda',
+    icon: Store,
+    subItems: [
+      {
+        href: '/dashboard/tienda',
+        label: 'Productos',
+        icon: ShoppingBag,
+      },
+      {
+        href: '/dashboard/tienda/categorias',
+        label: 'Categorías',
+        icon: Tag,
+      },
+      {
+        href: '/dashboard/ventas',
+        label: 'Ventas',
+        icon: ShoppingCart,
+      },
+    ],
   },
- {
-  href: '/dashboard/configuracion',
-  label: 'Configuración',
-  icon: Settings,
-  subItems: [
-    {
-      href: '/dashboard/configuracion/portada',  // ✅ NUEVO
-      label: 'Portada',
-      icon: Home,  // Importar: import { Home } from 'lucide-react';
-    },
-	{
-      href: '/dashboard/configuracion/sobre-mi',  // ✅ NUEVO
-      label: 'Sobre Mí',
-      icon: User,  // Importar: import { User } from 'lucide-react';
-    },
-    {
-      href: '/dashboard/configuracion/horarios',
-      label: 'Horarios',
-      icon: Clock,
-    },
-    {
-      href: '/dashboard/configuracion/contacto',
-      label: 'Información de Contacto',
-      icon: Phone,
-    },
-    {
-      href: '/dashboard/configuracion/colores',
-      label: 'Colores de la Web',
-      icon: Palette,
-    },
-	{
-      href: '/dashboard/configuracion/seo-analytics',  // ✅ AGREGAR
-      label: 'SEO y Analytics',
-      icon: BarChart3,
-    },
-	{
-  href: '/dashboard/configuracion/servicios-destacados',
-  label: 'Servicios Destacados',
-  icon: Sparkles,  // Ya debería estar importado
-},
-  ],
-},
+  {
+    href: '/dashboard/newsletter',
+    label: 'Newsletter',
+    icon: Mail,
+  },
+  {
+    href: '/dashboard/configuracion',
+    label: 'Configuración',
+    icon: Settings,
+    subItems: [
+      {
+        href: '/dashboard/configuracion/portada',
+        label: 'Portada',
+        icon: Home,
+      },
+      {
+        href: '/dashboard/configuracion/sobre-mi',
+        label: 'Sobre Mí',
+        icon: User,
+      },
+      {
+        href: '/dashboard/configuracion/horarios',
+        label: 'Horarios',
+        icon: Clock,
+      },
+      {
+        href: '/dashboard/configuracion/contacto',
+        label: 'Información de Contacto',
+        icon: Phone,
+      },
+      {
+        href: '/dashboard/configuracion/colores',
+        label: 'Colores de la Web',
+        icon: Palette,
+      },
+      {
+        href: '/dashboard/configuracion/seo-analytics',
+        label: 'SEO y Analytics',
+        icon: BarChart3,
+      },
+      {
+        href: '/dashboard/configuracion/servicios-destacados',
+        label: 'Servicios Destacados',
+        icon: Sparkles,
+      },
+    ],
+  },
 ];
 
 export default function DashboardSidebar() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [expandedItems, setExpandedItems] = useState<string[]>(['/dashboard/configuracion']);
+  const [expandedItems, setExpandedItems] = useState<string[]>([
+    '/dashboard/configuracion',
+    '/dashboard/tienda', // ✅ Expandir tienda por defecto
+  ]);
 
   const toggleExpand = (href: string) => {
     setExpandedItems((prev) =>

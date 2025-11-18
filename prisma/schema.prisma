@@ -34,7 +34,7 @@ model Category {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   
-  services    Service[] @relation("ServiceCategory")  // ✅ Agregar nombre de relación
+  services    Service[] @relation("ServiceCategory")
   
   @@map("categories")
 }
@@ -47,10 +47,9 @@ model Service {
   duration    Int
   price       Float?
   
-  // ✅ MANTENER columna vieja Y agregar nueva
-  category    String    // ← Columna vieja (temporal)
-  categoryId  String?   // ← Columna nueva (opcional por ahora)
-  categoryRel Category? @relation("ServiceCategory", fields: [categoryId], references: [id])  // ✅ Mismo nombre
+  category    String
+  categoryId  String?
+  categoryRel Category? @relation("ServiceCategory", fields: [categoryId], references: [id])
   
   benefits    String[]
   conditions  String[]
@@ -65,12 +64,11 @@ model Service {
   
   bookings    Booking[]
   faqs        FAQ[]
-  subTreatments  SubTreatment[]  // ✅ NUEVA RELACIÓN
+  subTreatments  SubTreatment[]
   
   @@index([categoryId])
 }
 
-// ✅ NUEVO MODELO
 model SubTreatment {
   id          String   @id @default(cuid())
   serviceId   String
@@ -78,8 +76,8 @@ model SubTreatment {
   
   name        String
   description String   @db.Text
-  duration    Int?     // Duración específica (opcional, en minutos)
-  imageUrl    String?  // Imagen del subtratamiento (opcional)
+  duration    Int?
+  imageUrl    String?
   
   active      Boolean  @default(true)
   order       Int      @default(0)
@@ -211,7 +209,6 @@ model LegalPage {
 model SiteConfig {
   id              String   @id @default(cuid())
   
-  // Colores
   primaryColor    String   @default("#2C5F2D")
   primaryDark     String   @default("#1e3d1f")
   secondaryColor  String   @default("#A27B5C")
@@ -219,7 +216,6 @@ model SiteConfig {
   creamColor      String   @default("#F5F1E8")
   textColor       String   @default("#1F2937")
   
-  // Fuentes (opcional futuro)
   headingFont     String   @default("Playfair Display")
   bodyFont        String   @default("Inter")
   
@@ -233,50 +229,38 @@ model Event {
   id              String      @id @default(cuid())
   title           String
   slug            String      @unique
-  shortDescription String     @db.Text // Para listado
-  description     String      @db.Text // Descripción completa (Markdown/HTML)
+  shortDescription String     @db.Text
+  description     String      @db.Text
   
-  // Fechas
   startDate       DateTime
   endDate         DateTime?
   
-  // Ubicación
-  location        String      // "Centro", "Online", "Otra ubicación"
-  locationDetails String?     // Dirección completa si es externa
+  location        String
+  locationDetails String?
   
-  // Clasificación
-  eventType       String      // "Taller", "Charla", "Retiro", "Evento Especial", "Colaboración"
+  eventType       String
   
-  // Precio
   price           Float?
   isFree          Boolean     @default(false)
   
-  // Plazas
   maxPlaces       Int?
   availablePlaces Int?
   
-  // Imágenes
-  heroImage       String?     // Imagen principal
-  images          Json?       // Galería de imágenes adicionales
-  // Formato: [{ url: "...", alt: "...", publicId: "..." }]
+  heroImage       String?
+  images          Json?
   
-  // Video
-  videoUrl        String?     // YouTube/Vimeo URL
+  videoUrl        String?
   
-  // Contenido adicional
-  includes        String[]    @default([]) // ¿Qué incluye?
-  whatToBring     String[]    @default([]) // ¿Qué llevar?
-  requirements    String?     @db.Text // Requisitos
+  includes        String[]    @default([])
+  whatToBring     String[]    @default([])
+  requirements    String?     @db.Text
   
-  // Inscripción
-  whatsappNumber  String?     // Número de WhatsApp para inscripción
-  whatsappMessage String?     @db.Text // Mensaje pre-rellenado
+  whatsappNumber  String?
+  whatsappMessage String?     @db.Text
   
-  // Estado
   status          EventStatus @default(UPCOMING)
   active          Boolean     @default(true)
   
-  // Orden
   order           Int         @default(0)
   
   createdAt       DateTime    @default(now())
@@ -287,19 +271,15 @@ model Event {
   @@map("events")
 }
 
-// Configuración del Hero de la Portada
 model HeroConfig {
   id              String   @id @default(cuid())
   
-  // Imagen de fondo
   backgroundImage String?
   
-  // Textos
   greeting        String   @default("Bienvenid@")
   mainTitle       String   @default("LINFOREDUCTOX")
   description     String   @db.Text
   
-  // Botones
   primaryButtonText   String @default("Ver Servicios")
   primaryButtonLink   String @default("/servicios")
   secondaryButtonText String @default("Reserva tu Experiencia")
@@ -311,27 +291,21 @@ model HeroConfig {
   @@map("hero_config")
 }
 
-// Configuración de la página "Sobre Mí"
 model AboutConfig {
   id                String   @id @default(cuid())
   
-  // Hero
   heroImage         String?
   heroTitle         String   @default("Aline Vidal")
   heroSubtitle      String   @default("Especialista en Medicina Ancestral Oriental")
   
-  // Contenido principal
-  biography         String   @db.Text // HTML del editor rico
+  biography         String   @db.Text
   secondaryImage    String?
   
-    // ✅ NUEVO: Filosofía separada
-  philosophy        String   @default("") @db.Text // HTML del editor rico
+  philosophy        String   @default("") @db.Text
   
-  // Datos destacados
   yearsExperience   Int      @default(0)
   certifications    String[] @default([])
   
-  // Video (opcional)
   videoUrl          String?
   
   createdAt         DateTime @default(now())
@@ -340,7 +314,6 @@ model AboutConfig {
   @@map("about_config")
 }
 
-// Configuración de Redes Sociales
 model SocialMediaConfig {
   id          String   @id @default(cuid())
   
@@ -350,7 +323,6 @@ model SocialMediaConfig {
   youtube     String?
   linkedin    String?
   
-  // Visibilidad
   showInstagram Boolean @default(true)
   showFacebook  Boolean @default(true)
   showTiktok    Boolean @default(false)
@@ -363,11 +335,10 @@ model SocialMediaConfig {
   @@map("social_media_config")
 }
 
-// Secciones destacadas de la portada (gestión de imágenes/contenido)
 model HomeSection {
   id          String   @id @default(cuid())
   
-  type        String   // "featured_services", "why_choose_us", "testimonials", "custom"
+  type        String
   title       String
   subtitle    String?
   content     String?  @db.Text
@@ -376,10 +347,7 @@ model HomeSection {
   active      Boolean  @default(true)
   order       Int      @default(0)
   
-  // Configuración específica (JSON)
   config      Json?
-  // Ejemplo para "featured_services": { serviceIds: ["id1", "id2", "id3"] }
-  // Ejemplo para "why_choose_us": { points: [{ icon: "✓", text: "..." }] }
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -387,22 +355,13 @@ model HomeSection {
   @@map("home_sections")
 }
 
-// ✅ AGREGAR ESTE MODELO AL FINAL DEL ARCHIVO, ANTES DE LOS ENUMS
-
 model SeoAnalytics {
   id                      String   @id @default(cuid())
   
-  // Google Search Console
-  googleSearchConsole     String?  // Meta tag verification code
-  
-  // Google Analytics 4
-  googleAnalyticsId       String?  // G-XXXXXXXXXX
-  
-  // Meta Pixel (Facebook)
-  metaPixelId             String?  // Número del pixel
-  
-  // Google Tag Manager
-  googleTagManagerId      String?  // GTM-XXXXXXX
+  googleSearchConsole     String?
+  googleAnalyticsId       String?
+  metaPixelId             String?
+  googleTagManagerId      String?
   
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
@@ -410,17 +369,103 @@ model SeoAnalytics {
   @@map("seo_analytics")
 }
 
+model PageMeta {
+  id              String   @id @default(cuid())
+  
+  pagePath        String   @unique
+  pageTitle       String
+  
+  metaTitle       String?  @db.VarChar(60)
+  metaDescription String?  @db.VarChar(160)
+  metaKeywords    String?  @db.Text
+  canonicalUrl    String?
+  
+  ogTitle         String?  @db.VarChar(60)
+  ogDescription   String?  @db.VarChar(160)
+  ogImage         String?
+  ogType          String?  @default("website")
+  
+  twitterCard     String?  @default("summary_large_image")
+  twitterTitle    String?  @db.VarChar(60)
+  twitterDescription String? @db.VarChar(160)
+  twitterImage    String?
+  
+  active          Boolean  @default(true)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("page_meta")
+}
+
+model SchemaConfig {
+  id              String   @id @default(cuid())
+  
+  businessName    String   @default("LINFOREDUCTOX")
+  businessType    String   @default("MedicalBusiness")
+  description     String?  @db.Text
+  
+  streetAddress   String?
+  addressLocality String?  @default("Errenteria")
+  addressRegion   String?  @default("Gipuzkoa")
+  postalCode      String?  @default("20100")
+  addressCountry  String   @default("ES")
+  
+  latitude        String?
+  longitude       String?
+  
+  telephone       String?
+  email           String?
+  
+  openingHours    Json?
+  
+  socialProfiles  Json?
+  
+  priceRange      String?  @default("€€")
+  
+  aggregateRating Json?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("schema_config")
+}
+
+model RobotsConfig {
+  id          String   @id @default(cuid())
+  
+  content     String   @db.Text
+  active      Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("robots_config")
+}
+
+model SitemapConfig {
+  id              String   @id @default(cuid())
+  
+  customUrls      Json?
+  
+  excludedPaths   String[] @default([])
+  
+  lastGenerated   DateTime?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("sitemap_config")
+}
+
 model HomeServicesSection {
   id                String   @id @default(cuid())
   
-  // Textos
   title             String   @default("Nuestros Servicios")
   subtitle          String?  @db.Text
   
-  // Visibilidad
   active            Boolean  @default(true)
   
-  // Servicios seleccionados (array de IDs en orden)
   selectedServices  String[] @default([])
   
   createdAt         DateTime @default(now())
@@ -432,22 +477,18 @@ model HomeServicesSection {
 model HomeAboutSection {
   id              String   @id @default(cuid())
   
-  // Textos
   label           String   @default("Creadora del Método")
   name            String   @default("Aline Vidal")
   subtitle        String   @default("Coach Corporal y Facialista. Diplomada en Acupuntura Estética, Osteopatía y Sistema Linfático.") @db.Text
   description     String   @default("Mi pasión es ayudar a las mujeres a reconectar con su cuerpo, liberar bloqueos energéticos y descubrir su belleza más auténtica a través del poder sanador del toque consciente.") @db.Text
   quote           String?  @db.Text
   
-  // Botón
   buttonText      String   @default("Conoce mi historia")
   buttonLink      String   @default("/aline-vidal")
   
-  // Imagen
   image           String   @default("/alin-vidal.jpg")
   imageAlt        String   @default("Aline Vidal - Fundadora de LINFOREDUCTOX")
   
-  // Visibilidad
   active          Boolean  @default(true)
   
   createdAt       DateTime @default(now())
@@ -456,12 +497,118 @@ model HomeAboutSection {
   @@map("home_about_section")
 }
 
+// ========================================
+// 🛒 SISTEMA DE TIENDA (NUEVO)
+// ========================================
+
+model ProductCategory {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?   @db.Text
+  icon        String    @default("📦")
+  active      Boolean   @default(true)
+  order       Int       @default(0)
+  
+  products    Product[]
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@map("product_categories")
+}
+
+model Product {
+  id              String           @id @default(cuid())
+  
+  name            String
+  slug            String           @unique
+  description     String           @db.Text
+  shortDescription String?         @db.Text
+  
+  basePrice       Float
+  
+  categoryId      String
+  category        ProductCategory  @relation(fields: [categoryId], references: [id])
+  
+  images          Json
+  
+  stock           Int?
+  trackStock      Boolean          @default(false)
+  
+  active          Boolean          @default(true)
+  featured        Boolean          @default(false)
+  order           Int              @default(0)
+  
+  metaTitle       String?
+  metaDescription String?
+  
+  sales           Sale[]
+  
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  
+  @@index([categoryId])
+  @@index([slug])
+  @@map("products")
+}
+
+model Sale {
+  id              String      @id @default(cuid())
+  
+  productId       String
+  product         Product     @relation(fields: [productId], references: [id])
+  
+  clientName      String
+  clientEmail     String
+  clientPhone     String
+  clientNotes     String?     @db.Text
+  
+  acceptsNewsletter Boolean   @default(false)
+  
+  status          SaleStatus  @default(PENDING)
+  
+  finalPrice      Float?
+  
+  adminNotes      String?     @db.Text
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  completedAt     DateTime?
+  cancelledAt     DateTime?
+  
+  @@index([productId])
+  @@index([status])
+  @@index([clientEmail])
+  @@map("sales")
+}
+
+model Newsletter {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  name            String?
+  
+  source          String
+  
+  active          Boolean  @default(true)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([email])
+  @@map("newsletter")
+}
+
+// ========================================
+// ENUMS
+// ========================================
+
 enum EventStatus {
-  DRAFT       // Borrador (no visible)
-  UPCOMING    // Próximo
-  ONGOING     // En curso
-  FINISHED    // Finalizado
-  CANCELLED   // Cancelado
+  DRAFT
+  UPCOMING
+  ONGOING
+  FINISHED
+  CANCELLED
 }
 
 enum BookingStatus {
@@ -476,4 +623,11 @@ enum TestimonialStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+enum SaleStatus {
+  PENDING
+  IN_PROCESS
+  COMPLETED
+  CANCELLED
 }
