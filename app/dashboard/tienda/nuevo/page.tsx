@@ -12,6 +12,7 @@ interface ProductCategory {
   id: string;
   name: string;
   icon: string;
+  active: boolean; // ✅ AGREGAR ESTA LÍNEA
 }
 
 export default function NuevoProductoPage() {
