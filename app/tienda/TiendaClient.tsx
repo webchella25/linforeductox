@@ -10,7 +10,7 @@ interface Product {
   id: string;
   name: string;
   slug: string;
-  shortDescription?: string;
+  shortDescription?: string | null; // ✅ CAMBIAR AQUÍ
   basePrice: number;
   featured: boolean;
   images: any;

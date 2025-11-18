@@ -19,11 +19,11 @@ interface Product {
   name: string;
   slug: string;
   description: string;
-  shortDescription?: string;
+  shortDescription?: string | null; // ✅ AGREGAR | null
   basePrice: number;
   featured: boolean;
   images: any;
-  stock?: number;
+  stock?: number | null; // ✅ AGREGAR | null también aquí
   trackStock: boolean;
   category: {
     id: string;
