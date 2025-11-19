@@ -607,6 +607,22 @@ model Newsletter {
   @@map("newsletter")
 }
 
+// ✅ NUEVO: Certificaciones
+model Certification {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  imageUrl    String?
+  issuer      String?  // Quien lo emitió
+  year        Int?
+  active      Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("certifications")
+}
+
 // ========================================
 // ENUMS
 // ========================================
