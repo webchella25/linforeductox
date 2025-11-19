@@ -472,7 +472,6 @@ export default function EditarServicioPage({
             <ImageUpload
               value={formData.heroImage}
               onChange={(url) => setFormData({ ...formData, heroImage: url })}
-              folder="services"
             />
           </div>
 
@@ -508,8 +507,7 @@ export default function EditarServicioPage({
                 onChange={(url) => {
                   setFormData({ ...formData, images: [...formData.images, url] });
                 }}
-                folder="services"
-              />
+				/>
             </div>
           </div>
         </div>

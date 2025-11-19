@@ -7,6 +7,7 @@ import { Calendar, Clock, User, Mail, Phone, MessageSquare, Check, Loader2, Arro
 import { format, addDays, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
 
 interface Service {
   id: string;

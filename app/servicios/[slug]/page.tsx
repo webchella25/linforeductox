@@ -290,82 +290,109 @@ export default async function ServicePage({ params }: ServicePageProps) {
         </div>
       </section>
 
-      {/* ✅ NUEVO: Subtratamientos desde childServices */}
-{service.childServices && service.childServices.length > 0 && (
-  <section className="section-padding bg-gradient-to-br from-cream/30 to-white">
-    <div className="container-custom">
-      <div className="text-center mb-12">
-        <h2 className="font-heading text-3xl md:text-4xl font-bold text-primary mb-4">
-          Opciones de {service.name}
-        </h2>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Elige el tratamiento que mejor se adapte a tus necesidades
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {service.childServices.map((child) => (
-          <Link
-            key={child.id}
-            href={`/servicios/${child.slug}`}
-            className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-primary transform hover:-translate-y-2"
-          >
-            {/* Imagen (si existe) */}
-            {child.imageUrl && (
-              <div className="relative h-48 w-full">
-                <Image
-                  src={child.imageUrl}
-                  alt={child.name}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  unoptimized
-                />
-              </div>
-            )}
-
-            {/* Header con gradiente */}
-            <div className="bg-gradient-to-br from-primary to-primary-dark p-6 text-white">
-              <h3 className="font-heading text-2xl font-bold mb-2 group-hover:scale-105 transition-transform">
-                {child.name}
-              </h3>
-              <div className="flex items-center gap-4 text-white/90">
-                <div className="flex items-center gap-1">
-                  <Clock size={18} />
-                  <span className="font-medium">{child.duration} min</span>
-                </div>
-                {child.price && (
-                  <div className="text-2xl font-bold text-secondary-light">
-                    {child.price}€
-                  </div>
-                )}
-              </div>
+      {/* ✅ Subtratamientos con IMÁGENES */}
+      {service.childServices && service.childServices.length > 0 && (
+        <section className="section-padding bg-gradient-to-br from-cream/30 to-white">
+          <div className="container-custom">
+            <div className="text-center mb-12">
+              <h2 className="font-heading text-3xl md:text-4xl font-bold text-primary mb-4">
+                Opciones de {service.name}
+              </h2>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                Elige el tratamiento que mejor se adapte a tus necesidades
+              </p>
             </div>
 
-            {/* Contenido */}
-            <div className="p-6">
-              <div 
-                className="prose prose-sm max-w-none text-gray-600 mb-6 line-clamp-4"
-                dangerouslySetInnerHTML={{ __html: child.description }}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {service.childServices.map((child: any) => {
+                // Obtener la primera imagen o usar heroImage
+                const childImage = child.heroImage || 
+                  (Array.isArray(child.images) && child.images.length > 0 
+                    ? child.images[0].url || child.images[0]
+                    : null);
 
-              {/* Botón */}
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                <span className="text-sm font-medium text-gray-500 group-hover:text-primary transition-colors">
-                  Ver detalles
-                </span>
-                <ArrowRight 
-                  className="text-primary group-hover:translate-x-2 transition-transform" 
-                  size={20} 
-                />
-              </div>
+                return (
+                  <Link
+                    key={child.id}
+                    href={`/servicios/${child.slug}`}
+                    className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-primary transform hover:-translate-y-2"
+                  >
+                    {/* Imagen */}
+                    {childImage && (
+                      <div className="relative h-56 w-full overflow-hidden">
+                        <Image
+                          src={childImage}
+                          alt={child.name}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform duration-500"
+                          unoptimized
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                        
+                        {/* Badge de precio sobre la imagen */}
+                        {child.price && (
+                          <div className="absolute top-4 right-4 bg-secondary text-white px-4 py-2 rounded-full font-bold text-lg shadow-lg">
+                            {child.price}€
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Header con gradiente (si no hay imagen) */}
+                    {!childImage && (
+                      <div className="bg-gradient-to-br from-primary to-primary-dark p-6 text-white">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-heading text-2xl font-bold">
+                            {child.name}
+                          </h3>
+                          {child.price && (
+                            <div className="text-2xl font-bold text-secondary-light">
+                              {child.price}€
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Contenido */}
+                    <div className="p-6">
+                      {/* Título (solo si hay imagen) */}
+                      {childImage && (
+                        <h3 className="font-heading text-2xl font-bold text-primary mb-3 group-hover:text-secondary transition-colors">
+                          {child.name}
+                        </h3>
+                      )}
+
+                      {/* Duración */}
+                      <div className="flex items-center gap-2 text-gray-600 mb-4">
+                        <Clock size={18} className="text-primary" />
+                        <span className="font-medium">{child.duration} minutos</span>
+                      </div>
+
+                      {/* Descripción */}
+                      <div 
+                        className="prose prose-sm max-w-none text-gray-600 mb-6 line-clamp-3"
+                        dangerouslySetInnerHTML={{ __html: child.description }}
+                      />
+
+                      {/* Botón de acción */}
+                      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                        <span className="text-sm font-semibold text-primary group-hover:text-secondary transition-colors">
+                          Ver detalles completos
+                        </span>
+                        <ArrowRight 
+                          className="text-primary group-hover:translate-x-2 group-hover:text-secondary transition-all" 
+                          size={20} 
+                        />
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
-          </Link>
-        ))}
-      </div>
-    </div>
-  </section>
-)}
+          </div>
+        </section>
+      )}
 
       {service.benefits && service.benefits.length > 0 && (
         <section className="section-padding bg-cream">
