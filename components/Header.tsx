@@ -112,6 +112,8 @@ const Header = () => {
                 fill
                 className="object-contain drop-shadow-lg"
                 priority
+				quality={90} // ✅ AGREGAR
+    sizes="(max-width: 768px) 48px, 56px" // ✅ AGREGAR
               />
             </motion.div>
             <div>

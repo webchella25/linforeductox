@@ -6,20 +6,33 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Toaster } from "react-hot-toast";
 import { SessionProvider } from "next-auth/react";
-import CookieBanner from '@/components/CookieBanner';
-import SeoAnalyticsScripts from '@/components/SeoAnalyticsScripts';
+import dynamic from 'next/dynamic';
 import { prisma } from '@/lib/prisma';
 
+// ✅ Lazy load de componentes no críticos
+const CookieBanner = dynamic(() => import('@/components/CookieBanner'), {
+  ssr: false,
+});
+
+const SeoAnalyticsScripts = dynamic(() => import('@/components/SeoAnalyticsScripts'), {
+  ssr: false,
+});
+
+// ✅ OPTIMIZADO: Fuentes con preload y pesos específicos
 const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-playfair",
   display: "swap",
+  preload: true,
+  weight: ["400", "700"],
 });
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
+  preload: true,
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -64,9 +77,17 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  // ✅ NUEVO: Iconos optimizados
+  icons: {
+    icon: [
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
 };
 
-// ✅ Schema.org Organization - Para toda la web
+// ✅ Schema.org Organization
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "MedicalBusiness",
@@ -115,7 +136,6 @@ const organizationSchema = {
   },
 };
 
-// ✅ NUEVA FUNCIÓN: Cargar config de SEO en el servidor
 async function getSeoConfig() {
   try {
     const config = await prisma.seoAnalytics.findFirst();
@@ -131,23 +151,27 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const seoConfig = await getSeoConfig(); // ✅ Cargar en el servidor
+  const seoConfig = await getSeoConfig();
 
   return (
     <html lang="es">
       <head>
-        {/* ✅ Google Search Console - SERVER SIDE */}
+        {/* ✅ OPTIMIZACIÓN: Preconnect a Google Fonts */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        
+        {/* Google Search Console */}
         {seoConfig?.googleSearchConsole && (
           <meta name="google-site-verification" content={seoConfig.googleSearchConsole} />
         )}
 
-        {/* ✅ Schema.org Organization */}
+        {/* Schema.org Organization */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
 
-        {/* ✅ CSS Dinámico de Colores */}
+        {/* CSS Dinámico de Colores */}
         <link rel="stylesheet" href="/api/config/colors/css" />
       </head>
       <body className={`${playfair.variable} ${inter.variable} antialiased`}>
@@ -173,7 +197,6 @@ export default async function RootLayout({
           />
         </SessionProvider>
         <CookieBanner />
-        {/* ✅ Scripts dinámicos (Analytics, GTM, Meta Pixel) */}
         <SeoAnalyticsScripts />
       </body>
     </html>
