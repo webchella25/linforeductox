@@ -623,6 +623,25 @@ model Certification {
   @@map("certifications")
 }
 
+model Redirect {
+  id          String   @id @default(cuid())
+  
+  source      String   @unique  // URL origen (ej: /old-page)
+  destination String            // URL destino (ej: /new-page)
+  permanent   Boolean  @default(true) // 301 (true) o 302 (false)
+  
+  active      Boolean  @default(true)
+  
+  hits        Int      @default(0) // Contador de veces que se usó
+  lastHit     DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([source])
+  @@map("redirects")
+}
+
 // ========================================
 // ENUMS
 // ========================================

@@ -2,13 +2,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, Search, BarChart3, Share2, Tag } from 'lucide-react';
+import { Save, Loader2, BarChart3, Search, TrendingUp, Code, ExternalLink } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
+
+interface SeoConfig {
+  id: string;
+  googleSearchConsole: string;
+  googleAnalyticsId: string;
+  metaPixelId: string;
+  googleTagManagerId: string;
+}
 
 export default function SeoAnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [config, setConfig] = useState({
+  const [config, setConfig] = useState<SeoConfig>({
+    id: '',
     googleSearchConsole: '',
     googleAnalyticsId: '',
     metaPixelId: '',
@@ -24,15 +34,11 @@ export default function SeoAnalyticsPage() {
       const res = await fetch('/api/config/seo-analytics');
       if (res.ok) {
         const data = await res.json();
-        setConfig({
-          googleSearchConsole: data.googleSearchConsole || '',
-          googleAnalyticsId: data.googleAnalyticsId || '',
-          metaPixelId: data.metaPixelId || '',
-          googleTagManagerId: data.googleTagManagerId || '',
-        });
+        setConfig(data);
       }
     } catch (error) {
       console.error('Error:', error);
+      toast.error('Error al cargar configuración');
     } finally {
       setLoading(false);
     }
@@ -53,7 +59,8 @@ export default function SeoAnalyticsPage() {
         toast.error('Error al guardar');
       }
     } catch (error) {
-      toast.error('Error al guardar');
+      console.error('Error:', error);
+      toast.error('Error al guardar configuración');
     } finally {
       setSaving(false);
     }
@@ -61,26 +68,84 @@ export default function SeoAnalyticsPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center p-12">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando configuración...</p>
-        </div>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="animate-spin text-primary" size={40} />
       </div>
     );
   }
 
+  const integrationStatus = [
+    {
+      name: 'Google Search Console',
+      active: !!config.googleSearchConsole,
+      icon: Search,
+    },
+    {
+      name: 'Google Analytics 4',
+      active: !!config.googleAnalyticsId,
+      icon: BarChart3,
+    },
+    {
+      name: 'Meta Pixel',
+      active: !!config.metaPixelId,
+      icon: TrendingUp,
+    },
+    {
+      name: 'Google Tag Manager',
+      active: !!config.googleTagManagerId,
+      icon: Code,
+    },
+  ];
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">SEO y Analytics</h1>
-          <p className="text-gray-600 mt-2">
-            Configura las herramientas de seguimiento y optimización
-          </p>
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">SEO y Analytics</h1>
+        <p className="text-gray-600 mt-2">
+          Configura las herramientas de seguimiento y optimización
+        </p>
+      </div>
+
+      {/* ✅ NUEVA SECCIÓN: Redirecciones 301 */}
+      <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl border border-purple-200 p-6">
+        <div className="flex items-start justify-between">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <ExternalLink className="text-white" size={24} />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                Redirecciones 301
+              </h2>
+              <p className="text-gray-600 mb-4">
+                Gestiona redirecciones permanentes de URLs antiguas a nuevas. 
+                Importante para mantener el SEO cuando cambias URLs.
+              </p>
+              <ul className="text-sm text-gray-600 space-y-1 mb-4">
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span>
+                  Evita errores 404 en Google
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span>
+                  Mantiene el posicionamiento de páginas antiguas
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span>
+                  Estadísticas de uso de cada redirección
+                </li>
+              </ul>
+              <Link
+                href="/dashboard/configuracion/seo-analytics/redirects"
+                className="inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium"
+              >
+                Gestionar Redirecciones
+                <ExternalLink size={18} />
+              </Link>
+            </div>
+          </div>
         </div>
-        <BarChart3 size={40} className="text-primary" />
       </div>
 
       {/* Google Search Console */}
@@ -161,10 +226,10 @@ export default function SeoAnalyticsPage() {
         </div>
       </div>
 
-      {/* Meta Pixel (Facebook) */}
+      {/* Meta Pixel */}
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="flex items-center gap-3 mb-4">
-          <Share2 size={24} className="text-blue-500" />
+          <TrendingUp size={24} className="text-blue-500" />
           <h2 className="text-xl font-semibold">Meta Pixel (Facebook)</h2>
         </div>
         
@@ -191,7 +256,7 @@ export default function SeoAnalyticsPage() {
         <div className="mt-4 p-4 bg-blue-50 rounded-lg">
           <p className="text-sm text-blue-800 font-medium mb-2">📋 Instrucciones:</p>
           <ol className="text-sm text-blue-700 space-y-1 list-decimal list-inside">
-            <li>Ve a <a href="https://business.facebook.com/events_manager2" target="_blank" rel="noopener noreferrer" className="underline">Meta Events Manager</a></li>
+            <li>Ve a <a href="https://business.facebook.com/events_manager" target="_blank" rel="noopener noreferrer" className="underline">Meta Events Manager</a></li>
             <li>Selecciona tu Pixel o crea uno nuevo</li>
             <li>Ve a "Configuración"</li>
             <li>Copia el "ID del píxel" (solo números)</li>
@@ -203,7 +268,7 @@ export default function SeoAnalyticsPage() {
       {/* Google Tag Manager */}
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="flex items-center gap-3 mb-4">
-          <Tag size={24} className="text-purple-600" />
+          <Code size={24} className="text-purple-600" />
           <h2 className="text-xl font-semibold">Google Tag Manager</h2>
         </div>
         
@@ -240,38 +305,53 @@ export default function SeoAnalyticsPage() {
       </div>
 
       {/* Botón Guardar */}
-      <div className="flex gap-4 justify-end bg-white rounded-xl shadow-sm p-6">
+      <div className="flex justify-end">
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-8 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md hover:shadow-lg"
+          className="bg-primary text-white px-8 py-3 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 flex items-center gap-2 font-medium"
         >
-          <Save size={20} />
-          {saving ? 'Guardando...' : 'Guardar Configuración'}
+          {saving ? (
+            <>
+              <Loader2 className="animate-spin" size={20} />
+              Guardando...
+            </>
+          ) : (
+            <>
+              <Save size={20} />
+              Guardar Configuración
+            </>
+          )}
         </button>
       </div>
 
-      {/* Info adicional */}
-      <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 rounded-lg p-6">
-        <div className="flex gap-3">
-          <div className="text-2xl">✅</div>
-          <div>
-            <h3 className="font-bold text-green-900 mb-2">Estado de Integración</h3>
-            <div className="space-y-2 text-sm text-green-800">
-              <div className="flex items-center gap-2">
-                {config.googleSearchConsole ? '✅' : '⭕'} Google Search Console
+      {/* Estado de Integración */}
+      <div className="bg-gray-50 rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          Estado de Integración
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {integrationStatus.map((item) => {
+            const Icon = item.icon;
+            return (
+              <div
+                key={item.name}
+                className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200"
+              >
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                  item.active ? 'bg-green-100' : 'bg-gray-100'
+                }`}>
+                  <Icon size={20} className={item.active ? 'text-green-600' : 'text-gray-400'} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">{item.name}</p>
+                  <p className={`text-xs ${item.active ? 'text-green-600' : 'text-gray-500'}`}>
+                    {item.active ? '✅ Configurado' : '⭕ No configurado'}
+                  </p>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                {config.googleAnalyticsId ? '✅' : '⭕'} Google Analytics 4
-              </div>
-              <div className="flex items-center gap-2">
-                {config.metaPixelId ? '✅' : '⭕'} Meta Pixel
-              </div>
-              <div className="flex items-center gap-2">
-                {config.googleTagManagerId ? '✅' : '⭕'} Google Tag Manager
-              </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
       </div>
     </div>
