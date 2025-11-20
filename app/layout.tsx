@@ -6,17 +6,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Toaster } from "react-hot-toast";
 import { SessionProvider } from "next-auth/react";
-import dynamic from 'next/dynamic';
+import CookieBanner from '@/components/CookieBanner';
+import SeoAnalyticsScripts from '@/components/SeoAnalyticsScripts';
 import { prisma } from '@/lib/prisma';
-
-// ✅ Lazy load de componentes no críticos
-const CookieBanner = dynamic(() => import('@/components/CookieBanner'), {
-  ssr: false,
-});
-
-const SeoAnalyticsScripts = dynamic(() => import('@/components/SeoAnalyticsScripts'), {
-  ssr: false,
-});
 
 // ✅ OPTIMIZADO: Fuentes con preload y pesos específicos
 const playfair = Playfair_Display({
@@ -76,14 +68,6 @@ export const metadata: Metadata = {
       "max-image-preview": "large",
       "max-snippet": -1,
     },
-  },
-  // ✅ NUEVO: Iconos optimizados
-  icons: {
-    icon: [
-      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-    ],
-    apple: '/apple-touch-icon.png',
   },
 };
 
