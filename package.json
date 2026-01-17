@@ -15,8 +15,8 @@
     "seed-legal": "tsx scripts/seed-legal-pages.ts",
     "seed-content": "tsx scripts/seed-content.ts",
     "migrate-categories": "tsx scripts/migrate-categories.ts",
-	"seed-products": "tsx scripts/seed-products.ts",
-	"migrate-subtreatments": "tsx scripts/migrate-subtreatments-to-services.ts"
+    "seed-products": "tsx scripts/seed-products.ts",
+    "migrate-subtreatments": "tsx scripts/migrate-subtreatments-to-services.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -43,7 +43,7 @@
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.23.24",
     "lucide-react": "^0.546.0",
-    "next": "16.0.0",
+    "next": "16.0.10",
     "next-auth": "^5.0.0-beta.30",
     "react": "19.2.0",
     "react-calendar": "^6.0.0",
