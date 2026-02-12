@@ -8,9 +8,9 @@ export const revalidate = 60;
 
 // ✅ METADATA PARA SEO
 export const metadata: Metadata = {
-  title: "Contacto - LINFOREDUCTOX | Reserva tu Cita en Errenteria",
-  description: "Contacta con LINFOREDUCTOX para reservar tu tratamiento de estética y medicina ancestral en Errenteria, Gipuzkoa.",
-  keywords: "contacto, reservar cita, Errenteria, Gipuzkoa, teléfono, email, horarios",
+  title: "Contacto - LINFOREDUCTOX | Reserva tu Cita en Madrid",
+  description: "Contacta con LINFOREDUCTOX para reservar tu tratamiento de estética y medicina ancestral en Madrid.",
+  keywords: "contacto, reservar cita, Madrid, teléfono, email, horarios",
   alternates: {
     canonical: "https://linforeductox.com/contacto",
   },
@@ -98,14 +98,14 @@ export default async function ContactPage() {
     mainEntity: {
       "@type": "MedicalBusiness",
       name: "LINFOREDUCTOX",
-      telephone: contactInfo?.phone || "+34-123-456-789",
-      email: contactInfo?.email || "info@linforeductox.com",
+      telephone: contactInfo?.phone || "+34603058818",
+      email: contactInfo?.email || "aline@linforeductox.com",
       address: {
         "@type": "PostalAddress",
-        streetAddress: contactInfo?.address || "Calle Principal, 123",
-        addressLocality: contactInfo?.city || "Errenteria",
-        addressRegion: "Gipuzkoa",
-        postalCode: contactInfo?.zipCode || "20100",
+        streetAddress: contactInfo?.address || "Calle Viriato, 65, Chamberí",
+        addressLocality: contactInfo?.city || "Madrid",
+        addressRegion: "Madrid",
+        postalCode: contactInfo?.zipCode || "28010",
         addressCountry: "ES",
       },
     },
@@ -179,9 +179,9 @@ export default async function ContactPage() {
                       <div>
                         <p className="font-semibold">Dirección</p>
                         <p className="text-gray-600">
-                          {contactInfo?.address || 'Calle Principal 123'}
+                          {contactInfo?.address || 'Calle Viriato, 65, Chamberí'}
                           <br />
-                          {contactInfo?.zipCode || '20100'} {contactInfo?.city || 'Errenteria'},
+                          {contactInfo?.zipCode || '28010'} {contactInfo?.city || 'Madrid'},
                         </p>
                       </div>
                     </div>
@@ -192,10 +192,10 @@ export default async function ContactPage() {
                       <div>
                         <p className="font-semibold">Teléfono</p>
                         <a 
-                          href={`tel:${contactInfo?.phone || '+34123456789'}`}
+                          href={`tel:${contactInfo?.phone || '+34603058818'}`}
                           className="text-gray-600 hover:text-primary transition-colors"
                         >
-                          {contactInfo?.phone || '+34 123 456 789'}
+                          {contactInfo?.phone || '+34 603 058 818'}
                         </a>
                       </div>
                     </div>
@@ -206,10 +206,10 @@ export default async function ContactPage() {
                       <div>
                         <p className="font-semibold">Email</p>
                         <a 
-                          href={`mailto:${contactInfo?.email || 'info@linforeductox.com'}`}
+                          href={`mailto:${contactInfo?.email || 'aline@linforeductox.com'}`}
                           className="text-gray-600 hover:text-primary transition-colors"
                         >
-                          {contactInfo?.email || 'info@linforeductox.com'}
+                          {contactInfo?.email || 'aline@linforeductox.com'}
                         </a>
                       </div>
                     </div>

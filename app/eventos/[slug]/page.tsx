@@ -145,8 +145,8 @@ export default async function EventPage({ params }: EventPageProps) {
           name: event.location === 'Centro' ? 'LINFOREDUCTOX' : event.locationDetails,
           address: {
             '@type': 'PostalAddress',
-            addressLocality: 'Oliva',
-            addressRegion: 'Valencia',
+            addressLocality: 'Madrid',
+            addressRegion: 'Madrid',
             addressCountry: 'ES',
           },
         },

@@ -1,6 +1,7 @@
 // app/tienda/page.tsx
 import { prisma } from '@/lib/prisma';
 import TiendaClient from './TiendaClient';
+import type { Metadata } from 'next';
 
 async function getProducts() {
   try {
@@ -78,9 +79,35 @@ async function getColors() {
   }
 }
 
-export const metadata = {
-  title: 'Tienda - LINFOREDUCTOX',
-  description: 'Descubre nuestros productos exclusivos de masaje y bienestar',
+export const metadata: Metadata = {
+  title: 'Tienda de Productos de Bienestar | LINFOREDUCTOX',
+  description: 'Descubre nuestros productos exclusivos de masaje, bienestar y cuidado corporal. Aceites esenciales, herramientas de masaje y más.',
+  keywords: 'tienda, productos, aceites esenciales, masaje, bienestar, cuidado corporal, LINFOREDUCTOX',
+  alternates: {
+    canonical: 'https://linforeductox.com/tienda',
+  },
+  openGraph: {
+    title: 'Tienda | LINFOREDUCTOX - Productos de Bienestar',
+    description: 'Productos exclusivos de masaje, bienestar y cuidado corporal.',
+    url: 'https://linforeductox.com/tienda',
+    siteName: 'LINFOREDUCTOX',
+    type: 'website',
+    locale: 'es_ES',
+    images: [
+      {
+        url: 'https://linforeductox.com/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Tienda LINFOREDUCTOX',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Tienda | LINFOREDUCTOX',
+    description: 'Productos exclusivos de masaje y bienestar.',
+    images: ['https://linforeductox.com/og-image.jpg'],
+  },
 };
 
 export default async function TiendaPage() {

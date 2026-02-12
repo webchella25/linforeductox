@@ -2,6 +2,41 @@
 import Link from 'next/link';
 import { ArrowRight, Clock, ChevronDown } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
+import type { Metadata } from 'next';
+
+export const revalidate = 60;
+
+// ✅ METADATA SEO
+export const metadata: Metadata = {
+  title: "Tratamientos de Estética y Medicina Ancestral | LINFOREDUCTOX",
+  description: "Descubre todos nuestros tratamientos: drenaje linfático, masajes corporales, tratamientos faciales y acupuntura tradicional china en Madrid.",
+  keywords: "tratamientos, servicios, drenaje linfático, masaje corporal, tratamiento facial, acupuntura, estética, Madrid",
+  alternates: {
+    canonical: "https://linforeductox.com/servicios",
+  },
+  openGraph: {
+    title: "Nuestros Tratamientos | LINFOREDUCTOX",
+    description: "Tratamientos corporales, faciales y acupuntura con técnicas ancestrales orientales en Madrid.",
+    url: "https://linforeductox.com/servicios",
+    siteName: "LINFOREDUCTOX",
+    type: "website",
+    locale: "es_ES",
+    images: [
+      {
+        url: "https://linforeductox.com/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Tratamientos LINFOREDUCTOX",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Nuestros Tratamientos | LINFOREDUCTOX",
+    description: "Tratamientos corporales, faciales y acupuntura con técnicas ancestrales orientales.",
+    images: ["https://linforeductox.com/og-image.jpg"],
+  },
+};
 
 async function getServices() {
   try {
@@ -32,8 +67,53 @@ function stripHtml(html: string): string {
 export default async function ServiciosPage() {
   const services = await getServices();
 
+  // ✅ Schema.org BreadcrumbList
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Inicio",
+        item: "https://linforeductox.com",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Tratamientos",
+        item: "https://linforeductox.com/servicios",
+      },
+    ],
+  };
+
+  // ✅ Schema.org ItemList para servicios
+  const servicesListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Tratamientos LINFOREDUCTOX",
+    description: "Lista de tratamientos de estética y medicina ancestral",
+    numberOfItems: services.length,
+    itemListElement: services.map((parent: any, index: number) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: parent.name,
+      url: `https://linforeductox.com/servicios/${parent.slug}`,
+    })),
+  };
+
   return (
     <>
+      {/* ✅ Schema.org Scripts */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(servicesListSchema) }}
+      />
+
       {/* Hero */}
       <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
         <div

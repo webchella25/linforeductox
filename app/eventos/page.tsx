@@ -8,14 +8,33 @@ import { es } from 'date-fns/locale';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Eventos | LINFOREDUCTOX - Talleres y Actividades',
-  description: 'Descubre nuestros próximos talleres, charlas y eventos especiales sobre medicina ancestral, drenaje linfático y bienestar.',
-  keywords: 'eventos, talleres, charlas, retiros, medicina ancestral, drenaje linfático, bienestar',
+  title: 'Eventos y Talleres | LINFOREDUCTOX - Actividades de Bienestar',
+  description: 'Descubre nuestros próximos talleres, charlas y eventos especiales sobre medicina ancestral, drenaje linfático y bienestar en Madrid.',
+  keywords: 'eventos, talleres, charlas, retiros, medicina ancestral, drenaje linfático, bienestar, Madrid',
+  alternates: {
+    canonical: 'https://linforeductox.com/eventos',
+  },
   openGraph: {
-    title: 'Eventos | LINFOREDUCTOX',
-    description: 'Talleres, charlas y eventos especiales sobre bienestar y medicina ancestral',
+    title: 'Eventos y Talleres | LINFOREDUCTOX',
+    description: 'Talleres, charlas y eventos especiales sobre bienestar y medicina ancestral en Madrid.',
     url: 'https://linforeductox.com/eventos',
+    siteName: 'LINFOREDUCTOX',
     type: 'website',
+    locale: 'es_ES',
+    images: [
+      {
+        url: 'https://linforeductox.com/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Eventos LINFOREDUCTOX',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Eventos y Talleres | LINFOREDUCTOX',
+    description: 'Talleres, charlas y eventos sobre bienestar y medicina ancestral.',
+    images: ['https://linforeductox.com/og-image.jpg'],
   },
 };
 

@@ -60,14 +60,14 @@ export async function generateMetadata({ params }: ServicePageProps): Promise<Me
 
   const title = `${service.name} | LINFOREDUCTOX - Estética y Medicina Ancestral`;
   const description = service.description?.slice(0, 160) || 
-    `Descubre los beneficios del ${service.name}. Tratamiento de ${service.duration} minutos en Errenteria.`;
+    `Descubre los beneficios del ${service.name}. Tratamiento de ${service.duration} minutos en Madrid.`;
 
   const ogImage = service.heroImage || 'https://linforeductox.com/og-image.jpg';
 
   return {
     title,
     description,
-    keywords: `${service.name}, ${service.category}, estética, medicina ancestral, Errenteria, drenaje linfático, ${service.conditions?.join(', ')}`,
+    keywords: `${service.name}, ${service.category}, estética, medicina ancestral, Madrid, drenaje linfático, ${service.conditions?.join(', ')}`,
     openGraph: {
       title,
       description,
@@ -187,14 +187,14 @@ export default async function ServicePage({ params }: ServicePageProps) {
       name: 'LINFOREDUCTOX',
       address: {
         '@type': 'PostalAddress',
-        addressLocality: 'Errenteria',
-        addressRegion: 'Gipuzkoa',
+        addressLocality: 'Madrid',
+        addressRegion: 'Madrid',
         addressCountry: 'ES',
       },
     },
     areaServed: {
       '@type': 'City',
-      name: 'Errenteria',
+      name: 'Madrid',
     },
     ...(service.price && {
       offers: {

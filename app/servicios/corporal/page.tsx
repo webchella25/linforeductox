@@ -37,7 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `${service.name} - LINFOREDUCTOX | Drenaje Linfático y Reductivos`,
     description: service.description?.slice(0, 160) || "Descubre nuestros tratamientos corporales con drenaje linfático.",
-    keywords: `${service.name}, tratamiento corporal, drenaje linfático, celulitis, Errenteria`,
+    keywords: `${service.name}, tratamiento corporal, drenaje linfático, celulitis, Madrid`,
     alternates: {
       canonical: "https://linforeductox.com/servicios/corporal",
     },

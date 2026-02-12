@@ -37,7 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `${service.name} - LINFOREDUCTOX | Medicina Tradicional China`,
     description: service.description?.slice(0, 160) || "Descubre los beneficios de la acupuntura tradicional china.",
-    keywords: `${service.name}, acupuntura, medicina china, dolor crónico, estrés, Errenteria`,
+    keywords: `${service.name}, acupuntura, medicina china, dolor crónico, estrés, Madrid`,
     alternates: {
       canonical: "https://linforeductox.com/servicios/acupuntura",
     },

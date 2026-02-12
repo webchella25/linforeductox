@@ -17,6 +17,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     select: { slug: true, updatedAt: true },
   });
 
+  // Obtener productos activos
+  const products = await prisma.product.findMany({
+    where: { active: true },
+    select: { slug: true, updatedAt: true },
+  });
+
   // Páginas estáticas
   const staticPages = [
     {
@@ -36,6 +42,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/servicios/corporal`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/servicios/facial`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/servicios/acupuntura`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.85,
     },
     {
       url: `${baseUrl}/testimonios`,
@@ -85,5 +109,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...servicePages, ...eventPages];
+  // Productos dinámicos
+  const productPages = products.map((product) => ({
+    url: `${baseUrl}/tienda/${product.slug}`,
+    lastModified: product.updatedAt,
+    changeFrequency: 'weekly' as const,
+    priority: 0.6,
+  }));
+
+  return [...staticPages, ...servicePages, ...eventPages, ...productPages];
 }

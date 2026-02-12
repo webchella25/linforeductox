@@ -2,6 +2,7 @@
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import ProductoDetalleClient from './ProductoDetalleClient';
+import type { Metadata } from 'next';
 
 async function getProduct(slug: string) {
   try {
@@ -82,19 +83,53 @@ async function getContactInfo() {
   }
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProduct(slug);
 
   if (!product) {
     return {
       title: 'Producto no encontrado - LINFOREDUCTOX',
+      description: 'Este producto no está disponible actualmente.',
     };
   }
 
+  const title = product.metaTitle || `${product.name} | Tienda LINFOREDUCTOX`;
+  const description = product.metaDescription || product.shortDescription || product.description?.slice(0, 160) || '';
+  const productImages = typeof product.images === 'string' ? JSON.parse(product.images) : product.images;
+  const ogImage = (Array.isArray(productImages) && productImages.length > 0)
+    ? productImages[0]?.url || 'https://linforeductox.com/og-image.jpg'
+    : 'https://linforeductox.com/og-image.jpg';
+
   return {
-    title: product.metaTitle || `${product.name} - LINFOREDUCTOX`,
-    description: product.metaDescription || product.shortDescription || product.description,
+    title,
+    description,
+    keywords: `${product.name}, ${product.category?.name || ''}, productos, bienestar, LINFOREDUCTOX`,
+    alternates: {
+      canonical: `https://linforeductox.com/tienda/${slug}`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `https://linforeductox.com/tienda/${slug}`,
+      siteName: 'LINFOREDUCTOX',
+      type: 'website',
+      locale: 'es_ES',
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: `${product.name} - LINFOREDUCTOX`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [ogImage],
+    },
   };
 }
 

@@ -43,12 +43,12 @@ export async function generateMetadata(): Promise<Metadata> {
     : "Aline Vidal - Fundadora de LINFOREDUCTOX | Terapeuta y Coach";
   
   const description = config?.heroSubtitle || 
-    "Conoce a Aline Vidal, fundadora de LINFOREDUCTOX. Especialista en drenaje linfático, medicina ancestral china y acupuntura estética en Errenteria.";
+    "Conoce a Aline Vidal, fundadora de LINFOREDUCTOX. Especialista en drenaje linfático, medicina ancestral china y acupuntura estética en Madrid.";
 
   return {
     title,
     description,
-    keywords: "Aline Vidal, terapeuta, coach corporal, acupuntura, medicina china, Errenteria",
+    keywords: "Aline Vidal, terapeuta, coach corporal, acupuntura, medicina china, Madrid",
     alternates: {
       canonical: "https://linforeductox.com/aline-vidal",
     },

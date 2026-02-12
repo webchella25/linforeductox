@@ -37,7 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `${service.name} - LINFOREDUCTOX | Rejuvenecimiento Natural`,
     description: service.description?.slice(0, 160) || "Descubre nuestros tratamientos faciales con técnicas ancestrales.",
-    keywords: `${service.name}, tratamiento facial, rejuvenecimiento, kobido, Errenteria`,
+    keywords: `${service.name}, tratamiento facial, rejuvenecimiento, kobido, Madrid`,
     alternates: {
       canonical: "https://linforeductox.com/servicios/facial",
     },

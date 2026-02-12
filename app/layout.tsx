@@ -28,11 +28,15 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "LINFOREDUCTOX - Estética y Medicina Ancestral Oriental en Madrid",
+  title: {
+    default: "LINFOREDUCTOX - Estética y Medicina Ancestral Oriental en Madrid",
+    template: "%s | LINFOREDUCTOX",
+  },
   description:
     "Centro especializado en drenaje linfático, tratamientos corporales, faciales y acupuntura en Madrid. Descubre el método LINFOREDUCTOX de Aline Vidal.",
   keywords: "drenaje linfático, masaje corporal, tratamiento facial, acupuntura, medicina ancestral, estética avanzada, Madrid, Aline Vidal, LINFOREDUCTOX",
   authors: [{ name: "Luis Granero", url: "https://www.luisgranero.com" }],
+  metadataBase: new URL("https://linforeductox.com"),
   openGraph: {
     title: "LINFOREDUCTOX - Estética y Medicina Ancestral Oriental",
     description: "Centro especializado en drenaje linfático, tratamientos corporales, faciales y acupuntura en Madrid.",
@@ -71,29 +75,33 @@ export const metadata: Metadata = {
   },
 };
 
-// ✅ Schema.org Organization
+// ✅ Schema.org Organization - Datos reales del negocio
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "MedicalBusiness",
+  "@id": "https://linforeductox.com/#organization",
   name: "LINFOREDUCTOX",
-  description: "Centro especializado en estética avanzada y medicina ancestral oriental",
+  description: "Centro especializado en estética avanzada y medicina ancestral oriental en Madrid",
   url: "https://linforeductox.com",
-  logo: "https://linforeductox.com/logo.png",
+  logo: {
+    "@type": "ImageObject",
+    url: "https://linforeductox.com/logo.png",
+  },
   image: "https://linforeductox.com/og-image.jpg",
-  telephone: "+34-123-456-789",
-  email: "info@linforeductox.com",
+  telephone: "+34603058818",
+  email: "aline@linforeductox.com",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "Calle Principal, 123",
+    streetAddress: "Calle Viriato, 65",
     addressLocality: "Madrid",
     addressRegion: "Madrid",
-    postalCode: "28001",
+    postalCode: "28010",
     addressCountry: "ES",
   },
   geo: {
     "@type": "GeoCoordinates",
-    latitude: "40.4168",
-    longitude: "-3.7038"
+    latitude: "40.4326",
+    longitude: "-3.7033",
   },
   openingHoursSpecification: [
     {
@@ -118,6 +126,16 @@ const organizationSchema = {
     "@type": "City",
     name: "Madrid",
   },
+  founder: {
+    "@type": "Person",
+    name: "Aline Vidal",
+  },
+  medicalSpecialty: [
+    "Drenaje linfático",
+    "Acupuntura",
+    "Tratamientos faciales",
+    "Tratamientos corporales",
+  ],
 };
 
 async function getSeoConfig() {
