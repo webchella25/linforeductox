@@ -25,6 +25,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No se proporcionó archivo' }, { status: 400 });
     }
 
+    // ✅ SEGURIDAD: Validar tipo MIME
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif'];
+    if (!allowedMimeTypes.includes(file.type)) {
+      return NextResponse.json(
+        { error: 'Tipo de archivo no permitido. Solo imágenes (JPEG, PNG, WebP, AVIF, GIF).' },
+        { status: 400 }
+      );
+    }
+
+    // ✅ SEGURIDAD: Validar tamaño máximo (10MB)
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      return NextResponse.json(
+        { error: 'El archivo es demasiado grande. Máximo 10MB.' },
+        { status: 400 }
+      );
+    }
+
+    // ✅ SEGURIDAD: Validar extensión del archivo
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.avif', '.gif'];
+    const fileName = file.name.toLowerCase();
+    if (!allowedExtensions.some(ext => fileName.endsWith(ext))) {
+      return NextResponse.json(
+        { error: 'Extensión de archivo no permitida.' },
+        { status: 400 }
+      );
+    }
+
     // Convertir archivo a buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
@@ -75,6 +103,14 @@ export async function DELETE(request: NextRequest) {
 
     if (!publicId) {
       return NextResponse.json({ error: 'No se proporcionó publicId' }, { status: 400 });
+    }
+
+    // ✅ SEGURIDAD: Validar que el publicId pertenece a nuestra carpeta
+    if (typeof publicId !== 'string' || !publicId.startsWith('linforeductox/')) {
+      return NextResponse.json(
+        { error: 'ID de imagen no válido.' },
+        { status: 400 }
+      );
     }
 
     // Eliminar de Cloudinary

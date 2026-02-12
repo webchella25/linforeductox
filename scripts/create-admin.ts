@@ -10,9 +10,16 @@ config({ path: path.resolve(process.cwd(), '.env') });
 const prisma = new PrismaClient();
 
 async function createAdmin() {
-  const email = 'aline@linforeductox.com';
-  const password = 'admin123'; // CAMBIAR después del primer login
-  const name = 'Aline Vidal';
+  const email = process.env.ADMIN_EMAIL || 'aline@linforeductox.com';
+  const password = process.env.ADMIN_PASSWORD || '';
+  const name = process.env.ADMIN_NAME || 'Aline Vidal';
+
+  // ✅ SEGURIDAD: No permitir contraseñas hardcodeadas o débiles
+  if (!password || password.length < 8) {
+    console.error('❌ ERROR: Debes establecer ADMIN_PASSWORD en tu .env con al menos 8 caracteres');
+    console.error('   Ejemplo: ADMIN_PASSWORD=MiContraseñaSegura123!');
+    process.exit(1);
+  }
 
   try {
     console.log('🔄 Creando usuario admin...');
@@ -32,9 +39,8 @@ async function createAdmin() {
 
     console.log('✅ Usuario admin creado:');
     console.log('   Email:', email);
-    console.log('   Password:', password);
     console.log('   ID:', user.id);
-    console.log('⚠️  IMPORTANTE: Cambia la contraseña después del primer login');
+    console.log('⚠️  IMPORTANTE: La contraseña NO se muestra por seguridad');
 
     // Crear registro de contactInfo inicial
     const existingContact = await prisma.contactInfo.findFirst();

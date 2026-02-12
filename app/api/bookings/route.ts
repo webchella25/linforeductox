@@ -1,8 +1,10 @@
 // app/api/bookings/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { auth } from '@/lib/auth';
 import { z } from 'zod';
 import { sendBookingConfirmationToClient, sendBookingNotificationToAdmin } from '@/lib/email';
+import { rateLimit, getClientIP } from '@/lib/rate-limit';
 
 const bookingSchema = z.object({
   serviceId: z.string(),
@@ -19,6 +21,20 @@ const bookingSchema = z.object({
 // POST - Crear nueva reserva
 export async function POST(request: NextRequest) {
   try {
+    // ✅ SEGURIDAD: Rate limiting - 10 reservas por IP cada 30 minutos
+    const clientIP = getClientIP(request);
+    const limiter = rateLimit(`bookings:${clientIP}`, {
+      maxRequests: 10,
+      windowSeconds: 30 * 60,
+    });
+
+    if (!limiter.success) {
+      return NextResponse.json(
+        { error: 'Demasiadas solicitudes. Por favor, espera unos minutos.' },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const validatedData = bookingSchema.parse(body);
 
@@ -94,6 +110,12 @@ export async function POST(request: NextRequest) {
 // GET para listar reservas (solo admin)
 export async function GET(request: NextRequest) {
   try {
+    // ✅ SEGURIDAD: Verificar autenticación admin
+    const session = await auth();
+    if (!session?.user?.role || session.user.role !== 'admin') {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const status = searchParams.get('status');
     const startDate = searchParams.get('startDate');

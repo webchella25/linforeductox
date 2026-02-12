@@ -1,6 +1,16 @@
 // lib/email.ts
 import { prisma } from '@/lib/prisma';
 
+// ✅ SEGURIDAD: Sanitizar HTML para prevenir inyección de código en emails
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 // Tipos
 interface EmailRecipient {
   email: string;
@@ -122,8 +132,12 @@ export async function sendBookingConfirmationToClient({
   // ✅ Obtener datos de contacto dinámicamente
   const contactInfo = await getContactInfo();
 
-  const subject = `✅ Reserva confirmada - ${serviceName}`;
-  
+  // ✅ SEGURIDAD: Sanitizar datos de usuario
+  const safeClientName = escapeHtml(clientName);
+  const safeServiceName = escapeHtml(serviceName);
+
+  const subject = `✅ Reserva confirmada - ${safeServiceName}`;
+
   const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -147,12 +161,12 @@ export async function sendBookingConfirmationToClient({
             <h1>¡Reserva Confirmada!</h1>
           </div>
           <div class="content">
-            <p>Hola <strong>${clientName}</strong>,</p>
+            <p>Hola <strong>${safeClientName}</strong>,</p>
             <p>Tu reserva ha sido confirmada correctamente. Aquí están los detalles:</p>
-            
+
             <div class="detail-box">
               <div class="detail-row">
-                <span class="label">Servicio:</span> ${serviceName}
+                <span class="label">Servicio:</span> ${safeServiceName}
               </div>
               <div class="detail-row">
                 <span class="label">Fecha:</span> ${new Date(date).toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
@@ -221,8 +235,15 @@ export async function sendBookingNotificationToAdmin({
   // ✅ Obtener email de admin dinámicamente
   const contactInfo = await getContactInfo();
 
-  const subject = `🔔 Nueva reserva: ${serviceName} - ${clientName}`;
-  
+  // ✅ SEGURIDAD: Sanitizar datos de usuario
+  const safeClientName2 = escapeHtml(clientName);
+  const safeServiceName2 = escapeHtml(serviceName);
+  const safeClientEmail = escapeHtml(clientEmail);
+  const safeClientPhone = escapeHtml(clientPhone);
+  const safeClientNotes = clientNotes ? escapeHtml(clientNotes) : '';
+
+  const subject = `🔔 Nueva reserva: ${safeServiceName2} - ${safeClientName2}`;
+
   const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -248,37 +269,37 @@ export async function sendBookingNotificationToAdmin({
           <div class="content">
             <p><strong>Hola Aline,</strong></p>
             <p>Has recibido una nueva reserva en tu agenda:</p>
-            
+
             <div class="detail-box">
               <h3 style="color: #2C5F2D; margin-top: 0;">Información del Servicio</h3>
               <div class="detail-row">
-                <span class="label">Servicio:</span> <strong>${serviceName}</strong>
+                <span class="label">Servicio:</span> <strong>${safeServiceName2}</strong>
               </div>
               <div class="detail-row">
                 <span class="label">Fecha:</span> ${new Date(date).toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
               </div>
               <div class="detail-row">
-                <span class="label">Hora:</span> ${startTime} - ${endTime}
+                <span class="label">Hora:</span> ${escapeHtml(startTime)} - ${escapeHtml(endTime)}
               </div>
             </div>
 
             <div class="detail-box">
               <h3 style="color: #2C5F2D; margin-top: 0;">Información del Cliente</h3>
               <div class="detail-row">
-                <span class="label">Nombre:</span> ${clientName}
+                <span class="label">Nombre:</span> ${safeClientName2}
               </div>
               <div class="detail-row">
-                <span class="label">Email:</span> <a href="mailto:${clientEmail}">${clientEmail}</a>
+                <span class="label">Email:</span> <a href="mailto:${safeClientEmail}">${safeClientEmail}</a>
               </div>
               <div class="detail-row">
-                <span class="label">Teléfono:</span> <a href="tel:${clientPhone}">${clientPhone}</a>
+                <span class="label">Teléfono:</span> <a href="tel:${safeClientPhone}">${safeClientPhone}</a>
               </div>
             </div>
 
-            ${clientNotes ? `
+            ${safeClientNotes ? `
               <div class="notes-box">
                 <strong>📝 Notas del cliente:</strong>
-                <p style="margin: 10px 0 0 0;">${clientNotes}</p>
+                <p style="margin: 10px 0 0 0;">${safeClientNotes}</p>
               </div>
             ` : ''}
 
@@ -316,8 +337,14 @@ export async function sendContactFormNotification({
   // ✅ Obtener email de admin dinámicamente
   const contactInfo = await getContactInfo();
 
-  const subject = `💬 Nuevo mensaje de contacto - ${name}`;
-  
+  // ✅ SEGURIDAD: Sanitizar datos de usuario
+  const safeName = escapeHtml(name);
+  const safeEmail = escapeHtml(email);
+  const safePhone = escapeHtml(phone);
+  const safeMessage = escapeHtml(message);
+
+  const subject = `💬 Nuevo mensaje de contacto - ${safeName}`;
+
   const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -343,27 +370,27 @@ export async function sendContactFormNotification({
           <div class="content">
             <p><strong>Hola Aline,</strong></p>
             <p>Has recibido un nuevo mensaje desde el formulario de contacto de tu web:</p>
-            
+
             <div class="detail-box">
               <h3 style="color: #2C5F2D; margin-top: 0;">Datos de Contacto</h3>
               <div class="detail-row">
-                <span class="label">Nombre:</span> ${name}
+                <span class="label">Nombre:</span> ${safeName}
               </div>
               <div class="detail-row">
-                <span class="label">Email:</span> <a href="mailto:${email}">${email}</a>
+                <span class="label">Email:</span> <a href="mailto:${safeEmail}">${safeEmail}</a>
               </div>
               <div class="detail-row">
-                <span class="label">Teléfono:</span> <a href="tel:${phone}">${phone}</a>
+                <span class="label">Teléfono:</span> <a href="tel:${safePhone}">${safePhone}</a>
               </div>
             </div>
 
             <div class="message-box">
               <strong style="color: #2C5F2D;">Mensaje:</strong>
-              <p style="margin: 10px 0 0 0; white-space: pre-wrap;">${message}</p>
+              <p style="margin: 10px 0 0 0; white-space: pre-wrap;">${safeMessage}</p>
             </div>
 
             <p style="margin-top: 30px;">
-              <a href="mailto:${email}?subject=Re: Tu consulta en LINFOREDUCTOX" 
+              <a href="mailto:${safeEmail}?subject=Re: Tu consulta en LINFOREDUCTOX"
                  style="display: inline-block; background-color: #2C5F2D; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px;">
                 Responder por Email
               </a>
@@ -412,7 +439,7 @@ export async function sendContactFormAutoReply({
             <h1>Gracias por contactarnos</h1>
           </div>
           <div class="content">
-            <p>Hola <strong>${name}</strong>,</p>
+            <p>Hola <strong>${escapeHtml(name)}</strong>,</p>
             <p>Hemos recibido tu mensaje y nos pondremos en contacto contigo lo antes posible.</p>
             <p>Nuestro horario de atención es de <strong>lunes a viernes de 9:00 a 19:00</strong>.</p>
             <p>Si tu consulta es urgente, puedes contactarnos directamente:</p>

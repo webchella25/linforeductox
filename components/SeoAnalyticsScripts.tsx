@@ -4,6 +4,19 @@
 import { useEffect, useState } from 'react';
 import Script from 'next/script';
 
+// ✅ SEGURIDAD: Validar formato de IDs de analytics para prevenir XSS
+function isValidGTMId(id: string): boolean {
+  return /^GTM-[A-Z0-9]{1,10}$/.test(id);
+}
+
+function isValidGAId(id: string): boolean {
+  return /^G-[A-Z0-9]{1,15}$/.test(id) || /^UA-\d{4,}-\d{1,4}$/.test(id);
+}
+
+function isValidPixelId(id: string): boolean {
+  return /^\d{10,20}$/.test(id);
+}
+
 export default function SeoAnalyticsScripts() {
   const [config, setConfig] = useState<{
     googleAnalyticsId?: string;
@@ -17,10 +30,11 @@ export default function SeoAnalyticsScripts() {
         const res = await fetch('/api/config/seo-analytics');
         if (res.ok) {
           const data = await res.json();
+          // ✅ SEGURIDAD: Solo aceptar IDs con formato válido
           setConfig({
-            googleAnalyticsId: data.googleAnalyticsId,
-            metaPixelId: data.metaPixelId,
-            googleTagManagerId: data.googleTagManagerId,
+            googleAnalyticsId: data.googleAnalyticsId && isValidGAId(data.googleAnalyticsId) ? data.googleAnalyticsId : undefined,
+            metaPixelId: data.metaPixelId && isValidPixelId(data.metaPixelId) ? data.metaPixelId : undefined,
+            googleTagManagerId: data.googleTagManagerId && isValidGTMId(data.googleTagManagerId) ? data.googleTagManagerId : undefined,
           });
         }
       } catch (error) {

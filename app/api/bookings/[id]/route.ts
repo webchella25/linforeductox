@@ -54,9 +54,24 @@ export async function PATCH(
 
     const body = await request.json();
 
+    // ✅ SEGURIDAD: Solo permitir campos específicos (whitelist)
+    const allowedFields = ['status', 'clientNotes', 'date', 'startTime', 'endTime', 'serviceId'];
+    const sanitizedData: Record<string, any> = {};
+
+    for (const key of allowedFields) {
+      if (body[key] !== undefined) {
+        sanitizedData[key] = body[key];
+      }
+    }
+
+    // Convertir fecha si existe
+    if (sanitizedData.date) {
+      sanitizedData.date = new Date(sanitizedData.date);
+    }
+
     const booking = await prisma.booking.update({
       where: { id },
-      data: body,
+      data: sanitizedData,
       include: { service: true },
     });
 

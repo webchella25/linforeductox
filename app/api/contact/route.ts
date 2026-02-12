@@ -1,9 +1,24 @@
 // app/api/contact/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { sendContactFormNotification, sendContactFormAutoReply } from '@/lib/email';
+import { rateLimit, getClientIP } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
+    // ✅ SEGURIDAD: Rate limiting - 5 mensajes por IP cada 15 minutos
+    const clientIP = getClientIP(request);
+    const limiter = rateLimit(`contact:${clientIP}`, {
+      maxRequests: 5,
+      windowSeconds: 15 * 60,
+    });
+
+    if (!limiter.success) {
+      return NextResponse.json(
+        { error: 'Demasiadas solicitudes. Por favor, espera unos minutos.' },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { name, email, phone, message } = body;
 

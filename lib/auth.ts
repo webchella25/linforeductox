@@ -23,26 +23,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const email = credentials.email as string;
         const password = credentials.password as string;
 
-        console.log('🟦 [AUTH] Intentando login con:', email);
-
         try {
           const user = await prisma.user.findUnique({
             where: { email },
           });
 
           if (!user) {
-            console.error('🔴 [AUTH] Usuario no encontrado:', email);
+            // ✅ SEGURIDAD: No revelar si el usuario existe o no
             return null;
           }
 
           const isPasswordValid = await bcrypt.compare(password, user.password);
 
           if (!isPasswordValid) {
-            console.error('🔴 [AUTH] Contraseña incorrecta para:', email);
             return null;
           }
-
-          console.log('✅ [AUTH] Login correcto:', email);
           
           return {
             id: user.id,

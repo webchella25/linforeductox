@@ -5,12 +5,20 @@ import { auth } from "@/lib/auth";
 // GET - Obtener testimonios (público si status=APPROVED, admin para todos)
 export async function GET(request: NextRequest) {
   try {
+    // ✅ SEGURIDAD: Verificar si es admin para devolver datos completos
+    const session = await auth();
+    const isAdmin = session?.user?.role === 'admin';
+
     const searchParams = request.nextUrl.searchParams;
     const status = searchParams.get('status');
 
     const where: any = {};
-    if (status) {
+    if (isAdmin && status) {
+      // Admin puede filtrar por cualquier estado
       where.status = status;
+    } else if (!isAdmin) {
+      // Usuarios públicos SOLO ven testimonios aprobados
+      where.status = 'APPROVED';
     }
 
     const testimonials = await prisma.testimonial.findMany({
@@ -25,7 +33,7 @@ export async function GET(request: NextRequest) {
         text: true,
         service: true,
         status: true,
-        email: true,
+        email: isAdmin, // ✅ SEGURIDAD: Solo admin ve emails
         createdAt: true,
       },
     });
@@ -54,6 +62,15 @@ export async function PATCH(request: NextRequest) {
     if (!id || !status) {
       return NextResponse.json(
         { error: 'ID y status son requeridos' },
+        { status: 400 }
+      );
+    }
+
+    // ✅ SEGURIDAD: Validar que el status es un valor permitido
+    const allowedStatuses = ['APPROVED', 'REJECTED', 'PENDING'];
+    if (!allowedStatuses.includes(status)) {
+      return NextResponse.json(
+        { error: 'Estado no válido' },
         { status: 400 }
       );
     }
