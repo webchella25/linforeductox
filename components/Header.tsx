@@ -174,6 +174,11 @@ const Header = () => {
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-secondary group-hover:w-full transition-all duration-300"></span>
               </button>
 
+              {/* Puente invisible para evitar que se cierre al mover el mouse */}
+              {isServicesOpen && (
+                <div className="absolute top-full left-0 right-0 h-4" />
+              )}
+
               {/* Mega Dropdown */}
               <AnimatePresence>
                 {isServicesOpen && (
@@ -208,11 +213,30 @@ const Header = () => {
                     </Link>
 
                     {/* Grid de Servicios */}
-                    <div className="p-3 max-h-[400px] overflow-y-auto">
+                    <div className="p-3 max-h-[60vh] overflow-y-auto overscroll-contain scroll-smooth">
                       {services.map((parent) => (
                         <div
                           key={parent.id}
-                          onMouseEnter={() => setHoveredParent(parent.id)}
+                          onMouseEnter={(e) => {
+                            setHoveredParent(parent.id);
+                            // Auto-scroll para que los hijos sean visibles
+                            if (parent.childServices && parent.childServices.length > 0) {
+                              setTimeout(() => {
+                                const el = e.currentTarget;
+                                const container = el.parentElement;
+                                if (container) {
+                                  const elBottom = el.offsetTop + el.offsetHeight;
+                                  const containerVisible = container.scrollTop + container.clientHeight;
+                                  if (elBottom > containerVisible) {
+                                    container.scrollTo({
+                                      top: el.offsetTop - 100,
+                                      behavior: 'smooth'
+                                    });
+                                  }
+                                }
+                              }, 250);
+                            }
+                          }}
                           className="mb-2"
                         >
                           {/* Servicio Padre como Card */}
@@ -236,8 +260,8 @@ const Header = () => {
                                   </p>
                                 )}
                               </div>
-                              <ChevronRight 
-                                size={16} 
+                              <ChevronRight
+                                size={16}
                                 className={`text-gray-400 transition-transform ${
                                   hoveredParent === parent.id ? "translate-x-1" : ""
                                 }`}
@@ -253,7 +277,7 @@ const Header = () => {
                                 animate={{ opacity: 1, height: "auto" }}
                                 exit={{ opacity: 0, height: 0 }}
                                 transition={{ duration: 0.2 }}
-                                className="ml-14 mt-2 space-y-1"
+                                className="ml-14 mt-2 space-y-1 pb-2"
                               >
                                 {parent.childServices.map((child) => (
                                   <Link
