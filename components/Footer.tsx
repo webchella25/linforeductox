@@ -352,20 +352,20 @@ export default async function Footer() {
               </p>
               <div className="hidden md:block w-1 h-1 bg-white/30 rounded-full"></div>
               <div className="flex items-center gap-4">
-                <Link 
-                  href="/legal/privacidad" 
+                <Link
+                  href="/privacidad"
                   className="hover:text-white transition-colors"
                 >
                   Privacidad
                 </Link>
-                <Link 
-                  href="/legal/terminos" 
+                <Link
+                  href="/aviso-legal"
                   className="hover:text-white transition-colors"
                 >
-                  Términos
+                  Aviso Legal
                 </Link>
-                <Link 
-                  href="/legal/cookies" 
+                <Link
+                  href="/cookies"
                   className="hover:text-white transition-colors"
                 >
                   Cookies
