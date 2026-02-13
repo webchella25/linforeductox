@@ -116,7 +116,7 @@ export default async function Footer() {
                   <h3 className="font-heading text-2xl font-bold tracking-tight">
                     LINFOREDUCTOX
                   </h3>
-                  <p className="text-white/60 text-xs">Centro de Bienestar</p>
+                  <p className="text-white/60 text-xs">Taller Linfático</p>
                 </div>
               </div>
             </Link>

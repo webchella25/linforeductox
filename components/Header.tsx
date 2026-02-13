@@ -130,7 +130,7 @@ const Header = () => {
               <p className={`text-xs transition-all duration-300 ${
                 isScrolled ? "text-gray-600" : "text-white/80"
               }`}>
-                Centro de Bienestar
+                Taller Linfático
               </p>
             </div>
           </Link>
