@@ -190,8 +190,7 @@ export default async function EventPage({ params }: EventPageProps) {
               : "url('https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=2070')",
           }}
         >
-          {/* ✅ Solo overlay oscuro suave para legibilidad, sin color */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-black/60" />
+          <div className="absolute inset-0 bg-black/30" />
         </div>
 
         <div className="relative z-10 text-center text-white px-6 max-w-4xl">

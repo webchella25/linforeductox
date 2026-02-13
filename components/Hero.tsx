@@ -62,7 +62,7 @@ export default async function Hero() {
           sizes="100vw"
           unoptimized
         />
-        <div className="overlay-dark"></div>
+        <div className="absolute inset-0 bg-black/30" />
       </div>
 
       <div className="relative z-10 text-center text-white px-6 max-w-5xl">

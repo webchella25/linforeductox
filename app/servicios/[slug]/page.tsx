@@ -150,12 +150,18 @@ export default async function ServicePage({ params }: ServicePageProps) {
   let contentImages: ServiceImage[] = [];
   try {
     if (service.images) {
-      const imagesData = typeof service.images === 'string' 
-        ? JSON.parse(service.images) 
+      const imagesData = typeof service.images === 'string'
+        ? JSON.parse(service.images)
         : service.images;
-      
+
       if (Array.isArray(imagesData)) {
-        contentImages = imagesData.sort((a, b) => a.position - b.position);
+        // Normalizar: si son strings simples (URLs), convertir a objetos
+        contentImages = imagesData.map((img: any, index: number) => {
+          if (typeof img === 'string') {
+            return { url: img, position: index, alt: '' };
+          }
+          return { url: img.url || img, position: img.position ?? index, alt: img.alt || '' };
+        }).sort((a, b) => a.position - b.position);
       }
     }
   } catch (error) {
@@ -231,7 +237,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
             sizes="100vw"
             unoptimized
           />
-          <div className={`absolute inset-0 bg-gradient-to-r ${config.gradient}`} />
+          <div className="absolute inset-0 bg-black/30" />
         </div>
 
         <div className="relative z-10 container-custom text-center text-white">

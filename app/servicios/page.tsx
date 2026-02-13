@@ -123,7 +123,7 @@ export default async function ServiciosPage() {
               "url('https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=2070')",
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary/70 to-primary-dark/90" />
+          <div className="absolute inset-0 bg-black/30" />
         </div>
         <div className="relative z-10 text-center text-white px-6">
           <h1 className="font-heading text-5xl md:text-6xl font-bold mb-4">
