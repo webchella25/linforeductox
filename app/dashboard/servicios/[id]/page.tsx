@@ -53,6 +53,7 @@ export default function EditarServicioPage({
     order: 0,
     active: true,
     heroImage: '',
+    cardImage: '',
     images: [] as string[],
     isSubService: false,
     parentServiceId: '',
@@ -113,6 +114,7 @@ export default function EditarServicioPage({
           order: service.order,
           active: service.active,
           heroImage: service.heroImage || '',
+          cardImage: service.cardImage || '',
           images: Array.isArray(service.images)
             ? service.images.map((img: any) => img.url || img)
             : [],
@@ -218,6 +220,7 @@ export default function EditarServicioPage({
         order: formData.order,
         active: formData.active,
         heroImage: formData.heroImage || null,
+        cardImage: formData.cardImage || null,
         images: formData.images.length > 0 ? formData.images : null,
         faqs: validFaqs.length > 0 ? validFaqs : null,
         parentServiceId: formData.isSubService && formData.parentServiceId 
@@ -472,6 +475,22 @@ export default function EditarServicioPage({
             <ImageUpload
               value={formData.heroImage}
               onChange={(url) => setFormData({ ...formData, heroImage: url })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Imagen para Tarjeta (Portada)
+            </label>
+            <p className="text-sm text-gray-500 mb-3">
+              Esta imagen se muestra en la tarjeta del servicio en la portada. Independiente de la imagen hero.
+            </p>
+            <ImageUpload
+              value={formData.cardImage}
+              onChange={(url) => setFormData({ ...formData, cardImage: url })}
+              onRemove={() => setFormData({ ...formData, cardImage: '' })}
+              label=""
+              aspectRatio="4/3"
             />
           </div>
 

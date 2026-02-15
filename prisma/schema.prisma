@@ -63,6 +63,7 @@ model Service {
   order       Int       @default(0)
   
   heroImage   String?
+  cardImage   String?    // Imagen para tarjeta en portada
   images      Json?
   
   createdAt   DateTime  @default(now())
@@ -320,6 +321,19 @@ model AboutConfig {
   updatedAt         DateTime @updatedAt
   
   @@map("about_config")
+}
+
+model EventsPageConfig {
+  id              String   @id @default(cuid())
+
+  heroImage       String?
+  heroTitle       String   @default("Eventos")
+  heroSubtitle    String   @default("Talleres, charlas y experiencias para tu bienestar")
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("events_page_config")
 }
 
 model SocialMediaConfig {

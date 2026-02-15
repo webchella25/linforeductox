@@ -59,7 +59,7 @@ export async function PATCH(
     const body = await request.json();
     
     // Extraer FAQs del body si existen
-    const { faqs, heroImage, images, ...serviceData } = body; // ✅ AGREGAR heroImage e images aquí
+    const { faqs, heroImage, cardImage, images, ...serviceData } = body;
 
     // Actualizar servicio y FAQs en una transacción
     const service = await prisma.$transaction(async (tx) => {
@@ -68,8 +68,9 @@ export async function PATCH(
         where: { id },
         data: {
           ...serviceData,
-          heroImage: heroImage !== undefined ? heroImage : undefined, // ✅ AGREGAR
-          images: images !== undefined ? images : undefined,         // ✅ AGREGAR
+          heroImage: heroImage !== undefined ? heroImage : undefined,
+          cardImage: cardImage !== undefined ? cardImage : undefined,
+          images: images !== undefined ? images : undefined,
         },
       });
 

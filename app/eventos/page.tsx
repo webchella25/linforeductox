@@ -44,9 +44,9 @@ async function getEvents() {
   try {
     const events = await prisma.event.findMany({
       where: {
-        active: true,  // ✅ Solo eventos activos
+        active: true,
         status: {
-          in: ['UPCOMING', 'ONGOING', 'FINISHED'],  // ✅ CAMBIO AQUÍ
+          in: ['UPCOMING', 'ONGOING', 'FINISHED'],
         },
       },
       orderBy: {
@@ -60,8 +60,27 @@ async function getEvents() {
   }
 }
 
+async function getEventsPageConfig() {
+  try {
+    const config = await prisma.eventsPageConfig.findFirst();
+    return config || {
+      heroImage: null,
+      heroTitle: 'Eventos',
+      heroSubtitle: 'Talleres, charlas y experiencias para tu bienestar',
+    };
+  } catch (error) {
+    console.error('Error obteniendo config de página de eventos:', error);
+    return {
+      heroImage: null,
+      heroTitle: 'Eventos',
+      heroSubtitle: 'Talleres, charlas y experiencias para tu bienestar',
+    };
+  }
+}
+
 export default async function EventosPage() {
   const events = await getEvents();
+  const eventsPageConfig = await getEventsPageConfig();
   const now = new Date();
 
   const upcomingEvents = events.filter((e) => {
@@ -81,7 +100,9 @@ export default async function EventosPage() {
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=2070')",
+            backgroundImage: eventsPageConfig.heroImage
+              ? `url('${eventsPageConfig.heroImage}')`
+              : "url('https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=2070')",
           }}
         >
           <div className="absolute inset-0 bg-black/30" />
@@ -89,10 +110,10 @@ export default async function EventosPage() {
 
         <div className="relative z-10 text-center text-white px-6 max-w-4xl">
           <h1 className="font-heading text-5xl md:text-6xl font-bold mb-4">
-            Eventos
+            {eventsPageConfig.heroTitle}
           </h1>
           <p className="text-xl md:text-2xl text-white/90">
-            Talleres, charlas y experiencias para tu bienestar
+            {eventsPageConfig.heroSubtitle}
           </p>
         </div>
       </section>

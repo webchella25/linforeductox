@@ -120,6 +120,11 @@ const menuItems = [
         label: 'Servicios Destacados',
         icon: Sparkles,
       },
+      {
+        href: '/dashboard/configuracion/eventos',
+        label: 'Página de Eventos',
+        icon: Calendar,
+      },
     ],
   },
 ];

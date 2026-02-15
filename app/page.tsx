@@ -226,18 +226,32 @@ export default async function Home() {
                   <Link
                     key={service.id}
                     href={`/servicios/${service.slug}`}
-                    className="group p-8 bg-cream rounded-2xl hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-primary"
+                    className="group bg-cream rounded-2xl hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-primary overflow-hidden"
                   >
-                    <h3 className="text-2xl font-bold text-primary mb-4 group-hover:text-secondary transition-colors">
-                      {service.name}
-                    </h3>
-                    <p className="text-gray-700 mb-6 line-clamp-4 leading-relaxed">
-                      {service.description}
-                    </p>
-                    <span className="inline-flex items-center gap-2 text-secondary font-semibold group-hover:gap-4 transition-all">
-                      Más información
-                      <ArrowRight size={20} />
-                    </span>
+                    {service.cardImage && (
+                      <div className="relative h-48 w-full overflow-hidden">
+                        <Image
+                          src={service.cardImage}
+                          alt={service.name}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          unoptimized
+                        />
+                      </div>
+                    )}
+                    <div className="p-8">
+                      <h3 className="text-2xl font-bold text-primary mb-4 group-hover:text-secondary transition-colors">
+                        {service.name}
+                      </h3>
+                      <p className="text-gray-700 mb-6 line-clamp-4 leading-relaxed">
+                        {service.description}
+                      </p>
+                      <span className="inline-flex items-center gap-2 text-secondary font-semibold group-hover:gap-4 transition-all">
+                        Más información
+                        <ArrowRight size={20} />
+                      </span>
+                    </div>
                   </Link>
                 ))}
               </div>
