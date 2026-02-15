@@ -7,6 +7,8 @@ import { format, isPast, differenceInDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { Metadata } from 'next';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Eventos y Talleres | LINFOREDUCTOX - Actividades de Bienestar',
   description: 'Descubre nuestros próximos talleres, charlas y eventos especiales sobre medicina ancestral, drenaje linfático y bienestar en Madrid.',
